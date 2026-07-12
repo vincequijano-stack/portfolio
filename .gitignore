@@ -1,3 +1,9 @@
+# ── Frontend ─────────────────────────────────────────────────
+Front End/node_modules/
+Front End/dist/
+Front End/.env
+Front End/.env.*
+
 # ── Backend ──────────────────────────────────────────────────
 Back End/node_modules/
 Back End/.env
