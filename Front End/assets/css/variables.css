@@ -1,0 +1,100 @@
+/* ============================================================
+   VARIABLES.CSS
+   Design Tokens — edit this file to retheme the entire site
+   ============================================================ */
+
+/* ── Dark Mode (default) ─────────────────────────────────── */
+:root {
+  /* Brand Colors */
+  --color-navy:          #0B2340;
+  --color-navy-mid:      #112C52;
+  --color-navy-light:    #1A3A6B;
+  --color-teal:          #00A89C;
+  --color-teal-light:    #00C4B7;
+  --color-teal-dark:     #007F75;
+  --color-amber:         #FFB84D;
+  --color-amber-light:   #FFC96A;
+  --color-amber-dark:    #E69A2A;
+
+  /* Semantic — Dark Mode */
+  --bg-primary:          #0B2340;
+  --bg-secondary:        #112C52;
+  --bg-card:             #142E54;
+  --bg-card-hover:       #1A3A6B;
+  --bg-overlay:          rgba(11, 35, 64, 0.92);
+
+  --text-primary:        #F0F6FF;
+  --text-secondary:      #A8C0D6;
+  --text-muted:          #6B8EAB;
+  --text-inverse:        #0B2340;
+
+  --border-color:        rgba(168, 192, 214, 0.15);
+  --border-color-strong: rgba(0, 168, 156, 0.3);
+
+  --shadow-sm:   0 2px 8px  rgba(0, 0, 0, 0.25);
+  --shadow-md:   0 4px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg:   0 8px 48px rgba(0, 0, 0, 0.45);
+  --shadow-teal: 0 4px 24px rgba(0, 168, 156, 0.25);
+  --shadow-amber:0 4px 24px rgba(255, 184, 77, 0.25);
+
+  --header-bg:   rgba(11, 35, 64, 0.85);
+  --nav-link-color: #A8C0D6;
+
+  /* Spacing */
+  --section-padding:     100px 0;
+  --section-padding-sm:  60px 0;
+  --container-max:       1200px;
+  --container-pad:       0 24px;
+
+  /* Radii */
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   20px;
+  --radius-xl:   32px;
+  --radius-pill: 100px;
+
+  /* Typography */
+  --font-family: 'DM Sans', sans-serif;
+  --font-size-xs:   0.75rem;
+  --font-size-sm:   0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg:   1.125rem;
+  --font-size-xl:   1.25rem;
+  --font-size-2xl:  1.5rem;
+  --font-size-3xl:  2rem;
+  --font-size-4xl:  2.75rem;
+  --font-size-5xl:  3.5rem;
+  --font-size-6xl:  4.5rem;
+
+  /* Transitions */
+  --transition-fast:   150ms ease;
+  --transition-base:   250ms ease;
+  --transition-slow:   400ms ease;
+  --transition-spring: 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Light Mode ───────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg-primary:          #F5F8FC;
+  --bg-secondary:        #FFFFFF;
+  --bg-card:             #FFFFFF;
+  --bg-card-hover:       #F0F6FF;
+  --bg-overlay:          rgba(245, 248, 252, 0.95);
+
+  --text-primary:        #0B2340;
+  --text-secondary:      #2D4B6B;
+  --text-muted:          #6B8EAB;
+  --text-inverse:        #F0F6FF;
+
+  --border-color:        rgba(11, 35, 64, 0.1);
+  --border-color-strong: rgba(0, 168, 156, 0.4);
+
+  --shadow-sm:   0 2px 8px  rgba(11, 35, 64, 0.08);
+  --shadow-md:   0 4px 24px rgba(11, 35, 64, 0.12);
+  --shadow-lg:   0 8px 48px rgba(11, 35, 64, 0.16);
+  --shadow-teal: 0 4px 24px rgba(0, 168, 156, 0.2);
+  --shadow-amber:0 4px 24px rgba(255, 184, 77, 0.2);
+
+  --header-bg:   rgba(255, 255, 255, 0.9);
+  --nav-link-color: #2D4B6B;
+}

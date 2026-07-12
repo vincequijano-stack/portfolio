@@ -1,0 +1,150 @@
+/* ============================================================
+   FOOTER.CSS
+   Copyright + sitemap link columns
+   ============================================================ */
+
+/* ── Footer ─────────────────────────────────────────────────── */
+/* EDIT: Update footer links and copyright in index.html #footer */
+#footer {
+  background: var(--color-navy);
+  padding: 64px 0 32px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+[data-theme="light"] #footer { background: var(--color-navy); }
+
+/* ── Top Row ──────────────────────────────────────────────────── */
+.footer-top {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 48px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 32px;
+}
+
+/* Brand column */
+.footer-brand .header-logo {
+  color: #fff;
+  margin-bottom: 16px;
+  display: inline-flex;
+}
+
+.footer-brand p {
+  font-size: var(--font-size-sm);
+  color: rgba(255,255,255,0.5);
+  line-height: 1.7;
+  margin-bottom: 24px;
+  max-width: 280px;
+}
+
+.footer-social {
+  display: flex;
+  gap: 10px;
+}
+
+.footer-social a {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.5);
+  transition: all var(--transition-base);
+}
+
+.footer-social a:hover {
+  background: rgba(0, 168, 156, 0.15);
+  border-color: var(--color-teal);
+  color: var(--color-teal);
+  transform: translateY(-3px);
+}
+
+.footer-social a svg { width: 16px; height: 16px; }
+
+/* Sitemap columns */
+.footer-col h4 {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.footer-col ul { list-style: none; }
+
+.footer-col li { margin-bottom: 10px; }
+
+.footer-col a {
+  font-size: var(--font-size-sm);
+  color: rgba(255,255,255,0.5);
+  transition: color var(--transition-fast);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.footer-col a:hover { color: var(--color-teal); }
+
+/* ── Bottom Row ───────────────────────────────────────────────── */
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-copyright {
+  font-size: var(--font-size-sm);
+  color: rgba(255,255,255,0.35);
+}
+
+.footer-copyright strong { color: rgba(255,255,255,0.6); }
+
+.footer-legal {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-legal a {
+  font-size: var(--font-size-xs);
+  color: rgba(255,255,255,0.35);
+  transition: color var(--transition-fast);
+}
+
+.footer-legal a:hover { color: var(--color-teal); }
+
+/* Back to top button */
+.back-to-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  background: none;
+  border: none;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.back-to-top:hover { color: var(--color-teal); }
+.back-to-top svg   { width: 16px; height: 16px; }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .footer-top { grid-template-columns: 1fr 1fr; gap: 36px; }
+  .footer-brand { grid-column: 1 / -1; }
+}
+
+@media (max-width: 480px) {
+  .footer-top { grid-template-columns: 1fr 1fr; gap: 28px; }
+  .footer-bottom { flex-direction: column; text-align: center; }
+}

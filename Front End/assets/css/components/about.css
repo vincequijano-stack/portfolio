@@ -1,0 +1,134 @@
+/* ============================================================
+   ABOUT.CSS
+   Bio paragraphs + stat cards with icons
+   ============================================================ */
+
+/* ── Section ────────────────────────────────────────────────── */
+#about {
+  background: var(--bg-secondary);
+  position: relative;
+}
+
+/* ── Grid ────────────────────────────────────────────────────── */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 72px;
+  align-items: start;
+}
+
+/* ── Left: Bio ───────────────────────────────────────────────── */
+/* EDIT: Update bio text in index.html #about-bio section */
+.about-bio .section-label { margin-bottom: 8px; }
+
+.about-bio h2 {
+  margin-bottom: 8px;
+}
+
+.about-bio .divider {
+  margin: 16px 0 28px;
+}
+
+.about-bio p {
+  font-size: var(--font-size-lg);
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+.about-bio p:last-of-type { margin-bottom: 32px; }
+
+/* Skill chips row */
+.about-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.about-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* ── Right: Stat Cards ───────────────────────────────────────── */
+/* EDIT: Update stat values and labels in index.html .stat-cards section */
+.stat-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 28px 24px;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-base);
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-teal), var(--color-amber));
+  transform: scaleX(0);
+  transition: transform var(--transition-base);
+}
+
+.stat-card:hover {
+  border-color: var(--border-color-strong);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-card:hover::before { transform: scaleX(1); }
+
+.stat-icon {
+  width: 44px; height: 44px;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 168, 156, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  color: var(--color-teal);
+}
+
+.stat-icon.amber {
+  background: rgba(255, 184, 77, 0.12);
+  color: var(--color-amber);
+}
+
+.stat-icon svg { width: 22px; height: 22px; }
+
+.stat-value {
+  font-size: var(--font-size-3xl);
+  font-weight: 900;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.stat-label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-cards { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .stat-card  { padding: 20px 16px; }
+  .stat-value { font-size: var(--font-size-2xl); }
+}

@@ -1,0 +1,143 @@
+/* ============================================================
+   CERTIFICATES.CSS
+   Certificate cards with hover zoom
+   ============================================================ */
+
+/* ── Section ────────────────────────────────────────────────── */
+#certificates {
+  background: var(--bg-secondary);
+}
+
+/* ── Grid ────────────────────────────────────────────────────── */
+/* EDIT: Add certificate data in index.html .cert-card elements */
+.certs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+/* ── Card ────────────────────────────────────────────────────── */
+.cert-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: all var(--transition-base);
+}
+
+.cert-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-color-strong);
+}
+
+/* ── Thumbnail ───────────────────────────────────────────────── */
+/* EDIT: Replace cert thumbnail images in assets/images/certificates/ */
+.cert-thumbnail {
+  height: 180px;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cert-thumbnail img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.cert-card:hover .cert-thumbnail img {
+  transform: scale(1.1);
+}
+
+/* Cert placeholder when no image */
+.cert-placeholder {
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--color-navy-light) 100%);
+}
+
+.cert-placeholder-icon {
+  width: 64px; height: 64px;
+  color: var(--color-teal);
+  opacity: 0.5;
+}
+
+/* Badge overlay */
+.cert-badge-overlay {
+  position: absolute;
+  top: 12px; left: 12px;
+  background: var(--color-amber);
+  color: var(--color-navy);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── Card Body ───────────────────────────────────────────────── */
+.cert-body {
+  padding: 20px 22px 24px;
+}
+
+.cert-title {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.cert-issuer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+  color: var(--color-teal);
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.cert-issuer svg { width: 14px; height: 14px; }
+
+.cert-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cert-date {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.cert-verify-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-amber);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.cert-verify-link:hover { color: var(--color-amber-light); }
+.cert-verify-link svg   { width: 12px; height: 12px; }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .certs-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 560px) {
+  .certs-grid { grid-template-columns: 1fr; }
+}

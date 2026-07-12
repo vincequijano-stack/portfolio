@@ -1,0 +1,208 @@
+/* ============================================================
+   SERVICES.CSS
+   3 service cards on deep navy background
+   ============================================================ */
+
+/* ── Section ────────────────────────────────────────────────── */
+#services {
+  background: var(--color-navy);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Dark-mode override so services always stays navy */
+[data-theme="light"] #services { background: var(--color-navy); }
+[data-theme="light"] #services .section-label { color: var(--color-teal); }
+[data-theme="light"] #services .section-title { color: #fff; }
+[data-theme="light"] #services .section-subtitle { color: rgba(255,255,255,0.65); }
+
+/* Decorative background rings */
+.services-bg-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.04);
+  pointer-events: none;
+}
+.services-bg-ring-1 { width: 600px; height: 600px; top: -200px; right: -150px; }
+.services-bg-ring-2 { width: 400px; height: 400px; bottom: -100px; left: -100px; }
+
+/* ── Cards Grid ──────────────────────────────────────────────── */
+/* EDIT: Update service titles, descriptions, and prices in index.html */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Card ────────────────────────────────────────────────────── */
+.service-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-lg);
+  padding: 36px 32px;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-base);
+  display: flex;
+  flex-direction: column;
+}
+
+.service-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg,
+    rgba(0, 168, 156, 0.08) 0%,
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.service-card:hover {
+  border-color: rgba(0, 168, 156, 0.4);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4), var(--shadow-teal);
+}
+
+.service-card:hover::before { opacity: 1; }
+
+/* Featured card highlight */
+.service-card.featured {
+  border-color: rgba(0, 168, 156, 0.5);
+  background: rgba(0, 168, 156, 0.06);
+}
+
+/* ── Icon ────────────────────────────────────────────────────── */
+.service-icon {
+  width: 56px; height: 56px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.service-icon.teal {
+  background: rgba(0, 168, 156, 0.18);
+  color: var(--color-teal);
+}
+.service-icon.amber {
+  background: rgba(255, 184, 77, 0.18);
+  color: var(--color-amber);
+}
+.service-icon svg { width: 28px; height: 28px; }
+
+/* ── Title ───────────────────────────────────────────────────── */
+.service-title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 12px;
+  position: relative; z-index: 1;
+}
+
+.service-desc {
+  font-size: var(--font-size-sm);
+  color: rgba(255,255,255,0.6);
+  line-height: 1.75;
+  flex: 1;
+  position: relative; z-index: 1;
+  margin-bottom: 24px;
+}
+
+/* ── Price Tag ───────────────────────────────────────────────── */
+/* EDIT: Update prices in index.html .service-price elements */
+.service-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative; z-index: 1;
+}
+
+.service-price {
+  font-size: var(--font-size-xl);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.service-price.amber { color: var(--color-amber); }
+.service-price.teal  { color: var(--color-teal); }
+
+.service-price-label {
+  font-size: var(--font-size-xs);
+  color: rgba(255,255,255,0.4);
+  font-weight: 500;
+}
+
+.service-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+}
+
+.service-cta.amber {
+  background: var(--color-amber);
+  color: var(--color-navy);
+  border: none;
+}
+.service-cta.amber:hover { background: var(--color-amber-light); transform: translateY(-2px); }
+
+.service-cta.teal {
+  background: transparent;
+  color: var(--color-teal);
+  border: 2px solid var(--color-teal);
+}
+.service-cta.teal:hover { background: var(--color-teal); color: var(--color-navy); transform: translateY(-2px); }
+
+/* ── Features List ───────────────────────────────────────────── */
+.service-features {
+  list-style: none;
+  margin-bottom: 24px;
+  position: relative; z-index: 1;
+}
+
+.service-features li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--font-size-sm);
+  color: rgba(255,255,255,0.7);
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.service-features li:last-child { border-bottom: none; }
+
+.feature-check {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: rgba(0, 168, 156, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.feature-check svg { width: 10px; height: 10px; color: var(--color-teal); }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .services-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 600px) {
+  .services-grid { grid-template-columns: 1fr; }
+  .service-card { padding: 28px 24px; }
+}

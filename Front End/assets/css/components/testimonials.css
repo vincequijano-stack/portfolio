@@ -1,0 +1,210 @@
+/* ============================================================
+   TESTIMONIALS.CSS
+   Horizontal slider with quote cards, dots, arrows
+   ============================================================ */
+
+/* ── Section ────────────────────────────────────────────────── */
+#testimonials {
+  background: var(--bg-primary);
+  overflow: hidden;
+}
+
+/* ── Slider Wrapper ──────────────────────────────────────────── */
+/* EDIT: Add/update testimonials in index.html .testimonial-slide elements */
+.testimonials-slider-wrapper {
+  position: relative;
+}
+
+.testimonials-track-outer {
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+
+.testimonials-track {
+  display: flex;
+  transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* ── Slide ───────────────────────────────────────────────────── */
+.testimonial-slide {
+  min-width: 100%;
+  padding: 0 60px;
+  box-sizing: border-box;
+}
+
+.testimonial-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 52px 56px;
+  position: relative;
+  overflow: hidden;
+}
+
+.testimonial-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-teal), var(--color-amber));
+}
+
+/* Quote mark */
+.testimonial-quote-mark {
+  position: absolute;
+  top: 40px; right: 48px;
+  font-size: 120px;
+  line-height: 1;
+  color: rgba(0, 168, 156, 0.08);
+  font-family: Georgia, serif;
+  pointer-events: none;
+  user-select: none;
+}
+
+.testimonial-stars {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  color: var(--color-amber);
+}
+
+.testimonial-stars svg { width: 18px; height: 18px; }
+
+.testimonial-text {
+  font-size: var(--font-size-xl);
+  line-height: 1.7;
+  color: var(--text-primary);
+  font-weight: 400;
+  font-style: italic;
+  margin-bottom: 36px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Author ──────────────────────────────────────────────────── */
+.testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.author-avatar {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-teal), var(--color-navy-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  border: 3px solid var(--border-color-strong);
+  overflow: hidden;
+}
+
+.author-avatar img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+
+.author-name {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.author-role {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* EDIT: Replace company logos in assets/images/logos/ */
+.company-logo {
+  margin-left: auto;
+  max-height: 32px;
+  max-width: 100px;
+  object-fit: contain;
+  opacity: 0.6;
+  filter: grayscale(1);
+  transition: all var(--transition-base);
+}
+
+.company-logo:hover { opacity: 1; filter: grayscale(0); }
+
+/* Company logo text fallback */
+.company-logo-text {
+  margin-left: auto;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  opacity: 0.6;
+}
+
+/* ── Navigation Arrows ───────────────────────────────────────── */
+.slider-arrow {
+  position: absolute;
+  top: 50%; transform: translateY(-50%);
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  z-index: 10;
+  transition: all var(--transition-base);
+}
+
+.slider-arrow:hover {
+  border-color: var(--color-teal);
+  color: var(--color-teal);
+  background: rgba(0, 168, 156, 0.08);
+}
+
+.slider-arrow svg { width: 20px; height: 20px; }
+
+.slider-arrow-prev { left: 0; }
+.slider-arrow-next { right: 0; }
+
+/* ── Dots ────────────────────────────────────────────────────── */
+.slider-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 28px;
+}
+
+.slider-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--border-color);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  border: none;
+}
+
+.slider-dot.active {
+  width: 28px;
+  border-radius: var(--radius-pill);
+  background: var(--color-teal);
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .testimonial-slide    { padding: 0 0; }
+  .testimonial-card     { padding: 36px 28px; }
+  .testimonial-text     { font-size: var(--font-size-lg); }
+  .slider-arrow         { display: none; }
+  .testimonial-quote-mark { font-size: 80px; }
+}
+
+@media (max-width: 480px) {
+  .testimonial-card { padding: 28px 20px; }
+  .testimonial-text { font-size: var(--font-size-base); }
+  .company-logo-text { display: none; }
+}

@@ -1,0 +1,13 @@
+# ── Backend ──────────────────────────────────────────────────
+Back End/node_modules/
+Back End/.env
+
+# ── OS Files ─────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Editor ───────────────────────────────────────────────────
+.vscode/settings.json
+*.swp
+*.swo
