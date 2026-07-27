@@ -11,7 +11,7 @@ export default function Services() {
         <div className="section-header reveal is-visible">
           <span className="section-label">What I Offer</span>
           <h2 className="section-title" id="services-heading" style={{ color: '#fff' }}>
-            Services <span className="gradient-text">&amp; Rates</span>
+            <span className="gradient-text">Services</span>
           </h2>
           <div className="divider"></div>
           <p className="section-subtitle" style={{ color: 'rgba(255,255,255,0.6)' }}>
@@ -20,7 +20,7 @@ export default function Services() {
         </div>
 
         <div className="services-grid">
-          {/* Service 1: Consulting */}
+          {/* Service 1: UI/UX Design */}
           <div className="service-card reveal reveal-delay-1 is-visible">
             <div className="service-icon amber">
               <svg
@@ -32,15 +32,13 @@ export default function Services() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                <circle cx="12" cy="12" r="10" />
-                <line x1="2" y1="12" x2="22" y2="12" />
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
               </svg>
             </div>
-            <h3 className="service-title">Tech Consulting</h3>
+            <h3 className="service-title">UI/UX Design</h3>
             <p className="service-desc">
-              Architecture reviews, stack decisions, hiring strategy, and roadmap planning for
-              early-stage and scaling startups.
+              Designing clean, intuitive interfaces and user flows for web and mobile products.
             </p>
             <ul className="service-features">
               <li>
@@ -57,7 +55,7 @@ export default function Services() {
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </span>
-                Architecture review
+                Wireframing
               </li>
               <li>
                 <span className="feature-check">
@@ -73,7 +71,7 @@ export default function Services() {
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </span>
-                Tech stack selection
+                Prototyping
               </li>
               <li>
                 <span className="feature-check">
@@ -89,24 +87,17 @@ export default function Services() {
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </span>
-                Team augmentation
+                User research
               </li>
             </ul>
-            <div className="service-footer">
-              <div>
-                <div className="service-price amber">
-                  $200
-                  <span style={{ fontSize: '1rem', fontWeight: 500 }}>/hr</span>
-                </div>
-                <div className="service-price-label">Starting rate</div>
-              </div>
-              <a href="#contact" className="service-cta amber">
-                Book Call
+            <div className="service-footer" style={{ justifyContent: 'center' }}>
+              <a href="#contact" className="service-cta amber" style={{ width: '100%', textAlign: 'center' }}>
+                Let's Talk
               </a>
             </div>
           </div>
 
-          {/* Service 2: Contract Dev (featured) */}
+          {/* Service 2: Web Development (featured) */}
           <div className="service-card featured reveal reveal-delay-2 is-visible">
             <div className="service-icon teal">
               <svg
@@ -122,10 +113,9 @@ export default function Services() {
                 <polyline points="8 6 2 12 8 18" />
               </svg>
             </div>
-            <h3 className="service-title">Contract Development</h3>
+            <h3 className="service-title">Web Development</h3>
             <p className="service-desc">
-              End-to-end feature development, API integrations, performance optimization, and
-              technical debt reduction on retainer.
+              Building responsive, performant websites and web apps from front end to back end.
             </p>
             <ul className="service-features">
               <li>
@@ -142,7 +132,7 @@ export default function Services() {
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </span>
-                Full-stack development
+                Responsive builds
               </li>
               <li>
                 <span className="feature-check">
@@ -158,7 +148,7 @@ export default function Services() {
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </span>
-                API integrations
+                API integration
               </li>
               <li>
                 <span className="feature-check">
@@ -174,24 +164,17 @@ export default function Services() {
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </span>
-                CI/CD &amp; DevOps
+                Cross-browser testing
               </li>
             </ul>
-            <div className="service-footer">
-              <div>
-                <div className="service-price teal">
-                  $150
-                  <span style={{ fontSize: '1rem', fontWeight: 500 }}>/hr</span>
-                </div>
-                <div className="service-price-label">Or fixed project rate</div>
-              </div>
-              <a href="#contact" className="service-cta teal">
-                Get Quote
+            <div className="service-footer" style={{ justifyContent: 'center' }}>
+              <a href="#contact" className="service-cta teal" style={{ width: '100%', textAlign: 'center' }}>
+                Let's Talk
               </a>
             </div>
           </div>
 
-          {/* Service 3: Speaking / Talks */}
+          {/* Service 3: Software Design */}
           <div className="service-card reveal reveal-delay-3 is-visible">
             <div className="service-icon amber">
               <svg
@@ -203,13 +186,13 @@ export default function Services() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                <path d="M3 11l19-9-9 19-2-8-8-2z" />
+                <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" />
+                <path d="M12 6v6l4 2" />
               </svg>
             </div>
-            <h3 className="service-title">Speaking Engagements</h3>
+            <h3 className="service-title">Software Design</h3>
             <p className="service-desc">
-              Conference talks, workshops, and podcast appearances on full-stack development, AI
-              tooling, and developer productivity.
+              Architecting maintainable, scalable software systems and solutions.
             </p>
             <ul className="service-features">
               <li>
@@ -226,7 +209,7 @@ export default function Services() {
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </span>
-                Keynote &amp; panel talks
+                System architecture
               </li>
               <li>
                 <span className="feature-check">
@@ -242,7 +225,7 @@ export default function Services() {
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </span>
-                Live workshops
+                Database design
               </li>
               <li>
                 <span className="feature-check">
@@ -258,16 +241,12 @@ export default function Services() {
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </span>
-                Podcast interviews
+                Code review
               </li>
             </ul>
-            <div className="service-footer">
-              <div>
-                <div className="service-price amber">Custom</div>
-                <div className="service-price-label">Per engagement</div>
-              </div>
-              <a href="#contact" className="service-cta amber">
-                Invite Me
+            <div className="service-footer" style={{ justifyContent: 'center' }}>
+              <a href="#contact" className="service-cta amber" style={{ width: '100%', textAlign: 'center' }}>
+                Let's Talk
               </a>
             </div>
           </div>
