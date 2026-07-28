@@ -6,12 +6,12 @@
 /* ── Footer ─────────────────────────────────────────────────── */
 /* EDIT: Update footer links and copyright in index.html #footer */
 #footer {
-  background: var(--color-navy);
+  background: #0A0A0A;
   padding: 64px 0 32px;
   border-top: 1px solid rgba(255,255,255,0.06);
 }
 
-[data-theme="light"] #footer { background: var(--color-navy); }
+[data-theme="light"] #footer { background: #0A0A0A; }
 
 /* ── Top Row ──────────────────────────────────────────────────── */
 .footer-top {
@@ -56,9 +56,9 @@
 }
 
 .footer-social a:hover {
-  background: rgba(0, 168, 156, 0.15);
-  border-color: var(--color-teal);
-  color: var(--color-teal);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #FFFFFF;
   transform: translateY(-3px);
 }
 
@@ -88,7 +88,7 @@
   gap: 4px;
 }
 
-.footer-col a:hover { color: var(--color-teal); }
+.footer-col a:hover { color: #FFFFFF; }
 
 /* ── Bottom Row ───────────────────────────────────────────────── */
 .footer-bottom {
@@ -117,7 +117,7 @@
   transition: color var(--transition-fast);
 }
 
-.footer-legal a:hover { color: var(--color-teal); }
+.footer-legal a:hover { color: #FFFFFF; }
 
 /* Back to top button */
 .back-to-top {
@@ -135,7 +135,7 @@
   text-transform: uppercase;
 }
 
-.back-to-top:hover { color: var(--color-teal); }
+.back-to-top:hover { color: #FFFFFF; }
 .back-to-top svg   { width: 16px; height: 16px; }
 
 /* ── Responsive ──────────────────────────────────────────────── */

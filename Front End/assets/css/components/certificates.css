@@ -1,6 +1,6 @@
 /* ============================================================
    CERTIFICATES.CSS
-   Certificate cards with hover zoom
+   Scroll Stack — certificate cards stack as you scroll
    ============================================================ */
 
 /* ── Section ────────────────────────────────────────────────── */
@@ -8,136 +8,244 @@
   background: var(--bg-secondary);
 }
 
-/* ── Grid ────────────────────────────────────────────────────── */
-/* EDIT: Add certificate data in index.html .cert-card elements */
-.certs-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 28px;
-}
-
-/* ── Card ────────────────────────────────────────────────────── */
-.cert-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  transition: all var(--transition-base);
-}
-
-.cert-card:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--border-color-strong);
-}
-
-/* ── Thumbnail ───────────────────────────────────────────────── */
-/* EDIT: Replace cert thumbnail images in assets/images/certificates/ */
-.cert-thumbnail {
-  height: 180px;
-  overflow: hidden;
+/* ══════════════════════════════════════════════════════════════
+   SCROLL STACK ROOT
+   A tall container that gives each card its own scroll range.
+   Cards are sticky inside .cert-scroll-sticky.
+══════════════════════════════════════════════════════════════ */
+.cert-scroll-root {
   position: relative;
-  background: var(--bg-primary);
+  /* min-height set via inline style (n * 80 + 100)vh */
+}
+
+.cert-scroll-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; /* re-enabled on cards below */
+}
+
+/* ── Deck container ── */
+.cert-stack-deck {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  height: 360px; /* visible "window" for the deck */
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: none;
 }
 
-.cert-thumbnail img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-
-.cert-card:hover .cert-thumbnail img {
-  transform: scale(1.1);
-}
-
-/* Cert placeholder when no image */
-.cert-placeholder {
-  width: 100%; height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--color-navy-light) 100%);
-}
-
-.cert-placeholder-icon {
-  width: 64px; height: 64px;
-  color: var(--color-teal);
-  opacity: 0.5;
-}
-
-/* Badge overlay */
-.cert-badge-overlay {
+/* ══════════════════════════════════════════════════════════════
+   ANIMATED CARD  (absolute-positioned inside deck)
+══════════════════════════════════════════════════════════════ */
+.cert-stack-animated {
   position: absolute;
-  top: 12px; left: 12px;
-  background: var(--color-amber);
-  color: var(--color-navy);
-  font-size: var(--font-size-xs);
+  inset: 0;
+  pointer-events: auto;
+  will-change: transform, opacity;
+  /* No CSS transition — JS drives every frame via inline style */
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CARD CHROME (shared by animated + static fallback)
+══════════════════════════════════════════════════════════════ */
+.cert-stack-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  /* Full size within the deck window */
+  width: 100%;
+  height: 100%;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cert-stack-card:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Thumbnail ── */
+.cert-stack-thumb {
+  height: 160px;
+  position: relative;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1e1e1e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+/* Decorative shimmer line */
+.cert-stack-thumb::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+}
+
+/* Ribbon icon */
+.cert-stack-icon {
+  width: 56px; height: 56px;
+  color: rgba(255, 255, 255, 0.18);
+}
+
+/* Badge pill */
+.cert-stack-badge {
+  position: absolute;
+  top: 14px; left: 14px;
+  background: #FFFFFF;
+  color: #000000;
+  font-size: 0.65rem;
   font-weight: 700;
-  padding: 4px 10px;
-  border-radius: var(--radius-pill);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 100px;
 }
 
-/* ── Card Body ───────────────────────────────────────────────── */
-.cert-body {
-  padding: 20px 22px 24px;
+/* ── Body ── */
+.cert-stack-body {
+  padding: 22px 28px 26px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-.cert-title {
+.cert-stack-title {
   font-size: var(--font-size-base);
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 6px;
   line-height: 1.4;
+  margin-bottom: 8px;
 }
 
-.cert-issuer {
+.cert-stack-issuer {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: var(--font-size-sm);
-  color: var(--color-teal);
+  color: var(--text-secondary);
   font-weight: 500;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
-.cert-issuer svg { width: 14px; height: 14px; }
+.cert-stack-issuer svg { flex-shrink: 0; }
 
-.cert-meta {
+.cert-stack-meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.cert-date {
+.cert-stack-date {
   font-size: var(--font-size-xs);
   color: var(--text-muted);
   font-weight: 500;
 }
 
-.cert-verify-link {
+.cert-stack-verify {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   font-size: var(--font-size-xs);
   font-weight: 700;
-  color: var(--color-amber);
+  color: #A0A0A0;
   text-decoration: none;
   transition: color var(--transition-fast);
 }
+.cert-stack-verify:hover { color: #FFFFFF; }
+.cert-stack-verify svg  { width: 12px; height: 12px; }
 
-.cert-verify-link:hover { color: var(--color-amber-light); }
-.cert-verify-link svg   { width: 12px; height: 12px; }
-
-/* ── Responsive ──────────────────────────────────────────────── */
-@media (max-width: 900px) {
-  .certs-grid { grid-template-columns: repeat(2, 1fr); }
+/* ══════════════════════════════════════════════════════════════
+   SCROLL PROGRESS DOTS
+══════════════════════════════════════════════════════════════ */
+.cert-scroll-dots {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+  pointer-events: none;
 }
 
-@media (max-width: 560px) {
-  .certs-grid { grid-template-columns: 1fr; }
+.cert-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.cert-dot-active {
+  background: #FFFFFF;
+  transform: scale(1.4);
+}
+
+.cert-dot-done {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   REDUCED-MOTION FALLBACK — simple vertical list
+══════════════════════════════════════════════════════════════ */
+.cert-stack-fallback {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.cert-stack-static {
+  position: relative;
+  height: 320px;
+  animation: fade-in-up 0.5s ease both;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* On mobile: collapse to a simple scrollable vertical list */
+  .cert-scroll-root {
+    min-height: unset !important;
+  }
+
+  .cert-scroll-sticky {
+    position: static;
+    height: auto;
+    pointer-events: auto;
+  }
+
+  .cert-stack-deck {
+    position: static;
+    height: auto;
+    flex-direction: column;
+    gap: 16px;
+    pointer-events: auto;
+  }
+
+  .cert-stack-animated {
+    position: static;
+    opacity: 1 !important;
+    transform: none !important;
+    height: 320px;
+  }
+
+  .cert-scroll-dots { display: none; }
+}
+
+@media (max-width: 480px) {
+  .cert-stack-animated { height: 280px; }
+  .cert-stack-thumb { height: 120px; }
+  .cert-stack-body  { padding: 16px 18px 20px; }
 }

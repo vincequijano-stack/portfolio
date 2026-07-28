@@ -1,44 +1,58 @@
 /* ============================================================
    VARIABLES.CSS
-   Design Tokens — edit this file to retheme the entire site
+   Design Tokens — Monochrome Professional Theme
    ============================================================ */
 
 /* ── Dark Mode (default) ─────────────────────────────────── */
 :root {
-  /* Brand Colors */
-  --color-navy:          #0B2340;
-  --color-navy-mid:      #112C52;
-  --color-navy-light:    #1A3A6B;
-  --color-teal:          #00A89C;
-  --color-teal-light:    #00C4B7;
-  --color-teal-dark:     #007F75;
-  --color-amber:         #FFB84D;
-  --color-amber-light:   #FFC96A;
-  --color-amber-dark:    #E69A2A;
+  /* Monochrome Palette */
+  --color-white:         #FFFFFF;
+  --color-gray-100:      #F5F5F5;
+  --color-gray-200:      #E0E0E0;
+  --color-gray-300:      #CCCCCC;
+  --color-gray-400:      #A0A0A0;
+  --color-gray-500:      #808080;
+  --color-gray-600:      #666666;
+  --color-gray-700:      #444444;
+  --color-gray-800:      #2A2A2A;
+  --color-gray-900:      #1A1A1A;
+  --color-gray-950:      #111111;
+  --color-black:         #000000;
+
+  /* Legacy aliases kept for backward compatibility (mapped to monochrome) */
+  --color-navy:          #0A0A0A;
+  --color-navy-mid:      #111111;
+  --color-navy-light:    #2A2A2A;
+  --color-teal:          #F5F5F5;
+  --color-teal-light:    #FFFFFF;
+  --color-teal-dark:     #CCCCCC;
+  --color-amber:         #FFFFFF;
+  --color-amber-light:   #F5F5F5;
+  --color-amber-dark:    #CCCCCC;
 
   /* Semantic — Dark Mode */
-  --bg-primary:          #0B2340;
-  --bg-secondary:        #112C52;
-  --bg-card:             #142E54;
-  --bg-card-hover:       #1A3A6B;
-  --bg-overlay:          rgba(11, 35, 64, 0.92);
+  --bg-primary:          #0A0A0A;
+  --bg-secondary:        #111111;
+  --bg-card:             #1A1A1A;
+  --bg-card-hover:       #222222;
+  --bg-overlay:          rgba(10, 10, 10, 0.94);
 
-  --text-primary:        #F0F6FF;
-  --text-secondary:      #A8C0D6;
-  --text-muted:          #6B8EAB;
-  --text-inverse:        #0B2340;
+  --text-primary:        #F5F5F5;
+  --text-secondary:      #A0A0A0;
+  --text-muted:          #666666;
+  --text-inverse:        #000000;
 
-  --border-color:        rgba(168, 192, 214, 0.15);
-  --border-color-strong: rgba(0, 168, 156, 0.3);
+  --border-color:        #2A2A2A;
+  --border-color-strong: #444444;
 
-  --shadow-sm:   0 2px 8px  rgba(0, 0, 0, 0.25);
-  --shadow-md:   0 4px 24px rgba(0, 0, 0, 0.35);
-  --shadow-lg:   0 8px 48px rgba(0, 0, 0, 0.45);
-  --shadow-teal: 0 4px 24px rgba(0, 168, 156, 0.25);
-  --shadow-amber:0 4px 24px rgba(255, 184, 77, 0.25);
+  --shadow-sm:   0 2px 8px  rgba(0, 0, 0, 0.4);
+  --shadow-md:   0 4px 24px rgba(0, 0, 0, 0.5);
+  --shadow-lg:   0 8px 48px rgba(0, 0, 0, 0.6);
+  --shadow-teal: 0 4px 24px rgba(255, 255, 255, 0.08);
+  --shadow-amber:0 4px 24px rgba(255, 255, 255, 0.08);
 
-  --header-bg:   rgba(11, 35, 64, 0.85);
-  --nav-link-color: #A8C0D6;
+  --header-bg:   rgba(10, 10, 10, 0.15);
+  --nav-link-color: #A0A0A0;
 
   /* Spacing */
   --section-padding:     100px 0;
@@ -75,26 +89,37 @@
 
 /* ── Light Mode ───────────────────────────────────────────── */
 [data-theme="light"] {
-  --bg-primary:          #F5F8FC;
+  --bg-primary:          #F5F5F5;
   --bg-secondary:        #FFFFFF;
   --bg-card:             #FFFFFF;
-  --bg-card-hover:       #F0F6FF;
-  --bg-overlay:          rgba(245, 248, 252, 0.95);
+  --bg-card-hover:       #F0F0F0;
+  --bg-overlay:          rgba(245, 245, 245, 0.97);
 
-  --text-primary:        #0B2340;
-  --text-secondary:      #2D4B6B;
-  --text-muted:          #6B8EAB;
-  --text-inverse:        #F0F6FF;
+  --text-primary:        #111111;
+  --text-secondary:      #444444;
+  --text-muted:          #888888;
+  --text-inverse:        #F5F5F5;
 
-  --border-color:        rgba(11, 35, 64, 0.1);
-  --border-color-strong: rgba(0, 168, 156, 0.4);
+  --border-color:        #E0E0E0;
+  --border-color-strong: #AAAAAA;
 
-  --shadow-sm:   0 2px 8px  rgba(11, 35, 64, 0.08);
-  --shadow-md:   0 4px 24px rgba(11, 35, 64, 0.12);
-  --shadow-lg:   0 8px 48px rgba(11, 35, 64, 0.16);
-  --shadow-teal: 0 4px 24px rgba(0, 168, 156, 0.2);
-  --shadow-amber:0 4px 24px rgba(255, 184, 77, 0.2);
+  --shadow-sm:   0 2px 8px  rgba(0, 0, 0, 0.06);
+  --shadow-md:   0 4px 24px rgba(0, 0, 0, 0.10);
+  --shadow-lg:   0 8px 48px rgba(0, 0, 0, 0.14);
+  --shadow-teal: 0 4px 24px rgba(0, 0, 0, 0.1);
+  --shadow-amber:0 4px 24px rgba(0, 0, 0, 0.1);
 
-  --header-bg:   rgba(255, 255, 255, 0.9);
-  --nav-link-color: #2D4B6B;
+  --header-bg:   rgba(255, 255, 255, 0.2);
+  --nav-link-color: #444444;
+
+  /* Monochrome palette stays the same in light mode */
+  --color-teal:          #111111;
+  --color-teal-light:    #000000;
+  --color-teal-dark:     #333333;
+  --color-amber:         #111111;
+  --color-amber-light:   #000000;
+  --color-amber-dark:    #333333;
+  --color-navy:          #FFFFFF;
+  --color-navy-mid:      #F5F5F5;
+  --color-navy-light:    #E0E0E0;
 }

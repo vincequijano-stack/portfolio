@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Header from './components/Header.jsx';
+import BeamsBackground from './components/BeamsBackground.jsx';
 import Hero from './components/Hero.jsx';
 import About from './components/About.jsx';
 import Projects from './components/Projects.jsx';
@@ -78,12 +79,13 @@ export default function App() {
           height: '3px',
           width: `${scrollProgress}%`,
           zIndex: 9999,
-          background: 'linear-gradient(90deg, var(--color-teal), var(--color-amber))',
+          background: 'linear-gradient(90deg, #FFFFFF, #888888)',
           transition: 'width 0.1s',
         }}
       ></div>
 
       <Header />
+      <BeamsBackground />
 
       <main id="main-content">
         <Hero />

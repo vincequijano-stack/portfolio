@@ -37,12 +37,139 @@
 
 .about-bio p:last-of-type { margin-bottom: 32px; }
 
-/* Skill chips row */
-.about-skills {
+/* ── Logo Loop (replaces skill pill chips) ─────────────────── */
+.logo-loop-wrapper {
+  position: relative;
+  margin: 28px 0 32px;
+  overflow: hidden;
+}
+
+.logo-loop-label {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+/* Edge fade masks — sit above the track, pointer-events: none */
+.logo-fade-left,
+.logo-fade-right {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 80px;
+  pointer-events: none;
+  z-index: 2;
+}
+.logo-fade-left  { left:  0; background: linear-gradient(to right,  var(--bg-secondary) 0%, transparent 100%); }
+.logo-fade-right { right: 0; background: linear-gradient(to left,   var(--bg-secondary) 0%, transparent 100%); }
+
+/* One marquee row */
+.marquee-row {
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.marquee-row:last-of-type { margin-bottom: 0; }
+
+/* The sliding track — holds 2× copies so we can loop -50% */
+.marquee-track {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
-  margin-bottom: 32px;
+  width: max-content; /* shrink-wraps both copies side-by-side */
+  will-change: transform;
+}
+
+/* Row 1: scrolls left (negative direction) */
+.marquee-left {
+  animation: marquee-left var(--dur, 36s) linear infinite;
+}
+/* Row 2: scrolls right (positive direction) */
+.marquee-right {
+  animation: marquee-right var(--dur, 36s) linear infinite;
+}
+
+/* Pause on row hover */
+.marquee-row:hover .marquee-track { animation-play-state: paused; }
+
+@keyframes marquee-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes marquee-right {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
+/* Individual logo item */
+.logo-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 20px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: default;
+  transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+  flex-shrink: 0;
+  min-width: 80px;
+}
+
+.logo-item:hover {
+  transform: translateY(-4px) scale(1.08);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Logo icon container */
+.logo-icon {
+  width: 36px; height: 36px;
+  color: rgba(255, 255, 255, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.25s ease;
+}
+.logo-icon svg { width: 100%; height: 100%; }
+
+.logo-item:hover .logo-icon {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Logo name label */
+.logo-name {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.3);
+  text-align: center;
+  white-space: nowrap;
+  transition: color 0.25s ease;
+}
+
+.logo-item:hover .logo-name {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* Reduced motion: disable animation, show as static flex row */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none !important; }
+  .marquee-row   { overflow: visible; }
+  .logo-loop-wrapper { overflow: visible; }
+  .logo-fade-left,
+  .logo-fade-right { display: none; }
+}
+
+/* Mobile: smaller logo items */
+@media (max-width: 480px) {
+  .logo-item  { padding: 10px 14px; min-width: 64px; }
+  .logo-icon  { width: 28px; height: 28px; }
+  .logo-name  { font-size: 0.6rem; }
+  .logo-fade-left,
+  .logo-fade-right { width: 48px; }
 }
 
 .about-cta-row {
@@ -74,7 +201,7 @@
   position: absolute;
   bottom: 0; left: 0; right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--color-teal), var(--color-amber));
+  background: linear-gradient(90deg, #FFFFFF, #666666);
   transform: scaleX(0);
   transition: transform var(--transition-base);
 }
@@ -90,17 +217,17 @@
 .stat-icon {
   width: 44px; height: 44px;
   border-radius: var(--radius-sm);
-  background: rgba(0, 168, 156, 0.12);
+  background: rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 16px;
-  color: var(--color-teal);
+  color: #FFFFFF;
 }
 
 .stat-icon.amber {
-  background: rgba(255, 184, 77, 0.12);
-  color: var(--color-amber);
+  background: rgba(255, 255, 255, 0.06);
+  color: #CCCCCC;
 }
 
 .stat-icon svg { width: 22px; height: 22px; }

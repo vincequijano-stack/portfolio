@@ -1,16 +1,29 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 export default function Hero() {
   return (
     <section id="hero" aria-label="Hero">
-      {/* Decorative backgrounds */}
-      <div className="hero-bg-blob hero-bg-blob-1" aria-hidden="true"></div>
-      <div className="hero-bg-blob hero-bg-blob-2" aria-hidden="true"></div>
-      <div className="hero-grid-overlay" aria-hidden="true"></div>
+      <div className="hero-inner">
+        {/* Left Column: Name & Role */}
+        <div className="hero-text-column reveal is-visible">
+          <h1 className="hero-headline">Vince Quijano</h1>
+          <div className="hero-roles">
+            <div className="hero-role-card">
+              <h3>Software Engineer</h3>
+            </div>
+            <div className="hero-role-card">
+              <h3>Web Developer</h3>
+            </div>
+            <div className="hero-role-card">
+              <h3>UI/UX Design</h3>
+            </div>
+          </div>
+        </div>
 
-      <div className="hero-inner" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '2rem' }}>
-        {/* Image Column */}
-        <div className="hero-image-wrapper reveal is-visible" style={{ margin: '0 auto' }}>
+        {/* Right Column: Visuals & CTAs */}
+        <div className="hero-visual-column" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '2rem' }}>
+          {/* Image Column */}
+          <div className="hero-image-wrapper reveal is-visible" style={{ margin: '0 auto' }}>
           <div className="hero-image-outer">
             {/* Decorative ring SVG */}
             <svg
@@ -37,8 +50,8 @@ export default function Hero() {
                   y2="480"
                   gradientUnits="userSpaceOnUse"
                 >
-                  <stop offset="0%" stopColor="#00A89C" />
-                  <stop offset="100%" stopColor="#FFB84D" />
+                  <stop offset="0%"   stopColor="#FFFFFF" />
+                  <stop offset="100%" stopColor="#555555" />
                 </linearGradient>
               </defs>
             </svg>
@@ -57,61 +70,46 @@ export default function Hero() {
               style={{ objectPosition: '5% center' }}
             />
 
-            {/* Floating Geometric Shapes */}
+            {/* Floating Geometric Shapes — kept for extra depth above beams */}
             <div className="geo-shape geo-shape-1 shape-float-1" aria-hidden="true">
-              <svg
-                viewBox="0 0 80 80"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <polygon
                   points="40,4 76,62 4,62"
-                  stroke="#00A89C"
+                  stroke="#FFFFFF"
                   strokeWidth="2"
-                  fill="rgba(0,168,156,0.08)"
+                  fill="rgba(255,255,255,0.05)"
                 />
               </svg>
             </div>
             <div className="geo-shape geo-shape-2 shape-float-2" aria-hidden="true">
-              <svg
-                viewBox="0 0 60 60"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+              <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect
-                  x="4"
-                  y="4"
-                  width="52"
-                  height="52"
-                  rx="8"
-                  stroke="#FFB84D"
+                  x="4" y="4" width="52" height="52" rx="8"
+                  stroke="#888888"
                   strokeWidth="2"
-                  fill="rgba(255,184,77,0.08)"
+                  fill="rgba(136,136,136,0.06)"
                   transform="rotate(20 30 30)"
                 />
               </svg>
             </div>
             <div className="geo-shape geo-shape-3 shape-float-3" aria-hidden="true">
-              <svg
-                viewBox="0 0 48 48"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <polygon
                   points="24,2 46,14 46,34 24,46 2,34 2,14"
-                  stroke="#00A89C"
+                  stroke="#CCCCCC"
                   strokeWidth="2"
-                  fill="rgba(0,168,156,0.06)"
+                  fill="rgba(200,200,200,0.04)"
                 />
               </svg>
             </div>
-
-
           </div>
         </div>
 
         {/* Content Column */}
-        <div className="hero-content reveal reveal-right is-visible" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div
+          className="hero-content reveal reveal-right is-visible"
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+        >
           <p className="hero-subtagline" id="hero-subtagline">
             Passionate about building clean, efficient, and user-centric web applications.
           </p>
@@ -120,45 +118,25 @@ export default function Hero() {
           <div className="hero-ctas" style={{ justifyContent: 'center' }}>
             <a href="#projects" className="btn btn-amber" id="hero-cta-projects">
               View Projects
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="9 18 15 12 9 6" />
               </svg>
             </a>
             <a href="#contact" className="btn btn-teal" id="hero-cta-hire">
               Hire Me
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
             </a>
           </div>
-
-
         </div>
-
+        </div>
       </div>
-
-
     </section>
   );
 }

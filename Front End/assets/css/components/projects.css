@@ -1,6 +1,7 @@
 /* ============================================================
    PROJECTS.CSS
-   Featured Projects — large + small cards with hover overlay
+   Magic Bento Grid — spotlight, tilt, border glow
+   Monochrome black/white/gray only
    ============================================================ */
 
 /* ── Section ────────────────────────────────────────────────── */
@@ -8,179 +9,476 @@
   background: var(--bg-primary);
 }
 
-/* ── Grid Layouts ────────────────────────────────────────────── */
-/* 3 large cards */
-.projects-grid-large {
+/* ══════════════════════════════════════════════════════════════
+   BENTO GRID
+   Areas:
+     Row 1: p1(small)  p2(tall↓)  p3(tall↓)
+     Row 2: p4(tall↓)  p2(cont.)  p3(cont.)
+     Row 3: p4(cont.)  p5(small)  p6(small)
+══════════════════════════════════════════════════════════════ */
+.projects-bento {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 28px;
-  margin-bottom: 28px;
+  grid-template-columns: 1fr 1.1fr 0.9fr;
+  grid-template-rows: 300px 300px 290px;
+  grid-template-areas:
+    "p1 p2 p3"
+    "p4 p2 p3"
+    "p4 p5 p6";
+  gap: 16px;
 }
 
-/* 3 smaller cards */
-.projects-grid-small {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 28px;
-}
+.bento-card-p1 { grid-area: p1; }
+.bento-card-p2 { grid-area: p2; }
+.bento-card-p3 { grid-area: p3; }
+.bento-card-p4 { grid-area: p4; }
+.bento-card-p5 { grid-area: p5; }
+.bento-card-p6 { grid-area: p6; }
 
-/* ── Card Base ───────────────────────────────────────────────── */
-/* EDIT: Add project data in index.html .project-card elements */
-.project-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  overflow: hidden;
+/* ══════════════════════════════════════════════════════════════
+   BENTO CARD BASE
+══════════════════════════════════════════════════════════════ */
+.bento-card {
+  /* Layout */
   position: relative;
-  transition: all var(--transition-base);
   display: flex;
   flex-direction: column;
-}
-
-.project-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--border-color-strong);
-}
-
-/* ── Screenshot / Thumbnail ─────────────────────────────────── */
-.project-thumbnail {
-  position: relative;
   overflow: hidden;
+
+  /* Aesthetics */
+  background: #0d0d0d;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+
+  /* Transition used on mouse-leave only (JS overrides during active hover) */
+  transition:
+    transform 0.5s cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+
+  /* Will-change for GPU compositing */
+  will-change: transform;
+  transform-style: preserve-3d;
+
+  /* Cursor */
+  cursor: default;
+
+  /* Custom prop defaults (spotlight off-screen) */
+  --mouse-x: -9999px;
+  --mouse-y: -9999px;
 }
 
-.projects-grid-large .project-thumbnail {
-  height: 220px;
-}
-
-.projects-grid-small .project-thumbnail {
-  height: 160px;
-}
-
-.project-thumbnail img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform var(--transition-slow);
-}
-
-.project-card:hover .project-thumbnail img {
-  transform: scale(1.06);
-}
-
-/* Metric Badge */
-.project-metric {
-  position: absolute;
-  top: 12px; right: 12px;
-  background: rgba(11, 35, 64, 0.85);
-  backdrop-filter: blur(8px);
-  color: var(--color-amber);
-  font-size: var(--font-size-xs);
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: var(--radius-pill);
-  border: 1px solid rgba(255, 184, 77, 0.3);
-  letter-spacing: 0.04em;
-}
-
-/* ── Hover Overlay ───────────────────────────────────────────── */
-.project-overlay {
+/* ── Spotlight ── */
+/* Radial gradient that follows cursor, clipped to card bounds */
+.bento-card::before {
+  content: '';
   position: absolute;
   inset: 0;
-  background: rgba(11, 35, 64, 0.88);
-  backdrop-filter: blur(4px);
+  z-index: 3;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(
+    800px circle at var(--mouse-x) var(--mouse-y),
+    rgba(255, 255, 255, 0.065),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+/* ── Border glow line ── */
+/* Thin bright border that traces the card edge on hover */
+.bento-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  border-radius: inherit;
+  border: 1px solid rgba(255, 255, 255, 0);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* ── Hover States ── */
+.bento-card.bento-hovered::before {
+  opacity: 1;
+}
+
+.bento-card.bento-hovered::after {
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 24px 64px rgba(0, 0, 0, 0.55),
+    0 0 40px rgba(255, 255, 255, 0.03);
+}
+
+/* ── Focus (keyboard nav) ── */
+.bento-card:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   THUMBNAIL (image cards — p1, p2, p3, p4)
+══════════════════════════════════════════════════════════════ */
+.bento-thumb {
+  position: relative;
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+  z-index: 1;
+}
+
+/* Small cards (1 grid row) — limit thumb height to leave room for body */
+.bento-card-p1 .bento-thumb {
+  flex: 0 0 140px;
+}
+
+/* Text-only visual block (for placeholder cards) */
+.bento-thumb--text {
+  flex: 0 0 130px;
+  background: #0a0a0a;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  opacity: 0;
-  transition: opacity var(--transition-base);
 }
 
-.project-thumbnail:hover .project-overlay { opacity: 1; }
+.bento-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  transform-origin: center;
+}
 
-.overlay-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 18px;
-  font-size: var(--font-size-sm);
+/* Subtle zoom on card hover */
+.bento-card.bento-hovered .bento-thumb img {
+  transform: scale(1.04);
+}
+
+/* Dark gradient overlay fading bottom of image into card bg */
+.bento-thumb-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 30%,
+    rgba(13, 13, 13, 0.55) 70%,
+    #0d0d0d 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Metric badge (top-right of thumb) ── */
+.bento-metric {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #FFFFFF;
+  font-size: 0.7rem;
   font-weight: 700;
-  border-radius: var(--radius-pill);
-  cursor: pointer;
-  font-family: inherit;
-  transition: all var(--transition-fast);
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  text-transform: uppercase;
+  transition: border-color 0.3s ease;
 }
 
-.overlay-btn-demo {
-  background: var(--color-amber);
-  color: var(--color-navy);
-  border: none;
+.bento-card.bento-hovered .bento-metric {
+  border-color: rgba(255, 255, 255, 0.35);
 }
-.overlay-btn-demo:hover { background: var(--color-amber-light); transform: scale(1.05); }
 
-.overlay-btn-repo {
-  background: transparent;
-  color: #fff;
-  border: 2px solid rgba(255,255,255,0.5);
+/* ══════════════════════════════════════════════════════════════
+   TEXT-ONLY VISUAL (p5, p6 — no images)
+══════════════════════════════════════════════════════════════ */
+.bento-text-visual {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
-.overlay-btn-repo:hover { border-color: var(--color-teal); color: var(--color-teal); transform: scale(1.05); }
 
-.overlay-btn svg { width: 14px; height: 14px; }
+.bento-text-visual-num {
+  font-size: 5rem;
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  color: rgba(255, 255, 255, 0.04);
+  line-height: 1;
+  user-select: none;
+  position: relative;
+  z-index: 1;
+  transition: color 0.4s ease;
+}
 
-/* ── Card Body ───────────────────────────────────────────────── */
-.project-body {
-  padding: 20px;
-  flex: 1;
+.bento-card.bento-hovered .bento-text-visual-num {
+  color: rgba(255, 255, 255, 0.07);
+}
+
+.bento-text-visual-grid {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CARD BODY
+══════════════════════════════════════════════════════════════ */
+.bento-body {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
+  padding: 20px 28px 28px;
+  flex-shrink: 0;
 }
 
-.project-title {
-  font-size: var(--font-size-lg);
+/* Tall cards get more generous body padding */
+.bento-card-p2 .bento-body,
+.bento-card-p3 .bento-body,
+.bento-card-p4 .bento-body {
+  padding: 24px 32px 32px;
+}
+
+/* ── Eyebrow / label ── */
+.bento-eyebrow {
+  display: block;
+  font-size: 0.68rem;
   font-weight: 700;
-  color: var(--text-primary);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
   margin-bottom: 8px;
+  transition: color 0.3s ease;
 }
 
-.projects-grid-small .project-title {
-  font-size: var(--font-size-base);
+.bento-card.bento-hovered .bento-eyebrow {
+  color: rgba(255, 255, 255, 0.55);
 }
 
-.project-summary {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  line-height: 1.65;
+/* ── Title ── */
+.bento-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #F5F5F5;
+  line-height: 1.3;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.bento-card-p2 .bento-title,
+.bento-card-p3 .bento-title,
+.bento-card-p4 .bento-title {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+/* ── Description ── */
+.bento-desc {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.7;
   margin-bottom: 16px;
+  /* Clamp to 2 lines on small cards */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.3s ease;
+}
+
+/* Full description on tall cards */
+.bento-card-p2 .bento-desc,
+.bento-card-p3 .bento-desc,
+.bento-card-p4 .bento-desc {
+  -webkit-line-clamp: 3;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.bento-card.bento-hovered .bento-desc {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* ── Footer row (tags + actions) ── */
+.bento-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+/* ── Tech tags ── */
+.bento-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
   flex: 1;
 }
 
-.project-tags {
+.bento-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 3px 9px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+.bento-card.bento-hovered .bento-tag {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* ── Action buttons ── */
+.bento-actions {
   display: flex;
-  flex-wrap: wrap;
   gap: 6px;
+  flex-shrink: 0;
 }
 
-.project-tags .tag {
+.bento-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
   font-size: 0.7rem;
-  padding: 3px 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border-radius: 100px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-family: inherit;
 }
 
-/* ── View All CTA ────────────────────────────────────────────── */
+.bento-action-demo {
+  background: #FFFFFF;
+  color: #000000;
+  border: 1px solid #FFFFFF;
+}
+.bento-action-demo:hover {
+  background: #E8E8E8;
+  transform: translateY(-1px);
+}
+
+.bento-action-repo {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.bento-action-repo:hover {
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: translateY(-1px);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   VIEW ALL CTA
+══════════════════════════════════════════════════════════════ */
 .projects-cta {
   text-align: center;
-  margin-top: 48px;
+  margin-top: 52px;
 }
 
-/* ── Responsive ──────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE — Tablet (max 1024px)
+   Collapse to 2 columns, lose the bento layout
+══════════════════════════════════════════════════════════════ */
 @media (max-width: 1024px) {
-  .projects-grid-large,
-  .projects-grid-small { grid-template-columns: repeat(2, 1fr); }
+  .projects-bento {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 340px 340px 320px;
+    grid-template-areas:
+      "p1 p2"
+      "p3 p4"
+      "p5 p6";
+    gap: 14px;
+  }
+
+  /* Reset all area-specific tall heights */
+  .bento-card-p1,
+  .bento-card-p2,
+  .bento-card-p3,
+  .bento-card-p4,
+  .bento-card-p5,
+  .bento-card-p6 {
+    grid-area: unset;
+  }
+
+  .bento-card-p1 { grid-area: p1; }
+  .bento-card-p2 { grid-area: p2; }
+  .bento-card-p3 { grid-area: p3; }
+  .bento-card-p4 { grid-area: p4; }
+  .bento-card-p5 { grid-area: p5; }
+  .bento-card-p6 { grid-area: p6; }
+
+  /* Normalize thumb heights */
+  .bento-card-p1 .bento-thumb { flex: 0 0 160px; }
+  .bento-thumb--text { flex: 0 0 130px; }
 }
 
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE — Mobile (max 640px)
+   Single column stack
+══════════════════════════════════════════════════════════════ */
 @media (max-width: 640px) {
-  .projects-grid-large,
-  .projects-grid-small { grid-template-columns: 1fr; }
-  .projects-grid-large .project-thumbnail { height: 200px; }
-  .projects-grid-small .project-thumbnail { height: 180px; }
+  .projects-bento {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-template-areas:
+      "p1" "p2" "p3" "p4" "p5" "p6";
+    gap: 12px;
+  }
+
+  .bento-card {
+    border-radius: 16px;
+    min-height: 320px;
+  }
+
+  .bento-card-p1 .bento-thumb { flex: 0 0 160px; }
+  .bento-thumb--text { flex: 0 0 130px; }
+
+  .bento-body {
+    padding: 18px 22px 22px;
+  }
+
+  .bento-card-p2 .bento-body,
+  .bento-card-p3 .bento-body,
+  .bento-card-p4 .bento-body {
+    padding: 18px 22px 22px;
+  }
+
+  /* Disable tilt on touch devices */
+  @media (hover: none) {
+    .bento-card {
+      transform: none !important;
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   REDUCED MOTION
+══════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  .bento-card {
+    transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
+    transform: none !important;
+  }
+  .bento-card::before { opacity: 0 !important; }
+  .bento-thumb img { transition: none; }
 }

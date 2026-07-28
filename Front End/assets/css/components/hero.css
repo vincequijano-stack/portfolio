@@ -14,35 +14,32 @@
   background: var(--bg-primary);
 }
 
-/* ── Background Blobs ───────────────────────────────────────── */
-.hero-bg-blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.12;
-  pointer-events: none;
-}
-
-.hero-bg-blob-1 {
-  width: 600px; height: 600px;
-  background: var(--color-teal);
-  top: -100px; right: -100px;
-}
-
-.hero-bg-blob-2 {
-  width: 400px; height: 400px;
-  background: var(--color-amber);
-  bottom: 0; left: -80px;
-}
-
-.hero-grid-overlay {
-  position: absolute;
+/* ── Beams Background Canvas ─────────────────────────────── */
+.beams-canvas {
+  position: fixed;
   inset: 0;
-  background-image:
-    linear-gradient(rgba(168, 192, 214, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(168, 192, 214, 0.04) 1px, transparent 1px);
-  background-size: 48px 48px;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
+  z-index: -1;
+  display: block;
+}
+
+/* Static fallback for prefers-reduced-motion */
+.beams-static-fallback {
+  display: none; /* hidden by default — canvas handles it */
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 600px 300px at 20% 40%, rgba(255,255,255,0.06) 0%, transparent 80%),
+    radial-gradient(ellipse 400px 200px at 80% 60%, rgba(255,255,255,0.04) 0%, transparent 80%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beams-canvas         { display: none; }
+  .beams-static-fallback{ display: block; }
 }
 
 /* ── Grid ────────────────────────────────────────────────────── */
@@ -86,25 +83,63 @@
 }
 
 .audience-btn.active {
-  background: var(--color-teal);
-  color: var(--color-navy);
-  box-shadow: var(--shadow-teal);
+  background: #FFFFFF;
+  color: #000000;
+  box-shadow: 0 2px 12px rgba(255, 255, 255, 0.15);
 }
 
 .audience-btn:hover:not(.active) {
   color: var(--text-primary);
-  background: rgba(0, 168, 156, 0.08);
+  background: rgba(255, 255, 255, 0.08);
 }
 
-/* ── Headline ────────────────────────────────────────────────── */
-/* EDIT: Hero text content is in index.html data-audience attributes */
+/* ── Headline & Roles ────────────────────────────────────────── */
+.hero-text-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .hero-headline {
-  font-size: clamp(2.5rem, 5vw, var(--font-size-6xl));
-  font-weight: 900;
-  line-height: 1.08;
-  letter-spacing: -0.03em;
-  margin-bottom: 20px;
+  font-size: clamp(3.2rem, 6vw, 4.8rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  margin-bottom: 12px;
+  color: var(--text-primary);
   transition: opacity 0.3s ease;
+}
+
+.hero-roles {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.hero-role-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 320px;
+}
+
+.hero-role-card h3 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #F5F5F5;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.hero-role-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(8px);
 }
 
 .hero-subtagline {
@@ -155,10 +190,10 @@
 }
 
 .social-icon-link:hover {
-  border-color: var(--color-teal);
-  color: var(--color-teal);
+  border-color: #FFFFFF;
+  color: #FFFFFF;
   transform: translateY(-3px);
-  box-shadow: var(--shadow-teal);
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.12);
 }
 
 .social-icon-link svg { width: 18px; height: 18px; }
@@ -193,7 +228,7 @@
   position: absolute;
   inset: -12px;
   border-radius: 50%;
-  border: 2px solid var(--color-teal);
+  border: 2px solid rgba(255, 255, 255, 0.5);
   animation: pulse-ring 2.5s ease-out infinite;
 }
 
@@ -207,8 +242,8 @@
   object-fit: cover;
   position: relative;
   z-index: 2;
-  border: 4px solid var(--color-teal);
-  box-shadow: 0 0 0 8px rgba(0, 168, 156, 0.12), var(--shadow-lg);
+  border: 4px solid #FFFFFF;
+  box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.08), var(--shadow-lg);
   display: block;
   margin: auto;
 }
@@ -270,8 +305,8 @@
   font-size: 18px;
 }
 
-.hero-stat-badge .badge-icon.teal { background: rgba(0, 168, 156, 0.15); }
-.hero-stat-badge .badge-icon.amber { background: rgba(255, 184, 77, 0.15); }
+.hero-stat-badge .badge-icon.teal { background: rgba(255, 255, 255, 0.1); }
+.hero-stat-badge .badge-icon.amber { background: rgba(255, 255, 255, 0.08); }
 
 .hero-stat-badge .badge-text strong {
   display: block;
@@ -315,7 +350,7 @@
 
 .scroll-wheel {
   width: 4px; height: 8px;
-  background: var(--color-teal);
+  background: #A0A0A0;
   border-radius: var(--radius-pill);
   animation: float 1.5s ease-in-out infinite;
 }

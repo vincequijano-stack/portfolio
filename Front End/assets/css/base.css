@@ -1,6 +1,6 @@
 /* ============================================================
    BASE.CSS
-   Reset, typography, global utilities
+   Reset, typography, global utilities — Monochrome Theme
    ============================================================ */
 
 *, *::before, *::after {
@@ -74,6 +74,7 @@ p { color: var(--text-secondary); }
 /* ── Section Layout ────────────────────────────────────────── */
 section {
   padding: var(--section-padding);
+  background: transparent !important;
 }
 
 .section-header {
@@ -87,7 +88,7 @@ section {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-teal);
+  color: var(--color-gray-400);
   margin-bottom: 12px;
 }
 
@@ -118,54 +119,126 @@ section {
   cursor: pointer;
 }
 
+/* Primary: solid white, black text */
+.btn-primary {
+  background: #FFFFFF;
+  color: #000000;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 4px 24px rgba(255, 255, 255, 0.12);
+}
+.btn-primary:hover {
+  background: #E0E0E0;
+  border-color: #E0E0E0;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(255, 255, 255, 0.2);
+}
+
+/* Secondary: ghost outline white */
+.btn-secondary {
+  background: transparent;
+  color: #F5F5F5;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+}
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #FFFFFF;
+  color: #FFFFFF;
+  transform: translateY(-2px);
+}
+
+/* Legacy aliases → mapped to monochrome */
 .btn-amber {
-  background: var(--color-amber);
-  color: var(--color-navy);
-  box-shadow: var(--shadow-amber);
+  background: #FFFFFF;
+  color: #000000;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 4px 24px rgba(255, 255, 255, 0.12);
 }
 .btn-amber:hover {
-  background: var(--color-amber-light);
+  background: #E0E0E0;
+  border-color: #E0E0E0;
   transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(255, 184, 77, 0.4);
+  box-shadow: 0 8px 32px rgba(255, 255, 255, 0.2);
 }
 
 .btn-teal {
   background: transparent;
-  color: var(--color-teal);
-  border: 2px solid var(--color-teal);
+  color: #F5F5F5;
+  border: 2px solid rgba(255, 255, 255, 0.35);
 }
 .btn-teal:hover {
-  background: var(--color-teal);
-  color: var(--color-navy);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #FFFFFF;
+  color: #FFFFFF;
   transform: translateY(-2px);
-  box-shadow: var(--shadow-teal);
 }
 
 .btn-teal-filled {
-  background: var(--color-teal);
-  color: var(--color-navy);
-  box-shadow: var(--shadow-teal);
+  background: #FFFFFF;
+  color: #000000;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 4px 24px rgba(255, 255, 255, 0.12);
 }
 .btn-teal-filled:hover {
-  background: var(--color-teal-light);
+  background: #E0E0E0;
+  border-color: #E0E0E0;
   transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(0, 168, 156, 0.4);
 }
 
 .btn-ghost {
   background: transparent;
   color: var(--text-primary);
-  border: 2px solid var(--border-color);
+  border: 2px solid var(--border-color-strong);
 }
 .btn-ghost:hover {
-  border-color: var(--color-teal);
-  color: var(--color-teal);
+  border-color: #FFFFFF;
+  color: #FFFFFF;
   transform: translateY(-2px);
 }
 
-/* ── Gradient Text ─────────────────────────────────────────── */
+/* Light mode button adjustments */
+[data-theme="light"] .btn-secondary,
+[data-theme="light"] .btn-teal {
+  color: #111111;
+  border-color: rgba(0, 0, 0, 0.35);
+}
+[data-theme="light"] .btn-secondary:hover,
+[data-theme="light"] .btn-teal:hover {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: #000000;
+  color: #000000;
+}
+[data-theme="light"] .btn-amber,
+[data-theme="light"] .btn-primary,
+[data-theme="light"] .btn-teal-filled {
+  background: #111111;
+  color: #FFFFFF;
+  border-color: #111111;
+}
+[data-theme="light"] .btn-amber:hover,
+[data-theme="light"] .btn-primary:hover,
+[data-theme="light"] .btn-teal-filled:hover {
+  background: #333333;
+  border-color: #333333;
+}
+[data-theme="light"] .btn-ghost {
+  color: #111111;
+  border-color: #AAAAAA;
+}
+[data-theme="light"] .btn-ghost:hover {
+  border-color: #000000;
+  color: #000000;
+}
+
+/* ── Gradient Text → White/Gray ─────────────────────────────── */
 .gradient-text {
-  background: linear-gradient(135deg, var(--color-teal) 0%, var(--color-amber) 100%);
+  background: linear-gradient(135deg, #FFFFFF 0%, #999999 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="light"] .gradient-text {
+  background: linear-gradient(135deg, #000000 0%, #555555 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -179,28 +252,38 @@ section {
   font-size: var(--font-size-xs);
   font-weight: 700;
   border-radius: var(--radius-pill);
-  background: rgba(0, 168, 156, 0.12);
-  color: var(--color-teal);
-  border: 1px solid rgba(0, 168, 156, 0.25);
+  background: transparent;
+  color: var(--color-gray-300);
+  border: 1px solid var(--color-gray-700);
+}
+
+[data-theme="light"] .tag {
+  background: transparent;
+  color: #444444;
+  border: 1px solid #AAAAAA;
 }
 
 /* ── Divider ────────────────────────────────────────────────── */
 .divider {
   width: 60px;
   height: 4px;
-  background: linear-gradient(90deg, var(--color-teal), var(--color-amber));
+  background: linear-gradient(90deg, #FFFFFF, #666666);
   border-radius: var(--radius-pill);
   margin: 16px auto 0;
+}
+
+[data-theme="light"] .divider {
+  background: linear-gradient(90deg, #000000, #888888);
 }
 
 /* ── Scrollbar ─────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-primary); }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-teal-dark);
+  background: var(--color-gray-700);
   border-radius: var(--radius-pill);
 }
-::-webkit-scrollbar-thumb:hover { background: var(--color-teal); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-gray-500); }
 
 /* ── Responsive Helpers ────────────────────────────────────── */
 @media (max-width: 768px) {
