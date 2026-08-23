@@ -1,6 +1,6 @@
 /* ============================================================
    CERTIFICATES.CSS
-   Scroll Stack — certificate cards stack as you scroll
+   PDF Certificate Gallery + Lightbox
    ============================================================ */
 
 /* ── Section ────────────────────────────────────────────────── */
@@ -9,243 +9,306 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
-   SCROLL STACK ROOT
-   A tall container that gives each card its own scroll range.
-   Cards are sticky inside .cert-scroll-sticky.
+   GALLERY GRID
 ══════════════════════════════════════════════════════════════ */
-.cert-scroll-root {
-  position: relative;
-  /* min-height set via inline style (n * 80 + 100)vh */
-}
-
-.cert-scroll-sticky {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none; /* re-enabled on cards below */
-}
-
-/* ── Deck container ── */
-.cert-stack-deck {
-  position: relative;
-  width: 100%;
-  max-width: 640px;
-  height: 360px; /* visible "window" for the deck */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
+.cert-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 48px;
 }
 
 /* ══════════════════════════════════════════════════════════════
-   ANIMATED CARD  (absolute-positioned inside deck)
+   CERTIFICATE CARD
 ══════════════════════════════════════════════════════════════ */
-.cert-stack-animated {
-  position: absolute;
-  inset: 0;
-  pointer-events: auto;
-  will-change: transform, opacity;
-  /* No CSS transition — JS drives every frame via inline style */
-}
-
-/* ══════════════════════════════════════════════════════════════
-   CARD CHROME (shared by animated + static fallback)
-══════════════════════════════════════════════════════════════ */
-.cert-stack-card {
+.cert-card {
   background: var(--bg-card);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  /* Full size within the deck window */
+  transition: border-color 0.3s ease, box-shadow 0.35s ease, transform 0.35s ease;
+  position: relative;
+}
+
+.cert-card:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+  transform: translateY(-4px);
+}
+
+/* Accent top bar */
+.cert-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--cert-accent, #7C3AED);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.cert-card:hover::before {
+  opacity: 1;
+}
+
+/* ── PDF Preview area ── */
+.cert-card-preview {
+  position: relative;
+  height: 280px;
+  background: #0d0d0d;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.cert-card-iframe {
   width: 100%;
   height: 100%;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  border: none;
+  display: block;
+  pointer-events: none; /* prevents focus trap inside card — use overlay btn */
 }
 
-.cert-stack-card:hover {
-  border-color: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-}
-
-/* ── Thumbnail ── */
-.cert-stack-thumb {
-  height: 160px;
-  position: relative;
-  background: linear-gradient(135deg, #0a0a0a 0%, #1e1e1e 100%);
+/* ── Hover overlay ── */
+.cert-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
 
-/* Decorative shimmer line */
-.cert-stack-thumb::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+.cert-card:hover .cert-card-overlay {
+  opacity: 1;
 }
 
-/* Ribbon icon */
-.cert-stack-icon {
-  width: 56px; height: 56px;
-  color: rgba(255, 255, 255, 0.18);
+.cert-card-expand-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 10px 20px;
+  border-radius: 100px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
-/* Badge pill */
-.cert-stack-badge {
-  position: absolute;
-  top: 14px; left: 14px;
-  background: #FFFFFF;
-  color: #000000;
-  font-size: 0.65rem;
+.cert-card-expand-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: scale(1.05);
+}
+
+/* ── Card body ── */
+.cert-card-body {
+  padding: 20px 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.cert-card-tag {
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 4px 12px;
-  border-radius: 100px;
 }
 
-/* ── Body ── */
-.cert-stack-body {
-  padding: 22px 28px 26px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.cert-stack-title {
-  font-size: var(--font-size-base);
+.cert-card-title {
+  font-size: 1rem;
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1.4;
-  margin-bottom: 8px;
+  margin: 0;
 }
 
-.cert-stack-issuer {
+.cert-card-meta {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: var(--font-size-sm);
+  gap: 8px;
+  font-size: 0.8rem;
   color: var(--text-secondary);
   font-weight: 500;
-  margin-bottom: 12px;
 }
 
-.cert-stack-issuer svg { flex-shrink: 0; }
+.cert-card-dot {
+  color: var(--text-muted);
+}
 
-.cert-stack-meta {
+.cert-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+  margin-top: 6px;
+  transition: color 0.2s ease;
+}
+
+.cert-card-link:hover {
+  color: #ffffff;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   LIGHTBOX MODAL
+══════════════════════════════════════════════════════════════ */
+.cert-lightbox-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: cert-backdrop-in 0.25s ease;
+}
+
+@keyframes cert-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.cert-lightbox-container {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  overflow: hidden;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: cert-modal-in 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6);
+}
+
+@keyframes cert-modal-in {
+  from { opacity: 0; transform: scale(0.94) translateY(16px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+/* ── Header ── */
+.cert-lightbox-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
 }
 
-.cert-stack-date {
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
+.cert-lightbox-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 2px;
+}
+
+.cert-lightbox-issuer {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
-.cert-stack-verify {
+.cert-lightbox-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cert-lightbox-open {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: var(--font-size-xs);
-  font-weight: 700;
-  color: #A0A0A0;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
   text-decoration: none;
-  transition: color var(--transition-fast);
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 100px;
+  transition: background 0.2s ease, color 0.2s ease;
 }
-.cert-stack-verify:hover { color: #FFFFFF; }
-.cert-stack-verify svg  { width: 12px; height: 12px; }
 
-/* ══════════════════════════════════════════════════════════════
-   SCROLL PROGRESS DOTS
-══════════════════════════════════════════════════════════════ */
-.cert-scroll-dots {
+.cert-lightbox-open:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.cert-lightbox-close {
   display: flex;
-  gap: 8px;
-  margin-top: 24px;
-  pointer-events: none;
-}
-
-.cert-dot {
-  width: 6px; height: 6px;
+  align-items: center;
+  justify-content: center;
+  width: 36px; height: 36px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  transition: background 0.3s ease, transform 0.3s ease;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
 
-.cert-dot-active {
-  background: #FFFFFF;
-  transform: scale(1.4);
+.cert-lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 
-.cert-dot-done {
-  background: rgba(255, 255, 255, 0.5);
+/* ── Lightbox PDF Body ── */
+.cert-lightbox-body {
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
 }
 
-/* ══════════════════════════════════════════════════════════════
-   REDUCED-MOTION FALLBACK — simple vertical list
-══════════════════════════════════════════════════════════════ */
-.cert-stack-fallback {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  max-width: 640px;
-  margin: 0 auto;
-}
-
-.cert-stack-static {
-  position: relative;
-  height: 320px;
-  animation: fade-in-up 0.5s ease both;
+.cert-lightbox-iframe {
+  width: 100%;
+  height: 100%;
+  min-height: 60vh;
+  border: none;
+  display: block;
 }
 
 /* ══════════════════════════════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════════════════════════════ */
-@media (max-width: 768px) {
-  /* On mobile: collapse to a simple scrollable vertical list */
-  .cert-scroll-root {
-    min-height: unset !important;
+@media (max-width: 1024px) {
+  .cert-gallery {
+    grid-template-columns: repeat(2, 1fr);
   }
-
-  .cert-scroll-sticky {
-    position: static;
-    height: auto;
-    pointer-events: auto;
-  }
-
-  .cert-stack-deck {
-    position: static;
-    height: auto;
-    flex-direction: column;
-    gap: 16px;
-    pointer-events: auto;
-  }
-
-  .cert-stack-animated {
-    position: static;
-    opacity: 1 !important;
-    transform: none !important;
-    height: 320px;
-  }
-
-  .cert-scroll-dots { display: none; }
 }
 
-@media (max-width: 480px) {
-  .cert-stack-animated { height: 280px; }
-  .cert-stack-thumb { height: 120px; }
-  .cert-stack-body  { padding: 16px 18px 20px; }
+@media (max-width: 640px) {
+  .cert-gallery {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .cert-card-preview {
+    height: 220px;
+  }
+
+  .cert-lightbox-container {
+    border-radius: 16px;
+    max-height: 85vh;
+  }
+
+  .cert-lightbox-header {
+    padding: 14px 16px;
+  }
+
+  .cert-lightbox-iframe {
+    min-height: 50vh;
+  }
 }
