@@ -14,6 +14,7 @@ Thumbs.db
 desktop.ini
 
 # ── Editor ───────────────────────────────────────────────────
+.vercel
 .vscode/settings.json
 *.swp
 *.swo

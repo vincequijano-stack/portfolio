@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800" style="background:#0D1117;font-family:Consolas, 'Courier New', monospace;">
+  <defs>
+    <linearGradient id="codeG" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#161B22"/>
+      <stop offset="100%" stop-color="#0D1117"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="800" fill="url(#codeG)"/>
+
+  <!-- Window Header -->
+  <rect x="0" y="0" width="800" height="55" fill="#161B22" stroke="#30363D" stroke-width="1"/>
+  <circle cx="30" cy="28" r="6" fill="#FF5F56"/>
+  <circle cx="50" cy="28" r="6" fill="#FFBD2E"/>
+  <circle cx="70" cy="28" r="6" fill="#27C93F"/>
+  <text x="105" y="34" fill="#8B949E" font-size="14" font-family="-apple-system,sans-serif" font-weight="600">AlgoLab · Algorithms &amp; Data Structures Visualizer</text>
+  <rect x="670" y="14" width="95" height="26" rx="6" fill="#238636"/>
+  <text x="685" y="32" fill="#FFFFFF" font-size="12" font-family="-apple-system,sans-serif" font-weight="600">▶ Run O(N)</text>
+
+  <!-- Left: Binary Search Tree / AVL Tree Visualizer -->
+  <rect x="35" y="85" width="460" height="420" rx="12" fill="#161B22" stroke="#30363D" stroke-width="1"/>
+  <text x="60" y="125" fill="#58A6FF" font-size="15" font-family="-apple-system,sans-serif" font-weight="bold">Self-Balancing AVL Binary Tree</text>
+  <text x="60" y="145" fill="#8B949E" font-size="12" font-family="-apple-system,sans-serif">In-order traversal: [12, 25, 33, 48, 56, 72, 89]</text>
+
+  <!-- Tree Lines -->
+  <line x1="265" y1="210" x2="175" y2="280" stroke="#58A6FF" stroke-width="3"/>
+  <line x1="265" y1="210" x2="355" y2="280" stroke="#58A6FF" stroke-width="3"/>
+  <line x1="175" y1="280" x2="125" y2="360" stroke="#3FB950" stroke-width="2.5"/>
+  <line x1="175" y1="280" x2="225" y2="360" stroke="#3FB950" stroke-width="2.5"/>
+  <line x1="355" y1="280" x2="305" y2="360" stroke="#3FB950" stroke-width="2.5"/>
+  <line x1="355" y1="280" x2="405" y2="360" stroke="#3FB950" stroke-width="2.5"/>
+
+  <!-- Tree Nodes -->
+  <circle cx="265" cy="210" r="28" fill="#1F6FEB" stroke="#58A6FF" stroke-width="2"/>
+  <text x="265" y="216" fill="#FFFFFF" font-size="15" font-weight="bold" text-anchor="middle">48</text>
+
+  <circle cx="175" cy="280" r="24" fill="#238636" stroke="#3FB950" stroke-width="2"/>
+  <text x="175" y="286" fill="#FFFFFF" font-size="14" font-weight="bold" text-anchor="middle">25</text>
+
+  <circle cx="355" cy="280" r="24" fill="#238636" stroke="#3FB950" stroke-width="2"/>
+  <text x="355" y="286" fill="#FFFFFF" font-size="14" font-weight="bold" text-anchor="middle">72</text>
+
+  <circle cx="125" cy="360" r="20" fill="#30363D" stroke="#8B949E" stroke-width="1.5"/>
+  <text x="125" y="365" fill="#E6EDF3" font-size="12" font-weight="bold" text-anchor="middle">12</text>
+
+  <circle cx="225" cy="360" r="20" fill="#30363D" stroke="#8B949E" stroke-width="1.5"/>
+  <text x="225" y="365" fill="#E6EDF3" font-size="12" font-weight="bold" text-anchor="middle">33</text>
+
+  <circle cx="305" cy="360" r="20" fill="#30363D" stroke="#8B949E" stroke-width="1.5"/>
+  <text x="305" y="365" fill="#E6EDF3" font-size="12" font-weight="bold" text-anchor="middle">56</text>
+
+  <circle cx="405" cy="360" r="20" fill="#30363D" stroke="#8B949E" stroke-width="1.5"/>
+  <text x="405" y="365" fill="#E6EDF3" font-size="12" font-weight="bold" text-anchor="middle">89</text>
+
+  <!-- Rotation Banner -->
+  <rect x="60" y="430" width="410" height="48" rx="8" fill="#0D1117" stroke="#30363D" stroke-width="1"/>
+  <text x="80" y="460" fill="#7EE787" font-size="12">✓ Balance Factor: 0 · Height: 3 · Rebalance: Not Required</text>
+
+  <!-- Right: Code Snippet & Complexity -->
+  <rect x="520" y="85" width="245" height="420" rx="12" fill="#161B22" stroke="#30363D" stroke-width="1"/>
+  <text x="540" y="125" fill="#F0883E" font-size="14" font-family="-apple-system,sans-serif" font-weight="bold">Time Complexities</text>
+
+  <g transform="translate(540, 150)">
+    <text x="0" y="15" fill="#8B949E" font-size="11">Operation</text>
+    <text x="120" y="15" fill="#8B949E" font-size="11">Big-O</text>
+    <line x1="0" y1="25" x2="205" y2="25" stroke="#30363D" stroke-width="1"/>
+    
+    <text x="0" y="50" fill="#E6EDF3" font-size="12">Search</text>
+    <text x="120" y="50" fill="#7EE787" font-size="12" font-weight="bold">O(log n)</text>
+
+    <text x="0" y="80" fill="#E6EDF3" font-size="12">Insert</text>
+    <text x="120" y="80" fill="#7EE787" font-size="12" font-weight="bold">O(log n)</text>
+
+    <text x="0" y="110" fill="#E6EDF3" font-size="12">Delete</text>
+    <text x="120" y="110" fill="#7EE787" font-size="12" font-weight="bold">O(log n)</text>
+
+    <text x="0" y="140" fill="#E6EDF3" font-size="12">Space</text>
+    <text x="120" y="140" fill="#FFA657" font-size="12" font-weight="bold">O(n)</text>
+  </g>
+
+  <!-- Code Preview -->
+  <rect x="535" y="320" width="215" height="165" rx="8" fill="#0D1117" stroke="#30363D" stroke-width="1"/>
+  <g transform="translate(545, 345)">
+    <text x="0" y="0" fill="#FF7B72" font-size="10">template</text>
+    <text x="50" y="0" fill="#79C0FF" font-size="10">&lt;typename T&gt;</text>
+    <text x="0" y="18" fill="#FF7B72" font-size="10">Node*</text>
+    <text x="35" y="18" fill="#D2A8FF" font-size="10">rotateLeft</text>
+    <text x="95" y="18" fill="#E6EDF3" font-size="10">(Node* x) {</text>
+    <text x="10" y="36" fill="#FF7B72" font-size="10">  Node*</text>
+    <text x="50" y="36" fill="#E6EDF3" font-size="10">y = x-&gt;right;</text>
+    <text x="10" y="54" fill="#E6EDF3" font-size="10">  x-&gt;right = y-&gt;left;</text>
+    <text x="10" y="72" fill="#E6EDF3" font-size="10">  y-&gt;left = x;</text>
+    <text x="10" y="90" fill="#FF7B72" font-size="10">  return</text>
+    <text x="55" y="90" fill="#E6EDF3" font-size="10">y;</text>
+    <text x="0" y="108" fill="#E6EDF3" font-size="10">}</text>
+  </g>
+
+  <!-- Bottom: Sorting Array Bar Chart -->
+  <rect x="35" y="530" width="730" height="225" rx="12" fill="#161B22" stroke="#30363D" stroke-width="1"/>
+  <text x="60" y="565" fill="#F0F6FC" font-size="14" font-family="-apple-system,sans-serif" font-weight="bold">QuickSort &amp; MergeSort Step-by-Step State Visualizer</text>
+  
+  <g transform="translate(60, 600)">
+    <!-- Array Bars -->
+    <rect x="0" y="60" width="28" height="60" rx="4" fill="#3FB950"/>
+    <text x="14" y="50" fill="#8B949E" font-size="10" text-anchor="middle">12</text>
+
+    <rect x="36" y="45" width="28" height="75" rx="4" fill="#3FB950"/>
+    <text x="50" y="35" fill="#8B949E" font-size="10" text-anchor="middle">18</text>
+
+    <rect x="72" y="30" width="28" height="90" rx="4" fill="#3FB950"/>
+    <text x="86" y="20" fill="#8B949E" font-size="10" text-anchor="middle">24</text>
+
+    <rect x="108" y="50" width="28" height="70" rx="4" fill="#58A6FF"/>
+    <text x="122" y="40" fill="#8B949E" font-size="10" text-anchor="middle">20</text>
+
+    <rect x="144" y="10" width="28" height="110" rx="4" fill="#FFA657"/>
+    <text x="158" y="0" fill="#FFA657" font-size="10" font-weight="bold" text-anchor="middle">PIVOT</text>
+
+    <rect x="180" y="20" width="28" height="100" rx="4" fill="#58A6FF"/>
+    <text x="194" y="10" fill="#8B949E" font-size="10" text-anchor="middle">38</text>
+
+    <rect x="216" y="5" width="28" height="115" rx="4" fill="#58A6FF"/>
+    <text x="230" y="-5" fill="#8B949E" font-size="10" text-anchor="middle">45</text>
+
+    <rect x="252" y="35" width="28" height="85" rx="4" fill="#58A6FF"/>
+    <text x="266" y="25" fill="#8B949E" font-size="10" text-anchor="middle">28</text>
+
+    <rect x="288" y="0" width="28" height="120" rx="4" fill="#58A6FF"/>
+    <text x="302" y="-10" fill="#8B949E" font-size="10" text-anchor="middle">50</text>
+
+    <rect x="324" y="25" width="28" height="95" rx="4" fill="#58A6FF"/>
+    <text x="338" y="15" fill="#8B949E" font-size="10" text-anchor="middle">35</text>
+  </g>
+
+  <text x="440" y="660" fill="#8B949E" font-size="12" font-family="-apple-system,sans-serif">Partitioning around pivot <tspan fill="#FFA657" font-weight="bold">[32]</tspan></text>
+  <text x="440" y="685" fill="#8B949E" font-size="12" font-family="-apple-system,sans-serif">Comparisons: <tspan fill="#E6EDF3">48</tspan> · Swaps: <tspan fill="#E6EDF3">14</tspan> · Depth: <tspan fill="#E6EDF3">3</tspan></text>
+</svg>
