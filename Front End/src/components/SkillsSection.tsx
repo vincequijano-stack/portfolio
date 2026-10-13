@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { skillsData, SkillGroup } from '../data/skills';
-import { Terminal, Layout, Server, Database, Wrench, CheckCircle } from 'lucide-react';
+import { Terminal, Layout, Server, Database, Wrench, Palette, CheckCircle } from 'lucide-react';
 
 export const SkillsSection: React.FC = () => {
   const [activeGroupIndex, setActiveGroupIndex] = useState<number | null>(null);
 
   const getGroupIcon = (name: string) => {
     switch (name) {
+      case 'Core Stack':
       case 'Programming Languages':
         return Terminal;
       case 'Frontend Development':
@@ -15,12 +16,17 @@ export const SkillsSection: React.FC = () => {
         return Server;
       case 'Databases':
         return Database;
+      case 'Tools & Cloud':
       case 'Development Tools':
         return Wrench;
+      case 'Graphics Designing':
+        return Palette;
       default:
         return Terminal;
     }
   };
+
+  const totalSkills = skillsData.reduce((sum, g) => sum + g.skills.length, 0);
 
   const displayedGroups =
     activeGroupIndex !== null ? [skillsData[activeGroupIndex]] : skillsData;
@@ -36,7 +42,7 @@ export const SkillsSection: React.FC = () => {
             </span>
             <h2 className="text-2xl font-bold text-[#262626] dark:text-white mt-1">Technical Skills</h2>
             <p className="text-sm text-[#737373] dark:text-[#A8A8A8] mt-1">
-              Categorized technologies, programming languages, and engineering tools.
+              Categorized technologies, programming languages, and design tools.
             </p>
           </div>
 
@@ -50,21 +56,29 @@ export const SkillsSection: React.FC = () => {
                   : 'bg-[#EFEFEF] dark:bg-[#262626] text-[#737373] dark:text-[#A8A8A8] hover:text-[#262626] dark:hover:text-white'
               }`}
             >
-              All (24)
+              All ({totalSkills})
             </button>
-            {skillsData.map((group, idx) => (
-              <button
-                key={group.category}
-                onClick={() => setActiveGroupIndex(idx)}
-                className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
-                  activeGroupIndex === idx
-                    ? 'bg-[#262626] dark:bg-white text-white dark:text-black'
-                    : 'bg-[#EFEFEF] dark:bg-[#262626] text-[#737373] dark:text-[#A8A8A8] hover:text-[#262626] dark:hover:text-white'
-                }`}
-              >
-                {group.category.split(' ')[0]}
-              </button>
-            ))}
+            {skillsData.map((group, idx) => {
+              const label =
+                group.category === 'Frontend Development'
+                  ? 'Frontend'
+                  : group.category === 'Backend Development'
+                  ? 'Backend'
+                  : group.category;
+              return (
+                <button
+                  key={group.category}
+                  onClick={() => setActiveGroupIndex(idx)}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
+                    activeGroupIndex === idx
+                      ? 'bg-[#262626] dark:bg-white text-white dark:text-black'
+                      : 'bg-[#EFEFEF] dark:bg-[#262626] text-[#737373] dark:text-[#A8A8A8] hover:text-[#262626] dark:hover:text-white'
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
         </div>
 

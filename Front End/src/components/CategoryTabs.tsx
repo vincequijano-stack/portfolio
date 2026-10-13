@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  Grid,
-  Globe,
-  Palette,
-  Terminal,
-  Database,
-  GraduationCap
-} from 'lucide-react';
+import { Grid, Globe, Palette } from 'lucide-react';
 import { categoryList, CategoryType } from '../data/projects';
 
 interface CategoryTabsProps {
@@ -28,12 +21,6 @@ export const CategoryTabs: React.FC<CategoryTabsProps> = ({
         return Globe;
       case 'UI/UX Design':
         return Palette;
-      case 'Programming':
-        return Terminal;
-      case 'Database Systems':
-        return Database;
-      case 'Academic Projects':
-        return GraduationCap;
       default:
         return Grid;
     }
@@ -47,12 +34,6 @@ export const CategoryTabs: React.FC<CategoryTabsProps> = ({
         return 'WEB DEV';
       case 'UI/UX Design':
         return 'UI/UX';
-      case 'Programming':
-        return 'CODE';
-      case 'Database Systems':
-        return 'DATABASE';
-      case 'Academic Projects':
-        return 'ACADEMIC';
       default:
         return cat.toUpperCase();
     }

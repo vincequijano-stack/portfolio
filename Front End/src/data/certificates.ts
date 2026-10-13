@@ -13,6 +13,17 @@ export interface Certificate {
 
 export const certificatesData: Certificate[] = [
   {
+    id: 'imaganation-2026',
+    title: 'ImaGnation 2026 Participant',
+    issuer: 'ImaGnation 2026',
+    date: '2026',
+    badgeColor: '#F59E0B',
+    tag: 'Achievement · Tech Event',
+    credentialId: 'IMG-2026-PART',
+    description: 'Official participant in ImaGnation 2026, engaging in design thinking, software development challenges, and collaborative technology innovation.',
+    skillsCovered: ['Innovation', 'Ideation', 'Full-Stack Development', 'Teamwork'],
+  },
+  {
     id: 'ai-fluency',
     title: 'AI Fluency Certification',
     issuer: 'Certiport',
