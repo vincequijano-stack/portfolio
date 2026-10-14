@@ -24,12 +24,6 @@ export const ProfileHighlights: React.FC<ProfileHighlightsProps> = ({
       color: '#10B981',
     },
     {
-      id: 'projects',
-      label: 'Projects',
-      icon: Grid,
-      color: '#8B5CF6',
-    },
-    {
       id: 'organization',
       label: 'Organization',
       icon: Building2,

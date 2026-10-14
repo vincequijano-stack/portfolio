@@ -61,20 +61,6 @@ export const StoryModal: React.FC<StoryModalProps> = ({
       gradient: 'from-emerald-600 to-teal-700',
     },
     {
-      id: 'projects',
-      title: 'Featured Projects',
-      subtitle: 'Cobuy & Systems',
-      icon: Grid,
-      bullets: [
-        'Cryptita Plays — Builder Workshop (BFC Biñan)',
-        'Personal Portfolio Website',
-        'Cobuy — A product recommendation system',
-      ],
-      ctaText: 'Jump to Gallery',
-      targetSection: 'projects',
-      gradient: 'from-purple-600 to-pink-600',
-    },
-    {
       id: 'organization',
       title: 'Organizations',
       subtitle: 'Tech Communities',
