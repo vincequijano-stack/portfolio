@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Code2, Grid, Award, Trophy, Building2 } from 'lucide-react';
+import { User, Grid, Award, Sparkles, Building2 } from 'lucide-react';
 
 interface ProfileHighlightsProps {
   onNavigate: (sectionId: string) => void;
@@ -12,42 +12,56 @@ export const ProfileHighlights: React.FC<ProfileHighlightsProps> = ({
 }) => {
   const highlights = [
     {
-      id: 'about',
-      label: 'About',
-      icon: User,
-      color: '#3B82F6',
+      id: 'events',
+      label: 'Events',
+      image: '/assets/images/event/Cryptita-Workshop.jpg',
+      isStory: true,
+      storyId: 'cryptita-workshop',
     },
     {
-      id: 'skills',
-      label: 'Skills',
-      icon: Code2,
-      color: '#10B981',
+      id: 'devcon-kids',
+      label: 'DEVCON Kids',
+      image: '/assets/images/event/DEVCON-KIDS.jpg',
+      isStory: true,
+      storyId: 'devcon-kids',
+    },
+    {
+      id: 'cryptita',
+      label: 'Cryptita Plays',
+      image: '/assets/images/event/Cryptita-Workshop.jpg',
+      isStory: true,
+      storyId: 'cryptita-workshop',
     },
     {
       id: 'projects',
       label: 'Projects',
       icon: Grid,
       color: '#8B5CF6',
-    },
-    {
-      id: 'organization',
-      label: 'Organization',
-      icon: Building2,
-      color: '#0284C7',
+      targetSection: 'projects',
     },
     {
       id: 'certificates',
       label: 'Certificates',
       icon: Award,
       color: '#F59E0B',
+      targetSection: 'certificates',
     },
     {
-      id: 'achievements',
-      label: 'Achievements',
-      icon: Trophy,
-      color: '#EC4899',
+      id: 'about',
+      label: 'About',
+      icon: User,
+      color: '#3B82F6',
+      targetSection: 'profile-top',
     },
   ];
+
+  const handleClick = (h: (typeof highlights)[0]) => {
+    if (h.isStory && h.storyId) {
+      onOpenStoryModal(h.storyId);
+    } else if (h.targetSection) {
+      onNavigate(h.targetSection);
+    }
+  };
 
   return (
     <div className="pt-6 pb-6 overflow-x-auto no-scrollbar">
@@ -57,16 +71,25 @@ export const ProfileHighlights: React.FC<ProfileHighlightsProps> = ({
           return (
             <button
               key={h.id}
-              onClick={() => onOpenStoryModal(h.id)}
+              onClick={() => handleClick(h)}
               className="group flex flex-col items-center gap-2 cursor-pointer focus:outline-none"
+              title={h.isStory ? `View ${h.label} Story` : `Go to ${h.label}`}
             >
-              {/* Highlight Circle with subtle ring matching reference image */}
+              {/* Highlight Circle with subtle ring matching Instagram highlight aesthetic */}
               <div className="w-[72px] h-[72px] sm:w-[78px] sm:h-[78px] rounded-full p-[3px] border border-[#DBDBDB] dark:border-[#363636] group-hover:border-[#262626] dark:group-hover:border-white transition-all bg-white dark:bg-black flex items-center justify-center shadow-2xs group-hover:scale-105">
-                <div className="w-full h-full rounded-full bg-[#FAFAFA] dark:bg-[#1A1A1A] group-hover:bg-[#F2F2F2] dark:group-hover:bg-[#262626] flex items-center justify-center transition-colors">
-                  <Icon
-                    className="w-6 h-6 transition-transform group-hover:scale-110"
-                    style={{ color: h.color }}
-                  />
+                <div className="w-full h-full rounded-full bg-[#FAFAFA] dark:bg-[#1A1A1A] overflow-hidden flex items-center justify-center transition-colors">
+                  {h.image ? (
+                    <img
+                      src={h.image}
+                      alt={h.label}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                  ) : Icon ? (
+                    <Icon
+                      className="w-6 h-6 transition-transform group-hover:scale-110"
+                      style={{ color: h.color }}
+                    />
+                  ) : null}
                 </div>
               </div>
 

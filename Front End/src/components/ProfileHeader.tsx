@@ -143,7 +143,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             {/* 2. Circular Avatar with Instagram "MyDay" Story Colorful Gradient Ring */}
             <div
               className="relative cursor-pointer group"
-              onClick={() => onOpenStoryModal('about')}
+              onClick={() => onOpenStoryModal('cryptita-workshop')}
               title="View Vince's MyDay / Story"
             >
               {/* Instagram MyDay Gradient Ring */}
