@@ -57,7 +57,7 @@ export const ProfileHighlights: React.FC<ProfileHighlightsProps> = ({
           return (
             <button
               key={h.id}
-              onClick={() => onNavigate(h.id === 'about' || h.id === 'organization' || h.id === 'achievements' ? 'about' : h.id)}
+              onClick={() => onOpenStoryModal(h.id)}
               className="group flex flex-col items-center gap-2 cursor-pointer focus:outline-none"
             >
               {/* Highlight Circle with subtle ring matching reference image */}
