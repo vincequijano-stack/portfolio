@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { RateModal, ClientReview } from './RateModal';
 import { profileData } from '../data/profile';
+import { eventStories } from '../data/events';
 
 interface ProfileHeaderProps {
   onNavigate: (sectionId: string) => void;
@@ -143,7 +144,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             {/* 2. Circular Avatar with Instagram "MyDay" Story Colorful Gradient Ring */}
             <div
               className="relative cursor-pointer group"
-              onClick={() => onOpenStoryModal('cryptita-workshop')}
+              onClick={() => onOpenStoryModal(eventStories[0]?.id || 'event-0')}
               title="View Vince's MyDay / Story"
             >
               {/* Instagram MyDay Gradient Ring */}

@@ -5,7 +5,14 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    open: true,
+    open: false,
+    fs: {
+      allow: ['..'],
+    },
+    watch: {
+      usePolling: true,
+      interval: 500,
+    },
   },
   build: {
     outDir: 'dist',

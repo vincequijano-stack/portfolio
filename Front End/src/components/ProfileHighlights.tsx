@@ -1,5 +1,6 @@
 import React from 'react';
-import { User, Grid, Award, Sparkles, Building2 } from 'lucide-react';
+import { User, Grid, Award } from 'lucide-react';
+import { eventStories } from '../data/events';
 
 interface ProfileHighlightsProps {
   onNavigate: (sectionId: string) => void;
@@ -10,28 +11,27 @@ export const ProfileHighlights: React.FC<ProfileHighlightsProps> = ({
   onNavigate,
   onOpenStoryModal,
 }) => {
+  // Dynamically create a highlight circle for each discovered event story
+  const dynamicEventHighlights = eventStories.map((story) => ({
+    id: story.id,
+    label:
+      story.title.length > 14
+        ? story.title.replace('Cryptita Plays: ', '').replace('Roadshow', '').trim()
+        : story.title,
+    image: story.image,
+    isStory: true,
+    storyId: story.id,
+  }));
+
   const highlights = [
     {
-      id: 'events',
-      label: 'Events',
-      image: '/assets/images/event/Cryptita-Workshop.jpg',
+      id: 'all-events',
+      label: 'All Events',
+      image: eventStories[0]?.image || '/assets/images/event/Cryptita-Workshop.jpg',
       isStory: true,
-      storyId: 'cryptita-workshop',
+      storyId: eventStories[0]?.id,
     },
-    {
-      id: 'devcon-kids',
-      label: 'DEVCON Kids',
-      image: '/assets/images/event/DEVCON-KIDS.jpg',
-      isStory: true,
-      storyId: 'devcon-kids',
-    },
-    {
-      id: 'cryptita',
-      label: 'Cryptita Plays',
-      image: '/assets/images/event/Cryptita-Workshop.jpg',
-      isStory: true,
-      storyId: 'cryptita-workshop',
-    },
+    ...dynamicEventHighlights,
     {
       id: 'projects',
       label: 'Projects',
@@ -67,7 +67,9 @@ export const ProfileHighlights: React.FC<ProfileHighlightsProps> = ({
     <div className="pt-6 pb-6 overflow-x-auto no-scrollbar">
       <div className="flex items-center gap-6 sm:gap-10 min-w-max px-2">
         {highlights.map((h) => {
-          const Icon = h.icon;
+          const Icon = 'icon' in h ? h.icon : undefined;
+          const color = 'color' in h ? h.color : undefined;
+
           return (
             <button
               key={h.id}
@@ -87,7 +89,7 @@ export const ProfileHighlights: React.FC<ProfileHighlightsProps> = ({
                   ) : Icon ? (
                     <Icon
                       className="w-6 h-6 transition-transform group-hover:scale-110"
-                      style={{ color: h.color }}
+                      style={{ color }}
                     />
                   ) : null}
                 </div>
