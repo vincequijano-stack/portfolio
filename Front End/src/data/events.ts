@@ -32,6 +32,16 @@ const knownEventMeta: Record<string, Partial<EventStory>> = {
     description: 'Empowering young minds through technology and innovation with DEVCON Laguna Chapter.',
     ctaText: 'View Organization',
   },
+  'blockquest-fiesta': {
+    title: 'Block Quest Fiesta',
+    subtitle: 'Web3 Gaming & Tech Community Event',
+    tag: 'Web3 & Community',
+    location: 'Cabuyao Athletes Basic School, Cabuyao',
+    date: 'October 10, 2026',
+    description: 'Participating in Block Quest Fiesta PH with Cryptita Plays, CJC Race, and technology ecosystem partners.',
+    ctaText: 'Visit CJC Race',
+    ctaLink: 'https://www.cjcrace.io',
+  },
 };
 
 // Helper to format raw filenames into readable human titles
