@@ -14,6 +14,7 @@ import {
 import { GithubIcon } from './SocialIcons';
 import { Project } from '../data/projects';
 import { profileData } from '../data/profile';
+import { notificationService } from '../services/notificationService';
 
 interface ProjectModalProps {
   project: Project | null;
@@ -78,6 +79,12 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
       try {
         localStorage.setItem(`project_liked_${project.id}`, 'true');
       } catch {}
+      // Automatically trigger real-time like notification
+      notificationService.recordLike({
+        id: project.id,
+        title: project.title,
+        thumbnail: project.thumbnail,
+      });
     }
     window.dispatchEvent(new CustomEvent('project_interaction_updated', { detail: { projectId: project.id } }));
   };

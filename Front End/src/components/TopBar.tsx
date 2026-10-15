@@ -80,9 +80,6 @@ export const TopBar: React.FC<TopBarProps> = ({
           >
             <div className="relative">
               <MessengerIcon className="w-5 h-5 stroke-[1.75]" />
-              <span className="absolute -top-1.5 -right-1.5 bg-[#ED4956] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-xs">
-                2
-              </span>
             </div>
             <span className="hidden sm:inline text-[14px] font-medium">Message me</span>
             <ExternalLink className="hidden sm:inline w-3 h-3 text-[#8E8E8E] dark:text-[#737373] opacity-0 group-hover:opacity-100 transition-opacity" />

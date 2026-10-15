@@ -6,7 +6,7 @@ import {
   Sun,
   Menu
 } from 'lucide-react';
-import { InstagramIcon, MessengerIcon, GithubIcon, LinkedinIcon } from './SocialIcons';
+import { InstagramIcon, GithubIcon, LinkedinIcon } from './SocialIcons';
 import { profileData } from '../data/profile';
 import { useTheme } from '../context/ThemeContext';
 
@@ -14,9 +14,16 @@ interface SidebarProps {
   activeSection: string;
   onNavigate: (sectionId: string) => void;
   onOpenCVModal?: () => void;
+  onOpenActivity?: () => void;
+  unreadCount?: number;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeSection, onNavigate }) => {
+export const Sidebar: React.FC<SidebarProps> = ({
+  activeSection,
+  onNavigate,
+  onOpenActivity,
+  unreadCount = 0,
+}) => {
   const { theme, toggleTheme } = useTheme();
 
   // Direct Gmail compose link for clients
@@ -71,32 +78,27 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeSection, onNavigate }) =
             />
           </button>
 
-          {/* Messages (with badge 2) -> Direct Gmail */}
-          <a
-            href={gmailComposeUrl}
-            onClick={handleMessageMe}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-3 rounded-xl text-[#262626] dark:text-[#F5F5F5] hover:bg-[#FAFAFA] dark:hover:bg-[#1A1A1A] transition-all relative"
-            title="Messages (2 unread)"
-            aria-label="Messages"
-          >
-            <div className="relative">
-              <MessengerIcon className="w-6 h-6 stroke-[1.75] transition-transform hover:scale-110" />
-              <span className="absolute -top-1.5 -right-1.5 bg-[#ED4956] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-xs">
-                2
-              </span>
-            </div>
-          </a>
-
-          {/* Notifications (Heart) */}
+          {/* Notifications (Heart) with Real-Time Notification Badge */}
           <button
-            onClick={() => onNavigate('certificates')}
-            className="p-3 rounded-xl text-[#262626] dark:text-[#F5F5F5] hover:bg-[#FAFAFA] dark:hover:bg-[#1A1A1A] transition-all"
+            onClick={() => {
+              if (onOpenActivity) {
+                onOpenActivity();
+              } else {
+                onNavigate('certificates');
+              }
+            }}
+            className="p-3 rounded-xl text-[#262626] dark:text-[#F5F5F5] hover:bg-[#FAFAFA] dark:hover:bg-[#1A1A1A] transition-all relative group"
             title="Notifications / Activity"
             aria-label="Notifications"
           >
-            <Heart className="w-6 h-6 stroke-[1.75] transition-transform hover:scale-110" />
+            <div className="relative">
+              <Heart className={`w-6 h-6 stroke-[1.75] transition-transform group-hover:scale-110 ${unreadCount > 0 ? 'text-[#ED4956]' : ''}`} />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-[#ED4956] text-white text-[9px] font-bold rounded-full min-w-4 h-4 px-1 flex items-center justify-center shadow-xs animate-pulse">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </div>
           </button>
 
           {/* Profile (Mini Circular Avatar) */}

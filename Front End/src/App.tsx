@@ -12,8 +12,11 @@ import { ContactSection } from './components/ContactSection';
 import { StoryModal } from './components/StoryModal';
 import { MobileNav } from './components/MobileNav';
 import { IntroSplash } from './components/IntroSplash';
-import { InstagramIcon, MessengerIcon } from './components/SocialIcons';
-import { Play } from 'lucide-react';
+import { InstagramIcon } from './components/SocialIcons';
+import { Play, Heart } from 'lucide-react';
+import { notificationService, LikeNotification } from './services/notificationService';
+import { ActivityModal } from './components/ActivityModal';
+import { LikeNotificationToast } from './components/LikeNotificationToast';
 
 import { projectsData, Project, CategoryType, categoryList } from './data/projects';
 import { profileData } from './data/profile';
@@ -23,6 +26,18 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState<CategoryType>('All Projects');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [activeStoryId, setActiveStoryId] = useState<string | null>(null);
+  const [isActivityOpen, setIsActivityOpen] = useState(false);
+  const [notifications, setNotifications] = useState<LikeNotification[]>([]);
+
+  useEffect(() => {
+    const unsubscribe = notificationService.subscribe((list) => {
+      setNotifications(list);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
   const [showIntro, setShowIntro] = useState<boolean>(() => {
     try {
       return !sessionStorage.getItem('ig_intro_shown');
@@ -111,7 +126,12 @@ export default function App() {
       {showIntro && <IntroSplash onComplete={handleIntroComplete} />}
 
       {/* 1. Left Slim 72px Sidebar (Desktop - Matching Reference Image) */}
-      <Sidebar activeSection={activeSection} onNavigate={handleNavigate} />
+      <Sidebar
+        activeSection={activeSection}
+        onNavigate={handleNavigate}
+        onOpenActivity={() => setIsActivityOpen(true)}
+        unreadCount={unreadCount}
+      />
 
       {/* 2. Main Content Wrapper: Offset by slim sidebar on desktop, centered container */}
       <div className="md:ml-[72px] flex flex-col min-h-screen">
@@ -128,17 +148,21 @@ export default function App() {
             <InstagramIcon className="w-6 h-6 stroke-[2]" />
             <span className="text-lg font-bold tracking-tight">Instagram</span>
           </a>
-          <a
-            href={gmailComposeUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-1 text-black dark:text-white relative"
+          <button
+            onClick={() => setIsActivityOpen(true)}
+            className="p-1 text-black dark:text-white relative group"
+            title="Notifications / Activity"
+            aria-label="Notifications"
           >
-            <MessengerIcon className="w-5 h-5 stroke-[1.75]" />
-            <span className="absolute -top-1 -right-1 bg-[#ED4956] text-white text-[9px] font-bold rounded-full w-3.5 h-3.5 flex items-center justify-center">
-              2
-            </span>
-          </a>
+            <div className="relative">
+              <Heart className={`w-6 h-6 stroke-[1.75] ${unreadCount > 0 ? 'text-[#ED4956]' : ''}`} />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#ED4956] text-white text-[9px] font-bold rounded-full min-w-3.5 h-3.5 px-0.5 flex items-center justify-center shadow-xs animate-pulse">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </div>
+          </button>
         </header>
 
         {/* Inner Content Container: Exactly max-w-[935px] matching real Instagram desktop */}
@@ -202,33 +226,13 @@ export default function App() {
         </footer>
       </div>
 
-      {/* 3. Floating Bottom-Right Messages Pill (Matching Reference Image) */}
-      <a
-        href={gmailComposeUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="hidden sm:flex fixed bottom-5 right-6 z-40 bg-white dark:bg-[#1A1A1A] border border-[#DBDBDB] dark:border-[#333333] rounded-full py-2 px-4 shadow-lg items-center gap-2.5 hover:scale-105 transition-transform duration-200 group text-[#262626] dark:text-white"
-        title="Send Vince an Email"
-      >
-        <div className="relative">
-          <MessengerIcon className="w-5 h-5 stroke-[1.75]" />
-          <span className="absolute -top-1 -right-1.5 bg-[#ED4956] text-white text-[9px] font-bold rounded-full w-3.5 h-3.5 flex items-center justify-center">
-            2
-          </span>
-        </div>
-        <span className="text-xs font-semibold">Messages</span>
-        <div className="w-5 h-5 rounded-full overflow-hidden border border-[#DBDBDB] dark:border-[#333333] ml-1">
-          <img
-            src="/assets/images/headshot/headshot.jpg"
-            alt={profileData.name}
-            className="w-full h-full object-cover"
-            style={{ objectPosition: '0% 20%' }}
-          />
-        </div>
-      </a>
-
       {/* 4. Mobile Bottom Navigation */}
-      <MobileNav activeSection={activeSection} onNavigate={handleNavigate} />
+      <MobileNav
+        activeSection={activeSection}
+        onNavigate={handleNavigate}
+        onOpenActivity={() => setIsActivityOpen(true)}
+        unreadCount={unreadCount}
+      />
 
       {/* 5. Modals */}
       {selectedProject && (
@@ -246,6 +250,18 @@ export default function App() {
           onNavigateSection={handleNavigate}
         />
       )}
+
+      {/* 6. Real-Time Activity / Notifications Popover & Toasts */}
+      <ActivityModal
+        isOpen={isActivityOpen}
+        onClose={() => setIsActivityOpen(false)}
+        notifications={notifications}
+        onSelectProject={(projectId) => {
+          const proj = projectsData.find((p) => p.id === projectId);
+          if (proj) setSelectedProject(proj);
+        }}
+      />
+      <LikeNotificationToast onOpenActivity={() => setIsActivityOpen(true)} />
     </div>
   );
 }
