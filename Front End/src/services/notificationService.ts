@@ -8,7 +8,7 @@ export interface LikeNotification {
   read: boolean;
 }
 
-const STORAGE_KEY = 'portfolio_notifications_v1';
+const STORAGE_KEY = 'portfolio_notifications_v2';
 const NTFY_TOPIC = 'vince_quijano_portfolio_likes_live';
 
 class NotificationService {
@@ -25,32 +25,20 @@ class NotificationService {
 
   private loadFromStorage() {
     try {
+      // Clear legacy storage that had mock sample notifications
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('portfolio_notifications_v1');
+      }
+
       const data = localStorage.getItem(STORAGE_KEY);
       if (data) {
-        this.notifications = JSON.parse(data);
+        const parsed: LikeNotification[] = JSON.parse(data);
+        // Only keep genuine notifications (never mock/init samples)
+        this.notifications = parsed.filter(
+          (n) => !n.id.startsWith('init_') && n.userName !== 'tech_enthusiast' && n.userName !== 'web3_builder'
+        );
       } else {
-        // Sample initial notifications so it never looks blank and feels active
-        this.notifications = [
-          {
-            id: 'init_1',
-            projectId: 'cobuy',
-            projectTitle: 'Cobuy — A product recommendation system',
-            projectThumbnail: '/assets/images/projects/project-portfolio.svg',
-            userName: 'tech_enthusiast',
-            timestamp: Date.now() - 1000 * 60 * 18,
-            read: true,
-          },
-          {
-            id: 'init_2',
-            projectId: 'cryptita-builder-workshop',
-            projectTitle: 'Cryptita Plays — Builder Workshop',
-            projectThumbnail: '/assets/images/projects/project-portfolio.svg',
-            userName: 'web3_builder',
-            timestamp: Date.now() - 1000 * 60 * 42,
-            read: true,
-          },
-        ];
-        this.saveToStorage();
+        this.notifications = [];
       }
     } catch {
       this.notifications = [];
