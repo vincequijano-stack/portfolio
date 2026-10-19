@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { User, Heart, Sparkles, ArrowRight, ShieldCheck, X } from 'lucide-react';
+import { User, Heart, ArrowRight, ShieldCheck, X, Mail } from 'lucide-react';
 import { profileData } from '../data/profile';
-import { setVisitorName } from '../services/notificationService';
+import { setVisitorName, setOwnerEmail } from '../services/notificationService';
 
 interface VisitorNameModalProps {
   isOpen: boolean;
@@ -16,6 +16,9 @@ export const VisitorNameModal: React.FC<VisitorNameModalProps> = ({
 }) => {
   const [name, setName] = useState(initialName);
   const [error, setError] = useState('');
+  const [isVerifyingOwner, setIsVerifyingOwner] = useState(false);
+  const [ownerEmailInput, setOwnerEmailInput] = useState('');
+  const [ownerError, setOwnerError] = useState('');
 
   if (!isOpen) return null;
 
@@ -26,8 +29,26 @@ export const VisitorNameModal: React.FC<VisitorNameModalProps> = ({
       setError('Please enter your name or @handle');
       return;
     }
+
+    if (cleanName.toLowerCase().includes('vincelawrencequijano')) {
+      setOwnerEmail(cleanName);
+      onClose('Vince Quijano');
+      return;
+    }
+
     setVisitorName(cleanName);
     onClose(cleanName);
+  };
+
+  const handleVerifyOwnerSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const clean = ownerEmailInput.toLowerCase().trim();
+    if (clean.includes('vincelawrencequijano')) {
+      setOwnerEmail(clean);
+      onClose('Vince Quijano');
+    } else {
+      setOwnerError('Only owner email "vincelawrencequijano" has developer access.');
+    }
   };
 
   const handleAnonymous = () => {
@@ -35,12 +56,6 @@ export const VisitorNameModal: React.FC<VisitorNameModalProps> = ({
     const guestName = `Guest_${randomGuestId}`;
     setVisitorName(guestName);
     onClose(guestName);
-  };
-
-  const handleDeveloperOwner = () => {
-    const ownerName = 'Vince Quijano (Developer)';
-    setVisitorName(ownerName);
-    onClose(ownerName);
   };
 
   return (
@@ -81,67 +96,120 @@ export const VisitorNameModal: React.FC<VisitorNameModalProps> = ({
           </span>
         </div>
 
-        {/* Title & Info */}
-        <h2 id="visitor-modal-title" className="text-base font-bold text-[#262626] dark:text-white mb-1">
-          Who's liking this project?
-        </h2>
-        <p className="text-xs text-[#8E8E8E] dark:text-[#A8A8A8] mb-4 leading-relaxed">
-          Enter your name or Instagram handle so Vince can see who supported his project!
-        </p>
+        {!isVerifyingOwner ? (
+          <>
+            {/* Title & Info */}
+            <h2 id="visitor-modal-title" className="text-base font-bold text-[#262626] dark:text-white mb-1">
+              Who's liking this project?
+            </h2>
+            <p className="text-xs text-[#8E8E8E] dark:text-[#A8A8A8] mb-4 leading-relaxed">
+              Please enter your name or Instagram handle for record purposes so Vince knows who supported his project!
+            </p>
 
-        {/* Input Form */}
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="relative text-left">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#8E8E8E] dark:text-[#737373]">
-              <User className="w-4 h-4" />
-            </div>
-            <input
-              type="text"
-              autoFocus
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                if (error) setError('');
-              }}
-              placeholder="e.g. Kenneth or @kenneth_dev"
-              maxLength={30}
-              className={`w-full pl-10 pr-4 py-2.5 bg-[#FAFAFA] dark:bg-[#1A1A1A] border ${
-                error ? 'border-[#ED4956]' : 'border-[#DBDBDB] dark:border-[#333333]'
-              } rounded-xl text-sm text-[#262626] dark:text-white placeholder-[#8E8E8E] dark:placeholder-[#737373] focus:outline-none focus:border-[#0095F6] dark:focus:border-[#0095F6] transition-colors`}
-            />
-          </div>
+            {/* Input Form */}
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <div className="relative text-left">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#8E8E8E] dark:text-[#737373]">
+                  <User className="w-4 h-4" />
+                </div>
+                <input
+                  type="text"
+                  autoFocus
+                  value={name}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    if (error) setError('');
+                  }}
+                  placeholder="e.g. Kenneth or @kenneth_dev"
+                  maxLength={30}
+                  className={`w-full pl-10 pr-4 py-2.5 bg-[#FAFAFA] dark:bg-[#1A1A1A] border ${
+                    error ? 'border-[#ED4956]' : 'border-[#DBDBDB] dark:border-[#333333]'
+                  } rounded-xl text-sm text-[#262626] dark:text-white placeholder-[#8E8E8E] dark:placeholder-[#737373] focus:outline-none focus:border-[#0095F6] dark:focus:border-[#0095F6] transition-colors`}
+                />
+              </div>
 
-          {error && <p className="text-xs text-[#ED4956] font-medium text-left">{error}</p>}
+              {error && <p className="text-xs text-[#ED4956] font-medium text-left">{error}</p>}
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full bg-[#ED4956] hover:bg-[#D93845] active:scale-[0.98] text-white text-sm font-semibold py-2.5 px-4 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-          >
-            <Heart className="w-4 h-4 fill-white" />
-            <span>Like Project</span>
-          </button>
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className="w-full bg-[#ED4956] hover:bg-[#D93845] active:scale-[0.98] text-white text-sm font-semibold py-2.5 px-4 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <Heart className="w-4 h-4 fill-white" />
+                <span>Like Project</span>
+              </button>
 
-          {/* Secondary Actions */}
-          <div className="flex items-center justify-between pt-1">
-            <button
-              type="button"
-              onClick={handleAnonymous}
-              className="text-xs font-medium text-[#8E8E8E] dark:text-[#737373] hover:text-[#262626] dark:hover:text-white transition-colors cursor-pointer"
-            >
-              Like Anonymously
-            </button>
+              {/* Secondary Actions */}
+              <div className="flex items-center justify-between pt-1">
+                <button
+                  type="button"
+                  onClick={handleAnonymous}
+                  className="text-xs font-medium text-[#8E8E8E] dark:text-[#737373] hover:text-[#262626] dark:hover:text-white transition-colors cursor-pointer"
+                >
+                  Like Anonymously
+                </button>
 
-            <button
-              type="button"
-              onClick={handleDeveloperOwner}
-              className="text-xs font-semibold text-[#0095F6] hover:underline transition-colors flex items-center gap-1 cursor-pointer"
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>I'm Vince (Owner)</span>
-            </button>
-          </div>
-        </form>
+                <button
+                  type="button"
+                  onClick={() => setIsVerifyingOwner(true)}
+                  className="text-xs font-semibold text-[#0095F6] hover:underline transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>I'm Vince (Owner)</span>
+                </button>
+              </div>
+            </form>
+          </>
+        ) : (
+          <>
+            {/* Developer/Owner verification step */}
+            <h2 id="visitor-modal-title" className="text-base font-bold text-[#262626] dark:text-white mb-1">
+              Verify Developer Email
+            </h2>
+            <p className="text-xs text-[#8E8E8E] dark:text-[#A8A8A8] mb-4 leading-relaxed">
+              Confirm your developer email to unlock owner mode and never be asked again.
+            </p>
+
+            <form onSubmit={handleVerifyOwnerSubmit} className="space-y-3">
+              <div className="relative text-left">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#8E8E8E] dark:text-[#737373]">
+                  <Mail className="w-4 h-4" />
+                </div>
+                <input
+                  type="text"
+                  autoFocus
+                  value={ownerEmailInput}
+                  onChange={(e) => {
+                    setOwnerEmailInput(e.target.value);
+                    if (ownerError) setOwnerError('');
+                  }}
+                  placeholder="vincelawrencequijano@gmail.com"
+                  className={`w-full pl-10 pr-4 py-2.5 bg-[#FAFAFA] dark:bg-[#1A1A1A] border ${
+                    ownerError ? 'border-[#ED4956]' : 'border-[#DBDBDB] dark:border-[#333333]'
+                  } rounded-xl text-sm text-[#262626] dark:text-white placeholder-[#8E8E8E] dark:placeholder-[#737373] focus:outline-none focus:border-[#0095F6] dark:focus:border-[#0095F6] transition-colors`}
+                />
+              </div>
+
+              {ownerError && <p className="text-xs text-[#ED4956] font-medium text-left">{ownerError}</p>}
+
+              <button
+                type="submit"
+                className="w-full bg-[#0095F6] hover:bg-[#1877F2] active:scale-[0.98] text-white text-sm font-semibold py-2.5 px-4 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                <span>Verify Owner</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsVerifyingOwner(false)}
+                className="w-full text-xs font-medium text-[#8E8E8E] dark:text-[#737373] hover:text-[#262626] dark:hover:text-white pt-1 transition-colors"
+              >
+                Back to Like Prompt
+              </button>
+            </form>
+          </>
+        )}
       </div>
     </div>
   );

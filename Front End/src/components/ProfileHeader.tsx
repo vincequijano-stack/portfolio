@@ -10,7 +10,8 @@ import {
   Pencil,
   X
 } from 'lucide-react';
-import { RateModal, ClientReview } from './RateModal';
+import { RateModal } from './RateModal';
+import { ratingService, ClientReview } from '../services/ratingService';
 import { profileData } from '../data/profile';
 import { eventStories } from '../data/events';
 
@@ -24,14 +25,14 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   onOpenStoryModal,
 }) => {
   const [isRateModalOpen, setIsRateModalOpen] = useState(false);
-  const [reviews, setReviews] = useState<ClientReview[]>(() => {
-    try {
-      const saved = localStorage.getItem('vince_client_reviews');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [reviews, setReviews] = useState<ClientReview[]>(() => ratingService.getReviews());
+
+  React.useEffect(() => {
+    const unsubscribe = ratingService.subscribe((list) => {
+      setReviews(list);
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Real-time editable Note (persists in localStorage)
   const [note, setNote] = useState<string>(() => {
@@ -54,24 +55,11 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     } catch {}
   };
 
-  const handleAddReview = (newRev: Omit<ClientReview, 'id' | 'date'>) => {
-    const review: ClientReview = {
-      ...newRev,
-      id: Date.now().toString(),
-      date: 'Just now',
-    };
-    const updated = [review, ...reviews];
-    setReviews(updated);
-    try {
-      localStorage.setItem('vince_client_reviews', JSON.stringify(updated));
-    } catch {}
+  const handleAddReview = (newRev: Omit<ClientReview, 'id' | 'date' | 'timestamp'>) => {
+    ratingService.submitReview(newRev);
   };
 
-  const totalReviews = reviews.length;
-  const averageRating =
-    totalReviews > 0
-      ? (reviews.reduce((acc, r) => acc + r.rating, 0) / totalReviews).toFixed(1)
-      : '0.0';
+  const { average: averageRating, count: totalReviews } = ratingService.getAverageRating();
 
   const handleDownloadCV = () => {
     const link = document.createElement('a');

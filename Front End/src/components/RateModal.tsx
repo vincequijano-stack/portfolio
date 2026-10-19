@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Star, X, CheckCircle2, MessageSquare, HeartHandshake, User } from 'lucide-react';
+import { getVisitorName, setVisitorName } from '../services/notificationService';
 
 export interface ClientReview {
   id: string;
@@ -8,6 +9,7 @@ export interface ClientReview {
   role?: string;
   feedback: string;
   date: string;
+  timestamp?: number;
 }
 
 interface RateModalProps {
@@ -25,7 +27,7 @@ export const RateModal: React.FC<RateModalProps> = ({
 }) => {
   const [selectedRating, setSelectedRating] = useState<number>(5);
   const [hoverRating, setHoverRating] = useState<number>(0);
-  const [clientName, setClientName] = useState<string>('');
+  const [clientName, setClientName] = useState<string>(() => getVisitorName());
   const [clientRole, setClientRole] = useState<string>('');
   const [clientFeedback, setClientFeedback] = useState<string>('');
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
@@ -53,6 +55,7 @@ export const RateModal: React.FC<RateModalProps> = ({
       return;
     }
 
+    setVisitorName(clientName.trim());
     onSubmitReview({
       rating: selectedRating,
       name: clientName.trim(),

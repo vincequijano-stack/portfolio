@@ -10,16 +10,47 @@ export interface LikeNotification {
 
 const STORAGE_KEY = 'portfolio_notifications_v2';
 const VISITOR_NAME_KEY = 'portfolio_visitor_name';
+const OWNER_EMAIL_KEY = 'portfolio_owner_email';
+const OWNER_MATCH = 'vincelawrencequijano';
 const NTFY_TOPIC = 'vince_quijano_portfolio_likes_live';
+
+export function isOwner(): boolean {
+  try {
+    if (typeof window !== 'undefined') {
+      const savedEmail = (localStorage.getItem(OWNER_EMAIL_KEY) || '').toLowerCase().trim();
+      if (savedEmail.includes(OWNER_MATCH)) return true;
+
+      const savedName = (localStorage.getItem(VISITOR_NAME_KEY) || '').toLowerCase().trim();
+      if (savedName.includes(OWNER_MATCH)) return true;
+
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return true;
+      }
+    }
+  } catch {}
+  return false;
+}
+
+export function setOwnerEmail(emailOrUser: string): boolean {
+  try {
+    if (typeof window !== 'undefined') {
+      const clean = emailOrUser.toLowerCase().trim();
+      if (clean.includes(OWNER_MATCH)) {
+        localStorage.setItem(OWNER_EMAIL_KEY, clean);
+        localStorage.setItem(VISITOR_NAME_KEY, 'Vince Quijano');
+        window.dispatchEvent(new CustomEvent('portfolio_owner_status_changed', { detail: true }));
+        return true;
+      }
+    }
+  } catch {}
+  return false;
+}
 
 export function getVisitorName(): string {
   try {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem(VISITOR_NAME_KEY);
-      if (stored) return stored;
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return 'Vince Quijano';
-      }
+      if (isOwner()) return 'Vince Quijano';
+      return localStorage.getItem(VISITOR_NAME_KEY) || '';
     }
   } catch {}
   return '';
@@ -29,6 +60,10 @@ export function setVisitorName(name: string): void {
   try {
     if (typeof window !== 'undefined') {
       const trimmed = name.trim();
+      if (trimmed.toLowerCase().includes(OWNER_MATCH)) {
+        setOwnerEmail(trimmed);
+        return;
+      }
       localStorage.setItem(VISITOR_NAME_KEY, trimmed);
       window.dispatchEvent(new CustomEvent('portfolio_visitor_name_changed', { detail: trimmed }));
     }
@@ -36,6 +71,7 @@ export function setVisitorName(name: string): void {
 }
 
 export function hasVisitorName(): boolean {
+  if (isOwner()) return true;
   return Boolean(getVisitorName());
 }
 
