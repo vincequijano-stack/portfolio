@@ -20,6 +20,15 @@ function timeAgo(timestamp: number): string {
   return `${days}d`;
 }
 
+function getInitials(userName: string): string {
+  const clean = userName.replace(/^@/, '').trim();
+  const parts = clean.split(' ').filter(Boolean);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return clean.slice(0, 2).toUpperCase() || 'VI';
+}
+
 export const ActivityModal: React.FC<ActivityModalProps> = ({
   isOpen,
   onClose,
@@ -55,10 +64,12 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-bold text-[#262626] dark:text-white leading-tight">
-                Notifications
+                Activity &amp; Likers
               </h2>
               <p className="text-[11px] text-[#8E8E8E] dark:text-[#737373]">
-                {unreadCount > 0 ? `${unreadCount} new interactions` : 'Real-time project activity'}
+                {notifications.length > 0
+                  ? `${notifications.length} project like${notifications.length === 1 ? '' : 's'} recorded`
+                  : 'Real-time project likers'}
               </p>
             </div>
           </div>
@@ -119,7 +130,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
                 <div className="relative shrink-0">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#FD1D1D] to-[#833AB4] p-[1.5px] flex items-center justify-center">
                     <div className="w-full h-full rounded-full bg-white dark:bg-[#121212] flex items-center justify-center font-bold text-xs text-[#262626] dark:text-white uppercase">
-                      {notif.userName.slice(0, 2)}
+                      {getInitials(notif.userName)}
                     </div>
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-[#ED4956] border-2 border-white dark:border-[#121212] flex items-center justify-center">

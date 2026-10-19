@@ -9,7 +9,31 @@ export interface LikeNotification {
 }
 
 const STORAGE_KEY = 'portfolio_notifications_v2';
+const VISITOR_NAME_KEY = 'portfolio_visitor_name';
 const NTFY_TOPIC = 'vince_quijano_portfolio_likes_live';
+
+export function getVisitorName(): string {
+  try {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(VISITOR_NAME_KEY) || '';
+    }
+  } catch {}
+  return '';
+}
+
+export function setVisitorName(name: string): void {
+  try {
+    if (typeof window !== 'undefined') {
+      const trimmed = name.trim();
+      localStorage.setItem(VISITOR_NAME_KEY, trimmed);
+      window.dispatchEvent(new CustomEvent('portfolio_visitor_name_changed', { detail: trimmed }));
+    }
+  } catch {}
+}
+
+export function hasVisitorName(): boolean {
+  return Boolean(getVisitorName());
+}
 
 class NotificationService {
   private notifications: LikeNotification[] = [];
@@ -21,11 +45,11 @@ class NotificationService {
     this.loadFromStorage();
     this.initBroadcastChannel();
     this.initRealtimeStream();
+    this.fetchCloudHistory();
   }
 
   private loadFromStorage() {
     try {
-      // Clear legacy storage that had mock sample notifications
       if (typeof window !== 'undefined') {
         localStorage.removeItem('portfolio_notifications_v1');
       }
@@ -33,7 +57,7 @@ class NotificationService {
       const data = localStorage.getItem(STORAGE_KEY);
       if (data) {
         const parsed: LikeNotification[] = JSON.parse(data);
-        // Only keep genuine notifications (never mock/init samples)
+        // Keep genuine notifications (ignore legacy mock data)
         this.notifications = parsed.filter(
           (n) => !n.id.startsWith('init_') && n.userName !== 'tech_enthusiast' && n.userName !== 'web3_builder'
         );
@@ -47,7 +71,7 @@ class NotificationService {
 
   private saveToStorage() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.notifications.slice(0, 30)));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.notifications.slice(0, 100)));
     } catch {}
   }
 
@@ -77,6 +101,41 @@ class NotificationService {
     }
   }
 
+  // Fetch all past likes stored in the cloud topic so historical likers are restored
+  private fetchCloudHistory() {
+    if (typeof window === 'undefined') return;
+
+    fetch(`https://ntfy.sh/${NTFY_TOPIC}/json?poll=1&since=all`)
+      .then((res) => {
+        if (!res.ok) return '';
+        return res.text();
+      })
+      .then((text) => {
+        if (!text) return;
+        const lines = text.trim().split('\n');
+        lines.forEach((line) => {
+          try {
+            const item = JSON.parse(line);
+            if (item.event === 'message' && item.message) {
+              const notifData = JSON.parse(item.message);
+              if (
+                notifData &&
+                notifData.id &&
+                !notifData.id.startsWith('init_') &&
+                notifData.userName !== 'tech_enthusiast' &&
+                notifData.userName !== 'web3_builder'
+              ) {
+                this.handleIncomingNotification(notifData, false);
+              }
+            }
+          } catch {}
+        });
+      })
+      .catch(() => {
+        // network fallback is silent
+      });
+  }
+
   private initRealtimeStream() {
     if (typeof window === 'undefined') return;
 
@@ -88,19 +147,21 @@ class NotificationService {
           const parsed = JSON.parse(event.data);
           if (parsed && parsed.event === 'message' && parsed.message) {
             const notifData = JSON.parse(parsed.message);
-            if (notifData && notifData.id) {
+            if (
+              notifData &&
+              notifData.id &&
+              !notifData.id.startsWith('init_') &&
+              notifData.userName !== 'tech_enthusiast' &&
+              notifData.userName !== 'web3_builder'
+            ) {
               this.handleIncomingNotification(notifData, false);
             }
           }
-        } catch {
-          // ignore parsing error
-        }
+        } catch {}
       };
       this.eventSource.onerror = () => {
-        // Silent recovery: close and let fallback handle it
         if (this.eventSource) {
           this.eventSource.close();
-          // Retry after 20 seconds
           setTimeout(() => this.initRealtimeStream(), 20000);
         }
       };
@@ -113,7 +174,7 @@ class NotificationService {
     // Avoid duplicates
     if (this.notifications.some((n) => n.id === notification.id)) return;
 
-    this.notifications = [notification, ...this.notifications].slice(0, 30);
+    this.notifications = [notification, ...this.notifications].slice(0, 100);
     this.saveToStorage();
     this.notifyListeners();
 
@@ -146,14 +207,21 @@ class NotificationService {
     }
   }
 
-  public recordLike(project: { id: string; title: string; thumbnail?: string }): LikeNotification {
-    const randomGuestId = Math.floor(1000 + Math.random() * 9000);
+  public recordLike(
+    project: { id: string; title: string; thumbnail?: string },
+    customUserName?: string
+  ): LikeNotification {
+    const finalUserName =
+      customUserName?.trim() ||
+      getVisitorName() ||
+      `Guest_${Math.floor(1000 + Math.random() * 9000)}`;
+
     const newNotif: LikeNotification = {
       id: `like_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
       projectId: project.id,
       projectTitle: project.title,
       projectThumbnail: project.thumbnail || '/assets/images/projects/project-portfolio.svg',
-      userName: `visitor_${randomGuestId}`,
+      userName: finalUserName,
       timestamp: Date.now(),
       read: false,
     };

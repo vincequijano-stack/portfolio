@@ -14,7 +14,7 @@ import {
 import { GithubIcon } from './SocialIcons';
 import { Project } from '../data/projects';
 import { profileData } from '../data/profile';
-import { notificationService } from '../services/notificationService';
+import { notificationService, getVisitorName } from '../services/notificationService';
 
 interface ProjectModalProps {
   project: Project | null;
@@ -92,10 +92,11 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
   const handleAddComment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!project || !newComment.trim()) return;
+    const currentVisitor = getVisitorName() || 'guest_visitor';
     const updated = [
       ...comments,
       {
-        user: 'guest_visitor',
+        user: currentVisitor,
         text: newComment.trim(),
         time: 'Just now',
         avatar: '👋',

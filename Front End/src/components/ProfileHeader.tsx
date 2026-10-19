@@ -17,12 +17,30 @@ import { eventStories } from '../data/events';
 interface ProfileHeaderProps {
   onNavigate: (sectionId: string) => void;
   onOpenStoryModal: (storyId: string) => void;
+  onOpenVisitorNameModal?: () => void;
 }
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   onNavigate,
   onOpenStoryModal,
+  onOpenVisitorNameModal,
 }) => {
+  const [visitorName, setVisitorNameState] = useState<string>(() => {
+    try {
+      return localStorage.getItem('portfolio_visitor_name') || '';
+    } catch {
+      return '';
+    }
+  });
+
+  React.useEffect(() => {
+    const handleNameChange = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      setVisitorNameState(customEvent.detail || '');
+    };
+    window.addEventListener('portfolio_visitor_name_changed', handleNameChange);
+    return () => window.removeEventListener('portfolio_visitor_name_changed', handleNameChange);
+  }, []);
   const [isRateModalOpen, setIsRateModalOpen] = useState(false);
   const [reviews, setReviews] = useState<ClientReview[]>(() => {
     try {
@@ -253,6 +271,21 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 github.com/{profileData.username}
               </a>
             </div>
+
+            {visitorName && (
+              <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FAFAFA] dark:bg-[#1A1A1A] border border-[#DBDBDB] dark:border-[#333333] text-[11px] text-[#737373] dark:text-[#A8A8A8]">
+                <span>Visiting as:</span>
+                <button
+                  type="button"
+                  onClick={onOpenVisitorNameModal}
+                  className="font-bold text-black dark:text-white hover:text-[#0095F6] dark:hover:text-[#0095F6] flex items-center gap-1 transition-colors underline decoration-dotted cursor-pointer"
+                  title="Click to change your name"
+                >
+                  <span>{visitorName}</span>
+                  <Pencil className="w-2.5 h-2.5 opacity-60" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
