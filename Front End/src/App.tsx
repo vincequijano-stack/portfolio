@@ -14,10 +14,9 @@ import { MobileNav } from './components/MobileNav';
 import { IntroSplash } from './components/IntroSplash';
 import { InstagramIcon } from './components/SocialIcons';
 import { Play, Heart } from 'lucide-react';
-import { notificationService, LikeNotification, hasVisitorName, getVisitorName } from './services/notificationService';
+import { notificationService, LikeNotification } from './services/notificationService';
 import { ActivityModal } from './components/ActivityModal';
 import { LikeNotificationToast } from './components/LikeNotificationToast';
-import { VisitorNameModal } from './components/VisitorNameModal';
 
 import { projectsData, Project, CategoryType, categoryList } from './data/projects';
 import { profileData } from './data/profile';
@@ -28,7 +27,6 @@ export default function App() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [activeStoryId, setActiveStoryId] = useState<string | null>(null);
   const [isActivityOpen, setIsActivityOpen] = useState(false);
-  const [isVisitorModalOpen, setIsVisitorModalOpen] = useState(false);
   const [notifications, setNotifications] = useState<LikeNotification[]>([]);
 
   useEffect(() => {
@@ -48,21 +46,11 @@ export default function App() {
     }
   });
 
-  useEffect(() => {
-    if (!showIntro && !hasVisitorName()) {
-      const timer = setTimeout(() => setIsVisitorModalOpen(true), 400);
-      return () => clearTimeout(timer);
-    }
-  }, [showIntro]);
-
   const handleIntroComplete = () => {
     setShowIntro(false);
     try {
       sessionStorage.setItem('ig_intro_shown', 'true');
     } catch {}
-    if (!hasVisitorName()) {
-      setTimeout(() => setIsVisitorModalOpen(true), 300);
-    }
   };
 
   const handleReplayIntro = () => {
@@ -275,13 +263,6 @@ export default function App() {
         }}
       />
       <LikeNotificationToast onOpenActivity={() => setIsActivityOpen(true)} />
-
-      {/* 7. Visitor Welcome & Name Prompt Modal */}
-      <VisitorNameModal
-        isOpen={isVisitorModalOpen}
-        initialName={getVisitorName()}
-        onClose={() => setIsVisitorModalOpen(false)}
-      />
     </div>
   );
 }

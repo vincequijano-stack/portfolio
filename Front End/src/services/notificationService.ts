@@ -15,7 +15,11 @@ const NTFY_TOPIC = 'vince_quijano_portfolio_likes_live';
 export function getVisitorName(): string {
   try {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem(VISITOR_NAME_KEY) || '';
+      const stored = localStorage.getItem(VISITOR_NAME_KEY);
+      if (stored) return stored;
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return 'Vince Quijano';
+      }
     }
   } catch {}
   return '';

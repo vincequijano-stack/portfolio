@@ -14,7 +14,8 @@ import {
 import { GithubIcon } from './SocialIcons';
 import { Project } from '../data/projects';
 import { profileData } from '../data/profile';
-import { notificationService, getVisitorName } from '../services/notificationService';
+import { notificationService, getVisitorName, hasVisitorName } from '../services/notificationService';
+import { VisitorNameModal } from './VisitorNameModal';
 
 interface ProjectModalProps {
   project: Project | null;
@@ -34,6 +35,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
     { user: string; text: string; time: string; avatar: string }[]
   >([]);
   const [newComment, setNewComment] = useState('');
+  const [isNameModalOpen, setIsNameModalOpen] = useState(false);
 
   useEffect(() => {
     if (project) {
@@ -65,6 +67,25 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
 
   if (!project) return null;
 
+  const performLike = (customName?: string) => {
+    if (!project) return;
+    setLikesCount(1);
+    setIsLiked(true);
+    try {
+      localStorage.setItem(`project_liked_${project.id}`, 'true');
+    } catch {}
+    // Automatically trigger real-time like notification
+    notificationService.recordLike(
+      {
+        id: project.id,
+        title: project.title,
+        thumbnail: project.thumbnail,
+      },
+      customName
+    );
+    window.dispatchEvent(new CustomEvent('project_interaction_updated', { detail: { projectId: project.id } }));
+  };
+
   const handleLikeToggle = () => {
     if (!project) return;
     if (isLiked) {
@@ -73,20 +94,14 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
       try {
         localStorage.removeItem(`project_liked_${project.id}`);
       } catch {}
+      window.dispatchEvent(new CustomEvent('project_interaction_updated', { detail: { projectId: project.id } }));
     } else {
-      setLikesCount(1);
-      setIsLiked(true);
-      try {
-        localStorage.setItem(`project_liked_${project.id}`, 'true');
-      } catch {}
-      // Automatically trigger real-time like notification
-      notificationService.recordLike({
-        id: project.id,
-        title: project.title,
-        thumbnail: project.thumbnail,
-      });
+      if (!hasVisitorName()) {
+        setIsNameModalOpen(true);
+      } else {
+        performLike();
+      }
     }
-    window.dispatchEvent(new CustomEvent('project_interaction_updated', { detail: { projectId: project.id } }));
   };
 
   const handleAddComment = (e: React.FormEvent) => {
@@ -373,6 +388,17 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Name Prompt only if an external guest likes for the first time */}
+      <VisitorNameModal
+        isOpen={isNameModalOpen}
+        onClose={(name) => {
+          setIsNameModalOpen(false);
+          if (name) {
+            performLike(name);
+          }
+        }}
+      />
     </div>
   );
 };

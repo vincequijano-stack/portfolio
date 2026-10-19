@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { User, Sparkles, Check, ArrowRight } from 'lucide-react';
+import { User, Heart, Sparkles, ArrowRight, ShieldCheck, X } from 'lucide-react';
 import { profileData } from '../data/profile';
 import { setVisitorName } from '../services/notificationService';
 
 interface VisitorNameModalProps {
   isOpen: boolean;
-  onClose: (name: string) => void;
+  onClose: (name?: string) => void;
   initialName?: string;
 }
 
@@ -23,18 +23,24 @@ export const VisitorNameModal: React.FC<VisitorNameModalProps> = ({
     e.preventDefault();
     const cleanName = name.trim();
     if (!cleanName) {
-      setError('Please enter your name or handle');
+      setError('Please enter your name or @handle');
       return;
     }
     setVisitorName(cleanName);
     onClose(cleanName);
   };
 
-  const handleGuest = () => {
+  const handleAnonymous = () => {
     const randomGuestId = Math.floor(1000 + Math.random() * 9000);
     const guestName = `Guest_${randomGuestId}`;
     setVisitorName(guestName);
     onClose(guestName);
+  };
+
+  const handleDeveloperOwner = () => {
+    const ownerName = 'Vince Quijano (Developer)';
+    setVisitorName(ownerName);
+    onClose(ownerName);
   };
 
   return (
@@ -43,15 +49,25 @@ export const VisitorNameModal: React.FC<VisitorNameModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="visitor-modal-title"
+      onClick={() => onClose()}
     >
       <div
-        className="w-full max-w-sm bg-white dark:bg-[#121212] border border-[#DBDBDB] dark:border-[#262626] rounded-2xl shadow-2xl p-6 sm:p-7 text-center transition-all animate-in zoom-in-95 duration-200"
+        className="w-full max-w-sm bg-white dark:bg-[#121212] border border-[#DBDBDB] dark:border-[#262626] rounded-2xl shadow-2xl p-6 sm:p-7 text-center transition-all animate-in zoom-in-95 duration-200 relative"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Instagram Profile Avatar with Animated Story Ring */}
-        <div className="relative inline-block mx-auto mb-4">
-          <div className="w-20 h-20 rounded-full p-[2.5px] bg-gradient-to-tr from-[#FCAF45] via-[#FD1D1D] to-[#833AB4] shadow-md animate-pulse">
-            <div className="w-full h-full rounded-full p-[2px] bg-white dark:bg-black overflow-hidden">
+        {/* Close Button */}
+        <button
+          onClick={() => onClose()}
+          className="absolute top-4 right-4 p-1 rounded-full text-[#8E8E8E] hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+          aria-label="Close"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
+        {/* Floating Heart & Avatar */}
+        <div className="relative inline-block mx-auto mb-3.5">
+          <div className="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-[#FCAF45] via-[#FD1D1D] to-[#833AB4] shadow-md">
+            <div className="w-full h-full rounded-full p-[1.5px] bg-white dark:bg-black overflow-hidden">
               <img
                 src="/assets/images/headshot/headshot.jpg"
                 alt={profileData.name}
@@ -60,21 +76,21 @@ export const VisitorNameModal: React.FC<VisitorNameModalProps> = ({
               />
             </div>
           </div>
-          <span className="absolute -bottom-1 -right-1 bg-[#0095F6] text-white p-1 rounded-full border-2 border-white dark:border-[#121212] shadow-xs">
-            <Sparkles className="w-3.5 h-3.5" />
+          <span className="absolute -bottom-1 -right-1 bg-[#ED4956] text-white p-1 rounded-full border-2 border-white dark:border-[#121212] shadow-xs">
+            <Heart className="w-3 h-3 fill-white" />
           </span>
         </div>
 
         {/* Title & Info */}
-        <h2 id="visitor-modal-title" className="text-lg font-bold text-[#262626] dark:text-white mb-1.5">
-          Welcome to My Portfolio!
+        <h2 id="visitor-modal-title" className="text-base font-bold text-[#262626] dark:text-white mb-1">
+          Who's liking this project?
         </h2>
-        <p className="text-xs text-[#8E8E8E] dark:text-[#A8A8A8] mb-5 leading-relaxed">
-          What should we call you? Enter your name or Instagram handle so Vince can see who's visiting and liking projects.
+        <p className="text-xs text-[#8E8E8E] dark:text-[#A8A8A8] mb-4 leading-relaxed">
+          Enter your name or Instagram handle so Vince can see who supported his project!
         </p>
 
         {/* Input Form */}
-        <form onSubmit={handleSubmit} className="space-y-3.5">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div className="relative text-left">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#8E8E8E] dark:text-[#737373]">
               <User className="w-4 h-4" />
@@ -97,23 +113,34 @@ export const VisitorNameModal: React.FC<VisitorNameModalProps> = ({
 
           {error && <p className="text-xs text-[#ED4956] font-medium text-left">{error}</p>}
 
-          {/* Continue Button */}
+          {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-[#0095F6] hover:bg-[#1877F2] active:scale-[0.98] text-white text-sm font-semibold py-2.5 px-4 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full bg-[#ED4956] hover:bg-[#D93845] active:scale-[0.98] text-white text-sm font-semibold py-2.5 px-4 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            <span>Continue to Portfolio</span>
-            <ArrowRight className="w-4 h-4" />
+            <Heart className="w-4 h-4 fill-white" />
+            <span>Like Project</span>
           </button>
 
-          {/* Guest fallback button */}
-          <button
-            type="button"
-            onClick={handleGuest}
-            className="w-full text-xs font-medium text-[#8E8E8E] dark:text-[#737373] hover:text-[#262626] dark:hover:text-white py-1 transition-colors"
-          >
-            Browse as Guest
-          </button>
+          {/* Secondary Actions */}
+          <div className="flex items-center justify-between pt-1">
+            <button
+              type="button"
+              onClick={handleAnonymous}
+              className="text-xs font-medium text-[#8E8E8E] dark:text-[#737373] hover:text-[#262626] dark:hover:text-white transition-colors cursor-pointer"
+            >
+              Like Anonymously
+            </button>
+
+            <button
+              type="button"
+              onClick={handleDeveloperOwner}
+              className="text-xs font-semibold text-[#0095F6] hover:underline transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>I'm Vince (Owner)</span>
+            </button>
+          </div>
         </form>
       </div>
     </div>
