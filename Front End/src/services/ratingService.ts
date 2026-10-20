@@ -14,26 +14,7 @@ export interface ClientReview {
 const STORAGE_KEY = 'vince_client_reviews_cloud_v1';
 const NTFY_RATINGS_TOPIC = 'vince_quijano_portfolio_ratings_live';
 
-const SEED_REVIEWS: ClientReview[] = [
-  {
-    id: 'rev_seed_1',
-    rating: 5,
-    name: 'DEVCON Laguna',
-    role: 'Tech Community Partner',
-    feedback: 'Outstanding technical presentation and interactive builder card created during the Cryptita Plays workshop! Vince Quijano is a dedicated builder.',
-    date: 'Aug 2026',
-    timestamp: 1785500000000,
-  },
-  {
-    id: 'rev_seed_2',
-    rating: 5,
-    name: 'Startup Collaborator',
-    role: 'Client / Founder',
-    feedback: 'Incredible Instagram-inspired UI, smooth animations, and clean code architecture. Vince delivers exceptional quality and fast turnaround.',
-    date: 'Sep 2026',
-    timestamp: 1788000000000,
-  },
-];
+const SEED_REVIEWS: ClientReview[] = [];
 
 class RatingService {
   private reviews: ClientReview[] = [];
@@ -54,12 +35,19 @@ class RatingService {
       const data = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('vince_client_reviews');
       if (data) {
         const parsed = JSON.parse(data);
-        this.reviews = Array.isArray(parsed) && parsed.length > 0 ? parsed : [...SEED_REVIEWS];
+        if (Array.isArray(parsed)) {
+          // Purge any seed/test reviews so only real client reviews remain
+          this.reviews = parsed.filter(
+            (r) => !r.id.startsWith('rev_seed') && r.id !== 'rev_1792505964341_l9mc'
+          );
+        } else {
+          this.reviews = [];
+        }
       } else {
-        this.reviews = [...SEED_REVIEWS];
+        this.reviews = [];
       }
     } catch {
-      this.reviews = [...SEED_REVIEWS];
+      this.reviews = [];
     }
   }
 
@@ -252,7 +240,7 @@ class RatingService {
 
   public getAverageRating(): { average: string; count: number } {
     if (this.reviews.length === 0) {
-      return { average: '5.0', count: 0 };
+      return { average: '0.0', count: 0 };
     }
     const sum = this.reviews.reduce((acc, r) => acc + Number(r.rating || 0), 0);
     const avg = (sum / this.reviews.length).toFixed(1);

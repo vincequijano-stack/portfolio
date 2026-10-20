@@ -61,7 +61,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
   const { averageRating, totalReviews } = React.useMemo(() => {
     if (!reviews || reviews.length === 0) {
-      return { averageRating: '5.0', totalReviews: 0 };
+      return { averageRating: '0.0', totalReviews: 0 };
     }
     const sum = reviews.reduce((acc, r) => acc + (Number(r.rating) || 0), 0);
     return {

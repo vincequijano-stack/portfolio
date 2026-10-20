@@ -15,26 +15,7 @@ const INITIAL_DB = {
     'cryptita-plays-builder-workshop': [],
     'personal-portfolio': []
   },
-  reviews: [
-    {
-      id: 'rev_seed_1',
-      rating: 5,
-      name: 'DEVCON Laguna',
-      role: 'Tech Community Partner',
-      feedback: 'Outstanding technical presentation and interactive builder card created during the Cryptita Plays workshop! Vince Quijano is a dedicated builder.',
-      date: 'Aug 2026',
-      timestamp: 1785500000000
-    },
-    {
-      id: 'rev_seed_2',
-      rating: 5,
-      name: 'Startup Collaborator',
-      role: 'Client / Founder',
-      feedback: 'Incredible Instagram-inspired UI, smooth animations, and clean code architecture. Vince delivers exceptional quality and fast turnaround.',
-      date: 'Sep 2026',
-      timestamp: 1788000000000
-    }
-  ]
+  reviews: []
 };
 
 function ensureDbFile() {
