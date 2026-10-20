@@ -66,32 +66,52 @@ function calculateAverage(reviews) {
 // ── Likes Methods ─────────────────────────────────────────────
 function getAllLikes() {
   const db = readDb();
-  return db.likes;
+  return {
+    likes: db.likes || {},
+    likers: db.likedBy || {}
+  };
 }
 
-function toggleLike(projectId, visitorId, isLiked) {
+function toggleLike(projectId, visitorId, isLiked, userName) {
   const db = readDb();
-  if (!db.likes[projectId]) {
+  if (db.likes[projectId] === undefined) {
     db.likes[projectId] = 0;
   }
   if (!Array.isArray(db.likedBy[projectId])) {
     db.likedBy[projectId] = [];
   }
 
-  const alreadyLiked = db.likedBy[projectId].includes(visitorId);
+  // Find index of existing like by visitorId or userName
+  const existingIndex = db.likedBy[projectId].findIndex((item) => {
+    if (typeof item === 'object' && item !== null) {
+      return item.visitorId === visitorId || (userName && item.userName === userName);
+    }
+    return item === visitorId;
+  });
+  const alreadyLiked = existingIndex !== -1;
 
   // If client sends explicit isLiked status
   let finalLiked = isLiked !== undefined ? Boolean(isLiked) : !alreadyLiked;
 
+  const displayName = (userName && String(userName).trim()) || 'Visitor';
+
   if (finalLiked) {
     if (!alreadyLiked) {
-      db.likedBy[projectId].push(visitorId);
-      db.likes[projectId] = (db.likes[projectId] || 0) + 1;
+      db.likedBy[projectId].unshift({
+        visitorId,
+        userName: displayName,
+        timestamp: Date.now()
+      });
+      db.likes[projectId] = Math.max(db.likes[projectId] + 1, db.likedBy[projectId].length);
+    } else {
+      if (typeof db.likedBy[projectId][existingIndex] === 'object') {
+        db.likedBy[projectId][existingIndex].userName = displayName;
+      }
     }
   } else {
     if (alreadyLiked) {
-      db.likedBy[projectId] = db.likedBy[projectId].filter(id => id !== visitorId);
-      db.likes[projectId] = Math.max(0, (db.likes[projectId] || 1) - 1);
+      db.likedBy[projectId].splice(existingIndex, 1);
+      db.likes[projectId] = Math.max(0, db.likes[projectId] - 1);
     }
   }
 
@@ -100,6 +120,7 @@ function toggleLike(projectId, visitorId, isLiked) {
   return {
     projectId,
     likesCount: db.likes[projectId],
+    likers: db.likedBy[projectId],
     isLiked: finalLiked
   };
 }

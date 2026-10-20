@@ -17,6 +17,7 @@ import { profileData } from '../data/profile';
 import { notificationService, getVisitorName, hasVisitorName } from '../services/notificationService';
 import { likeService } from '../services/likeService';
 import { VisitorNameModal } from './VisitorNameModal';
+import { LikersModal } from './LikersModal';
 
 interface ProjectModalProps {
   project: Project | null;
@@ -37,6 +38,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
   >([]);
   const [newComment, setNewComment] = useState('');
   const [isNameModalOpen, setIsNameModalOpen] = useState(false);
+  const [isLikersModalOpen, setIsLikersModalOpen] = useState(false);
 
   useEffect(() => {
     if (project) {
@@ -314,9 +316,14 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
 
             {/* Likes count & date */}
             <div className="text-left mb-3">
-              <p className="text-xs font-bold text-[#262626] dark:text-white">
+              <button
+                type="button"
+                onClick={() => setIsLikersModalOpen(true)}
+                className="text-xs font-bold text-[#262626] dark:text-white hover:opacity-70 transition-opacity cursor-pointer text-left block"
+                title="View who liked this post"
+              >
                 {likesCount} {likesCount === 1 ? 'like' : 'likes'}
-              </p>
+              </button>
               <p className="text-[10px] text-[#8E8E8E] dark:text-[#737373] uppercase tracking-wide">
                 {project.postedDate}
               </p>
@@ -389,6 +396,14 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
             performLike(name);
           }
         }}
+      />
+
+      {/* Likers List Modal (Clicking "X likes") */}
+      <LikersModal
+        isOpen={isLikersModalOpen}
+        onClose={() => setIsLikersModalOpen(false)}
+        projectTitle={project.title}
+        likers={likeService.getLikers(project.id)}
       />
     </div>
   );

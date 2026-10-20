@@ -2,6 +2,12 @@ import { API_BASE_URL } from '../config/api';
 import { notificationService, getVisitorName } from './notificationService';
 import { projectsData } from '../data/projects';
 
+export interface LikerUser {
+  visitorId?: string;
+  userName: string;
+  timestamp: number;
+}
+
 // Generate or retrieve persistent visitor ID for unique likes
 function getVisitorId(): string {
   try {
@@ -19,13 +25,15 @@ function getVisitorId(): string {
 
 class LikeService {
   private likes: Record<string, number> = {};
-  private listeners: Set<(likes: Record<string, number>) => void> = new Set();
+  private likers: Record<string, LikerUser[]> = {};
+  private listeners: Set<() => void> = new Set();
   private isLoaded = false;
 
   constructor() {
-    // Initialize with default project counts as baseline
+    // Initialize default project counts as baseline
     projectsData.forEach((p) => {
       this.likes[p.id] = p.likes || 1;
+      this.likers[p.id] = [];
     });
 
     this.loadFromStorage();
@@ -35,10 +43,16 @@ class LikeService {
   private loadFromStorage() {
     try {
       if (typeof window !== 'undefined') {
-        const stored = localStorage.getItem('portfolio_cached_likes');
-        if (stored) {
-          const parsed = JSON.parse(stored);
+        const storedLikes = localStorage.getItem('portfolio_cached_likes');
+        if (storedLikes) {
+          const parsed = JSON.parse(storedLikes);
           this.likes = { ...this.likes, ...parsed };
+        }
+
+        const storedLikers = localStorage.getItem('portfolio_cached_likers');
+        if (storedLikers) {
+          const parsed = JSON.parse(storedLikers);
+          this.likers = { ...this.likers, ...parsed };
         }
       }
     } catch {}
@@ -48,6 +62,7 @@ class LikeService {
     try {
       if (typeof window !== 'undefined') {
         localStorage.setItem('portfolio_cached_likes', JSON.stringify(this.likes));
+        localStorage.setItem('portfolio_cached_likers', JSON.stringify(this.likers));
       }
     } catch {}
   }
@@ -60,6 +75,9 @@ class LikeService {
         const data = await res.json();
         if (data.success && data.likes) {
           this.likes = { ...this.likes, ...data.likes };
+          if (data.likers) {
+            this.likers = { ...this.likers, ...data.likers };
+          }
           this.isLoaded = true;
           this.saveToStorage();
           this.notifyListeners();
@@ -72,11 +90,49 @@ class LikeService {
   }
 
   public getLikesCount(projectId: string): number {
-    if (this.likes[projectId] !== undefined) {
-      return this.likes[projectId];
+    const list = this.getLikers(projectId);
+    const storedCount = this.likes[projectId] !== undefined ? this.likes[projectId] : 0;
+    return Math.max(storedCount, list.length);
+  }
+
+  public getLikers(projectId: string): LikerUser[] {
+    const map = new Map<string, LikerUser>();
+
+    // 1. From likers stored in this service
+    const existing = this.likers[projectId] || [];
+    existing.forEach((u) => {
+      if (u && u.userName) {
+        map.set(u.userName.toLowerCase(), u);
+      }
+    });
+
+    // 2. From notifications for this project
+    const notifs = notificationService.getNotifications();
+    notifs
+      .filter((n) => n.projectId === projectId)
+      .forEach((n) => {
+        const key = n.userName.toLowerCase();
+        if (!map.has(key)) {
+          map.set(key, {
+            userName: n.userName,
+            timestamp: n.timestamp,
+          });
+        }
+      });
+
+    // 3. If current user liked the project, ensure their name is in the list
+    if (this.isProjectLiked(projectId)) {
+      const currentVisitor = getVisitorName() || 'You';
+      const key = currentVisitor.toLowerCase();
+      if (!map.has(key)) {
+        map.set(key, {
+          userName: currentVisitor,
+          timestamp: Date.now(),
+        });
+      }
     }
-    const defaultProj = projectsData.find((p) => p.id === projectId);
-    return defaultProj?.likes || 1;
+
+    return Array.from(map.values()).sort((a, b) => b.timestamp - a.timestamp);
   }
 
   public isProjectLiked(projectId: string): boolean {
@@ -108,12 +164,29 @@ class LikeService {
       }
     } catch {}
 
-    const currentCount = this.getLikesCount(projectId);
-    const updatedCount = targetLiked
-      ? currentCount + 1
-      : Math.max(0, currentCount - 1);
+    if (!Array.isArray(this.likers[projectId])) {
+      this.likers[projectId] = [];
+    }
 
-    this.likes[projectId] = updatedCount;
+    if (targetLiked) {
+      const alreadyHas = this.likers[projectId].some(
+        (u) => u.userName.toLowerCase() === visitorName.toLowerCase()
+      );
+      if (!alreadyHas) {
+        this.likers[projectId].unshift({
+          visitorId,
+          userName: visitorName,
+          timestamp: Date.now(),
+        });
+      }
+      this.likes[projectId] = Math.max((this.likes[projectId] || 0) + 1, this.likers[projectId].length);
+    } else {
+      this.likers[projectId] = this.likers[projectId].filter(
+        (u) => u.visitorId !== visitorId && u.userName.toLowerCase() !== visitorName.toLowerCase()
+      );
+      this.likes[projectId] = Math.max(0, (this.likes[projectId] || 1) - 1);
+    }
+
     this.saveToStorage();
     this.notifyListeners();
 
@@ -132,7 +205,12 @@ class LikeService {
     if (typeof window !== 'undefined') {
       window.dispatchEvent(
         new CustomEvent('project_interaction_updated', {
-          detail: { projectId, likesCount: updatedCount, isLiked: targetLiked },
+          detail: {
+            projectId,
+            likesCount: this.getLikesCount(projectId),
+            isLiked: targetLiked,
+            likers: this.getLikers(projectId),
+          },
         })
       );
     }
@@ -153,11 +231,16 @@ class LikeService {
 
         if (res.ok) {
           const data = await res.json();
-          if (data.success && typeof data.likesCount === 'number') {
-            this.likes[projectId] = data.likesCount;
+          if (data.success) {
+            if (typeof data.likesCount === 'number') {
+              this.likes[projectId] = data.likesCount;
+            }
+            if (Array.isArray(data.likers)) {
+              this.likers[projectId] = data.likers;
+            }
             this.saveToStorage();
             this.notifyListeners();
-            return { likesCount: data.likesCount, isLiked: data.isLiked };
+            return { likesCount: this.getLikesCount(projectId), isLiked: data.isLiked };
           }
         }
       } catch (e) {
@@ -165,20 +248,19 @@ class LikeService {
       }
     }
 
-    return { likesCount: updatedCount, isLiked: targetLiked };
+    return { likesCount: this.getLikesCount(projectId), isLiked: targetLiked };
   }
 
-  public subscribe(listener: (likes: Record<string, number>) => void) {
+  public subscribe(listener: () => void) {
     this.listeners.add(listener);
-    listener({ ...this.likes });
+    listener();
     return () => {
       this.listeners.delete(listener);
     };
   }
 
   private notifyListeners() {
-    const copy = { ...this.likes };
-    this.listeners.forEach((l) => l(copy));
+    this.listeners.forEach((l) => l());
   }
 }
 
