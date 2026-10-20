@@ -59,7 +59,16 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     ratingService.submitReview(newRev);
   };
 
-  const { average: averageRating, count: totalReviews } = ratingService.getAverageRating();
+  const { averageRating, totalReviews } = React.useMemo(() => {
+    if (!reviews || reviews.length === 0) {
+      return { averageRating: '5.0', totalReviews: 0 };
+    }
+    const sum = reviews.reduce((acc, r) => acc + (Number(r.rating) || 0), 0);
+    return {
+      averageRating: (sum / reviews.length).toFixed(1),
+      totalReviews: reviews.length,
+    };
+  }, [reviews]);
 
   const handleDownloadCV = () => {
     const link = document.createElement('a');

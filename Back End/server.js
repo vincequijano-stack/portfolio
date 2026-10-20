@@ -13,27 +13,38 @@ const express    = require('express');
 const cors       = require('cors');
 const rateLimit  = require('express-rate-limit');
 const contactRoute = require('./routes/contact');
+const likesRoute   = require('./routes/likes');
+const ratingsRoute = require('./routes/ratings');
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
 
 // ── CORS ──────────────────────────────────────────────────────
-// EDIT: Set ALLOWED_ORIGINS in .env to your frontend URL(s)
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5500')
+const defaultAllowedOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:3000',
+  'http://localhost:5500',
+  'http://127.0.0.1:5500',
+];
+const envAllowedOrigins = (process.env.ALLOWED_ORIGINS || '')
   .split(',')
-  .map(o => o.trim());
+  .map(o => o.trim())
+  .filter(Boolean);
+
+const allowedOrigins = Array.from(new Set([...defaultAllowedOrigins, ...envAllowedOrigins]));
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (e.g. curl, Postman)
-    if (!origin || allowedOrigins.includes(origin)) {
+    // Allow requests with no origin (e.g. curl, Postman, mobile apps)
+    if (!origin || allowedOrigins.includes(origin) || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
       callback(null, true);
     } else {
       callback(new Error(`CORS: Origin ${origin} not allowed`));
     }
   },
-  methods: ['POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type'],
+  methods: ['GET', 'POST', 'OPTIONS', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 // ── Body Parser ───────────────────────────────────────────────
@@ -53,6 +64,8 @@ const contactLimiter = rateLimit({
 // ── Routes ────────────────────────────────────────────────────
 app.get('/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
 app.use('/api/contact', contactLimiter, contactRoute);
+app.use('/api/likes', likesRoute);
+app.use('/api/ratings', ratingsRoute);
 
 // ── 404 Handler ───────────────────────────────────────────────
 app.use((req, res) => {
@@ -69,5 +82,7 @@ app.use((err, req, res, _next) => {
 app.listen(PORT, () => {
   console.log(`\n🚀 Portfolio backend running on http://localhost:${PORT}`);
   console.log(`   Health check: http://localhost:${PORT}/health`);
+  console.log(`   Likes API:    GET/POST http://localhost:${PORT}/api/likes`);
+  console.log(`   Ratings API:  GET/POST http://localhost:${PORT}/api/ratings`);
   console.log(`   Contact API:  POST http://localhost:${PORT}/api/contact\n`);
 });

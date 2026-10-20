@@ -15,6 +15,7 @@ import { GithubIcon } from './SocialIcons';
 import { Project } from '../data/projects';
 import { profileData } from '../data/profile';
 import { notificationService, getVisitorName, hasVisitorName } from '../services/notificationService';
+import { likeService } from '../services/likeService';
 import { VisitorNameModal } from './VisitorNameModal';
 
 interface ProjectModalProps {
@@ -40,20 +41,27 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
   useEffect(() => {
     if (project) {
       try {
-        const savedLiked = localStorage.getItem(`project_liked_${project.id}`);
         const savedComments = localStorage.getItem(`project_comments_${project.id}`);
-        const userLiked = savedLiked === 'true';
-        setIsLiked(userLiked);
-        setLikesCount(userLiked ? 1 : 0);
+        setIsLiked(likeService.isProjectLiked(project.id));
+        setLikesCount(likeService.getLikesCount(project.id));
         setComments(savedComments ? JSON.parse(savedComments) : []);
       } catch {
         setIsLiked(false);
-        setLikesCount(0);
+        setLikesCount(likeService.getLikesCount(project.id));
         setComments([]);
       }
       setIsSaved(false);
       setNewComment('');
     }
+  }, [project]);
+
+  useEffect(() => {
+    if (!project) return;
+    const unsubscribe = likeService.subscribe(() => {
+      setLikesCount(likeService.getLikesCount(project.id));
+      setIsLiked(likeService.isProjectLiked(project.id));
+    });
+    return () => unsubscribe();
   }, [project]);
 
   // Handle ESC key to close modal
@@ -67,34 +75,17 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
 
   if (!project) return null;
 
-  const performLike = (customName?: string) => {
+  const performLike = async (customName?: string) => {
     if (!project) return;
-    setLikesCount(1);
-    setIsLiked(true);
-    try {
-      localStorage.setItem(`project_liked_${project.id}`, 'true');
-    } catch {}
-    // Automatically trigger real-time like notification
-    notificationService.recordLike(
-      {
-        id: project.id,
-        title: project.title,
-        thumbnail: project.thumbnail,
-      },
-      customName
-    );
-    window.dispatchEvent(new CustomEvent('project_interaction_updated', { detail: { projectId: project.id } }));
+    const res = await likeService.toggleLike(project.id, customName);
+    setLikesCount(res.likesCount);
+    setIsLiked(res.isLiked);
   };
 
   const handleLikeToggle = () => {
     if (!project) return;
     if (isLiked) {
-      setLikesCount(0);
-      setIsLiked(false);
-      try {
-        localStorage.removeItem(`project_liked_${project.id}`);
-      } catch {}
-      window.dispatchEvent(new CustomEvent('project_interaction_updated', { detail: { projectId: project.id } }));
+      performLike();
     } else {
       if (!hasVisitorName()) {
         setIsNameModalOpen(true);

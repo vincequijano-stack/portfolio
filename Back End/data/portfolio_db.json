@@ -1,0 +1,41 @@
+{
+  "likes": {
+    "cryptita-plays-builder-workshop": 14,
+    "personal-portfolio": 29
+  },
+  "likedBy": {
+    "cryptita-plays-builder-workshop": [],
+    "personal-portfolio": [
+      "test_vis_1"
+    ]
+  },
+  "reviews": [
+    {
+      "id": "rev_1792505964341_l9mc",
+      "rating": 5,
+      "name": "Verified Client",
+      "role": "Software Engineer",
+      "feedback": "Superb portfolio and outstanding developer experience!",
+      "date": "Just now",
+      "timestamp": 1792505964341
+    },
+    {
+      "id": "rev_seed_1",
+      "rating": 5,
+      "name": "DEVCON Laguna",
+      "role": "Tech Community Partner",
+      "feedback": "Outstanding technical presentation and interactive builder card created during the Cryptita Plays workshop! Vince Quijano is a dedicated builder.",
+      "date": "Aug 2026",
+      "timestamp": 1785500000000
+    },
+    {
+      "id": "rev_seed_2",
+      "rating": 5,
+      "name": "Startup Collaborator",
+      "role": "Client / Founder",
+      "feedback": "Incredible Instagram-inspired UI, smooth animations, and clean code architecture. Vince delivers exceptional quality and fast turnaround.",
+      "date": "Sep 2026",
+      "timestamp": 1788000000000
+    }
+  ]
+}

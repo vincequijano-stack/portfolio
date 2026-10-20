@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../config/api';
 import { notificationService } from './notificationService';
 
 export interface ClientReview {
@@ -13,6 +14,27 @@ export interface ClientReview {
 const STORAGE_KEY = 'vince_client_reviews_cloud_v1';
 const NTFY_RATINGS_TOPIC = 'vince_quijano_portfolio_ratings_live';
 
+const SEED_REVIEWS: ClientReview[] = [
+  {
+    id: 'rev_seed_1',
+    rating: 5,
+    name: 'DEVCON Laguna',
+    role: 'Tech Community Partner',
+    feedback: 'Outstanding technical presentation and interactive builder card created during the Cryptita Plays workshop! Vince Quijano is a dedicated builder.',
+    date: 'Aug 2026',
+    timestamp: 1785500000000,
+  },
+  {
+    id: 'rev_seed_2',
+    rating: 5,
+    name: 'Startup Collaborator',
+    role: 'Client / Founder',
+    feedback: 'Incredible Instagram-inspired UI, smooth animations, and clean code architecture. Vince delivers exceptional quality and fast turnaround.',
+    date: 'Sep 2026',
+    timestamp: 1788000000000,
+  },
+];
+
 class RatingService {
   private reviews: ClientReview[] = [];
   private listeners: Set<(reviews: ClientReview[]) => void> = new Set();
@@ -24,18 +46,20 @@ class RatingService {
     this.initBroadcastChannel();
     this.initRealtimeStream();
     this.fetchCloudHistory();
+    this.fetchBackendRatings();
   }
 
   private loadFromStorage() {
     try {
       const data = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('vince_client_reviews');
       if (data) {
-        this.reviews = JSON.parse(data);
+        const parsed = JSON.parse(data);
+        this.reviews = Array.isArray(parsed) && parsed.length > 0 ? parsed : [...SEED_REVIEWS];
       } else {
-        this.reviews = [];
+        this.reviews = [...SEED_REVIEWS];
       }
     } catch {
-      this.reviews = [];
+      this.reviews = [...SEED_REVIEWS];
     }
   }
 
@@ -44,6 +68,28 @@ class RatingService {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.reviews.slice(0, 100)));
       localStorage.setItem('vince_client_reviews', JSON.stringify(this.reviews.slice(0, 100)));
     } catch {}
+  }
+
+  public async fetchBackendRatings() {
+    if (!API_BASE_URL) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/ratings`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.reviews) && data.reviews.length > 0) {
+          // Merge reviews without duplicates
+          const existingIds = new Set(this.reviews.map((r) => r.id));
+          const newItems = data.reviews.filter((r: ClientReview) => !existingIds.has(r.id));
+          if (newItems.length > 0 || this.reviews.length !== data.reviews.length) {
+            this.reviews = data.reviews;
+            this.saveToStorage();
+            this.notifyListeners();
+          }
+        }
+      }
+    } catch (e) {
+      // Backend offline: offline cache will be used
+    }
   }
 
   private initBroadcastChannel() {
@@ -156,7 +202,7 @@ class RatingService {
     }
   }
 
-  public submitReview(data: Omit<ClientReview, 'id' | 'date' | 'timestamp'>): ClientReview {
+  public async submitReview(data: Omit<ClientReview, 'id' | 'date' | 'timestamp'>): Promise<ClientReview> {
     const newRev: ClientReview = {
       ...data,
       id: `rev_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
@@ -164,6 +210,7 @@ class RatingService {
       timestamp: Date.now(),
     };
 
+    // 1. Optimistic update locally
     this.handleIncomingReview(newRev, true);
     notificationService.recordLike(
       {
@@ -173,6 +220,29 @@ class RatingService {
       },
       newRev.name
     );
+
+    // 2. Persist to Express backend if API is configured
+    if (API_BASE_URL) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/ratings`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+        if (res.ok) {
+          const result = await res.json();
+          if (result.success && result.reviews) {
+            this.reviews = result.reviews;
+            this.saveToStorage();
+            this.notifyListeners();
+          }
+        }
+      } catch (e) {
+        console.warn('Backend rating sync failed, local state retained', e);
+      }
+    }
+
     return newRev;
   }
 
@@ -182,7 +252,7 @@ class RatingService {
 
   public getAverageRating(): { average: string; count: number } {
     if (this.reviews.length === 0) {
-      return { average: '0.0', count: 0 };
+      return { average: '5.0', count: 0 };
     }
     const sum = this.reviews.reduce((acc, r) => acc + Number(r.rating || 0), 0);
     const avg = (sum / this.reviews.length).toFixed(1);

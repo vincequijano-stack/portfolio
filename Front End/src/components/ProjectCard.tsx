@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Heart, MessageCircle, ExternalLink, Layers } from 'lucide-react';
 import { Project } from '../data/projects';
+import { likeService } from '../services/likeService';
 
 interface ProjectCardProps {
   project: Project;
@@ -10,28 +11,29 @@ interface ProjectCardProps {
 export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [likesCount, setLikesCount] = useState(0);
+  const [likesCount, setLikesCount] = useState<number>(() => likeService.getLikesCount(project.id));
   const [commentsCount, setCommentsCount] = useState(0);
 
   const syncStats = React.useCallback(() => {
     try {
-      const isLiked = localStorage.getItem(`project_liked_${project.id}`) === 'true';
       const storedComments = localStorage.getItem(`project_comments_${project.id}`);
-      const count = storedComments ? JSON.parse(storedComments).length : 0;
-      setLikesCount(isLiked ? 1 : 0);
+      const count = storedComments ? JSON.parse(storedComments).length : (project.commentsCount || 0);
+      setLikesCount(likeService.getLikesCount(project.id));
       setCommentsCount(count);
     } catch {
-      setLikesCount(0);
+      setLikesCount(likeService.getLikesCount(project.id));
       setCommentsCount(0);
     }
-  }, [project.id]);
+  }, [project.id, project.commentsCount]);
 
   React.useEffect(() => {
     syncStats();
     const handleUpdate = () => syncStats();
+    const unsubscribe = likeService.subscribe(() => syncStats());
     window.addEventListener('project_interaction_updated', handleUpdate);
     window.addEventListener('storage', handleUpdate);
     return () => {
+      unsubscribe();
       window.removeEventListener('project_interaction_updated', handleUpdate);
       window.removeEventListener('storage', handleUpdate);
     };

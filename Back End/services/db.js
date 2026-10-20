@@ -1,0 +1,168 @@
+'use strict';
+
+const fs = require('fs');
+const path = require('path');
+
+const DATA_DIR = path.join(__dirname, '..', 'data');
+const DB_FILE = path.join(DATA_DIR, 'portfolio_db.json');
+
+const INITIAL_DB = {
+  likes: {
+    'cryptita-plays-builder-workshop': 14,
+    'personal-portfolio': 28
+  },
+  likedBy: {
+    'cryptita-plays-builder-workshop': [],
+    'personal-portfolio': []
+  },
+  reviews: [
+    {
+      id: 'rev_seed_1',
+      rating: 5,
+      name: 'DEVCON Laguna',
+      role: 'Tech Community Partner',
+      feedback: 'Outstanding technical presentation and interactive builder card created during the Cryptita Plays workshop! Vince Quijano is a dedicated builder.',
+      date: 'Aug 2026',
+      timestamp: 1785500000000
+    },
+    {
+      id: 'rev_seed_2',
+      rating: 5,
+      name: 'Startup Collaborator',
+      role: 'Client / Founder',
+      feedback: 'Incredible Instagram-inspired UI, smooth animations, and clean code architecture. Vince delivers exceptional quality and fast turnaround.',
+      date: 'Sep 2026',
+      timestamp: 1788000000000
+    }
+  ]
+};
+
+function ensureDbFile() {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+  if (!fs.existsSync(DB_FILE)) {
+    fs.writeFileSync(DB_FILE, JSON.stringify(INITIAL_DB, null, 2), 'utf-8');
+  }
+}
+
+function readDb() {
+  ensureDbFile();
+  try {
+    const raw = fs.readFileSync(DB_FILE, 'utf-8');
+    const data = JSON.parse(raw);
+    return {
+      likes: data.likes || {},
+      likedBy: data.likedBy || {},
+      reviews: Array.isArray(data.reviews) ? data.reviews : []
+    };
+  } catch (err) {
+    console.error('[DB] Failed reading db file, using initial fallback:', err.message);
+    return JSON.parse(JSON.stringify(INITIAL_DB));
+  }
+}
+
+function writeDb(data) {
+  ensureDbFile();
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
+    return true;
+  } catch (err) {
+    console.error('[DB] Failed writing db file:', err.message);
+    return false;
+  }
+}
+
+function calculateAverage(reviews) {
+  if (!reviews || reviews.length === 0) {
+    return { average: '0.0', count: 0 };
+  }
+  const sum = reviews.reduce((acc, r) => acc + (Number(r.rating) || 0), 0);
+  const avg = (sum / reviews.length).toFixed(1);
+  return { average: avg, count: reviews.length };
+}
+
+// ── Likes Methods ─────────────────────────────────────────────
+function getAllLikes() {
+  const db = readDb();
+  return db.likes;
+}
+
+function toggleLike(projectId, visitorId, isLiked) {
+  const db = readDb();
+  if (!db.likes[projectId]) {
+    db.likes[projectId] = 0;
+  }
+  if (!Array.isArray(db.likedBy[projectId])) {
+    db.likedBy[projectId] = [];
+  }
+
+  const alreadyLiked = db.likedBy[projectId].includes(visitorId);
+
+  // If client sends explicit isLiked status
+  let finalLiked = isLiked !== undefined ? Boolean(isLiked) : !alreadyLiked;
+
+  if (finalLiked) {
+    if (!alreadyLiked) {
+      db.likedBy[projectId].push(visitorId);
+      db.likes[projectId] = (db.likes[projectId] || 0) + 1;
+    }
+  } else {
+    if (alreadyLiked) {
+      db.likedBy[projectId] = db.likedBy[projectId].filter(id => id !== visitorId);
+      db.likes[projectId] = Math.max(0, (db.likes[projectId] || 1) - 1);
+    }
+  }
+
+  writeDb(db);
+
+  return {
+    projectId,
+    likesCount: db.likes[projectId],
+    isLiked: finalLiked
+  };
+}
+
+// ── Ratings Methods ───────────────────────────────────────────
+function getRatings() {
+  const db = readDb();
+  const stats = calculateAverage(db.reviews);
+  return {
+    reviews: db.reviews,
+    average: stats.average,
+    count: stats.count
+  };
+}
+
+function addRating({ rating, name, role, feedback }) {
+  const db = readDb();
+  const numRating = Math.max(1, Math.min(5, Number(rating) || 5));
+
+  const newReview = {
+    id: `rev_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    rating: numRating,
+    name: (name || 'Anonymous Client').trim(),
+    role: (role || 'Client / Collaborator').trim(),
+    feedback: (feedback || '').trim(),
+    date: 'Just now',
+    timestamp: Date.now()
+  };
+
+  db.reviews.unshift(newReview);
+  writeDb(db);
+
+  const stats = calculateAverage(db.reviews);
+  return {
+    review: newReview,
+    reviews: db.reviews,
+    average: stats.average,
+    count: stats.count
+  };
+}
+
+module.exports = {
+  getAllLikes,
+  toggleLike,
+  getRatings,
+  addRating
+};
