@@ -38,7 +38,7 @@ export const profileData: ProfileData = {
   linkedin: "https://linkedin.com/in/vincequijano",
   email: "vincelawrencequijano@gmail.com",
   stats: {
-    projects: 2,
+    projects: 3,
     skills: 16,
     certificates: 4,
     contributions: "500+",
@@ -63,7 +63,7 @@ export const profileData: ProfileData = {
       label: "Projects",
       icon: "Grid",
       targetId: "projects",
-      description: "Cobuy — A product recommendation system.",
+      description: "CoBuy — Thesis buying pattern mining system.",
     },
     {
       id: "organization",

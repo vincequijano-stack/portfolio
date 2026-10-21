@@ -197,9 +197,16 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
           <div className="p-4 overflow-y-auto flex-1 space-y-4 text-left">
             {/* Title & Category */}
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#0095F6]">
-                {project.category}
-              </span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#0095F6]">
+                  {project.category}
+                </span>
+                {project.stats && (
+                  <span className="text-[10px] font-semibold bg-[#E0F2FE] dark:bg-[#0369A1]/30 text-[#0284C7] dark:text-[#38BDF8] px-2 py-0.5 rounded-full border border-[#BAE6FD] dark:border-[#0284C7]/40">
+                    {project.stats.label}: {project.stats.value}
+                  </span>
+                )}
+              </div>
               <h2 id="modal-project-title" className="text-lg font-bold text-[#262626] dark:text-white mt-0.5">
                 {project.title}
               </h2>
