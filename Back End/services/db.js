@@ -8,9 +8,9 @@ const DB_FILE = path.join(DATA_DIR, 'portfolio_db.json');
 
 const INITIAL_DB = {
   likes: {
-    'cobuy-pattern-mining': 18,
-    'cryptita-plays-builder-workshop': 14,
-    'personal-portfolio': 28
+    'cobuy-pattern-mining': 0,
+    'cryptita-plays-builder-workshop': 0,
+    'personal-portfolio': 0
   },
   likedBy: {
     'cobuy-pattern-mining': [],

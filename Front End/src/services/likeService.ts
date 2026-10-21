@@ -30,9 +30,9 @@ class LikeService {
   private isLoaded = false;
 
   constructor() {
-    // Initialize default project counts as baseline
+    // Initialize default project counts as baseline (0 for clean start)
     projectsData.forEach((p) => {
-      this.likes[p.id] = p.likes || 1;
+      this.likes[p.id] = typeof p.likes === 'number' ? p.likes : 0;
       this.likers[p.id] = [];
     });
 
@@ -43,6 +43,14 @@ class LikeService {
   private loadFromStorage() {
     try {
       if (typeof window !== 'undefined') {
+        // Clear out any legacy hardcoded mock likes (28, 18, 14, etc.)
+        const resetKey = 'portfolio_likes_v3_clean_real';
+        if (!localStorage.getItem(resetKey)) {
+          localStorage.removeItem('portfolio_cached_likes');
+          localStorage.removeItem('portfolio_cached_likers');
+          localStorage.setItem(resetKey, 'true');
+        }
+
         const storedLikes = localStorage.getItem('portfolio_cached_likes');
         if (storedLikes) {
           const parsed = JSON.parse(storedLikes);
@@ -184,7 +192,7 @@ class LikeService {
       this.likers[projectId] = this.likers[projectId].filter(
         (u) => u.visitorId !== visitorId && u.userName.toLowerCase() !== visitorName.toLowerCase()
       );
-      this.likes[projectId] = Math.max(0, (this.likes[projectId] || 1) - 1);
+      this.likes[projectId] = Math.max(0, (this.likes[projectId] || 0) - 1);
     }
 
     this.saveToStorage();
