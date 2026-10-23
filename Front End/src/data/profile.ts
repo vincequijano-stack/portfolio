@@ -34,8 +34,8 @@ export const profileData: ProfileData = {
   bio: "Passionate CS student crafting scalable web apps, data mining systems, and intuitive user experiences. Focused on clean code, performance, and modern web architectures.",
   location: "Pamantasan ng Cabuyao · Laguna, Philippines",
   website: "https://vincequijano.dev",
-  github: "https://github.com/vincequijano",
-  linkedin: "https://linkedin.com/in/vincequijano",
+  github: "https://github.com/vincequijano-stack",
+  linkedin: "https://www.linkedin.com/in/vince-quijano-769768421",
   email: "vincelawrencequijano@gmail.com",
   stats: {
     projects: 3,

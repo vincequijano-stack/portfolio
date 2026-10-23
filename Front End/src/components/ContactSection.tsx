@@ -143,7 +143,7 @@ export const ContactSection: React.FC = () => {
                     rel="noopener noreferrer"
                     className="text-xs font-semibold text-[#262626] dark:text-white hover:text-[#0095F6]"
                   >
-                    github.com/{profileData.username}
+                    {profileData.github.replace(/^https?:\/\//, '')}
                   </a>
                 </div>
               </div>
@@ -160,7 +160,7 @@ export const ContactSection: React.FC = () => {
                     rel="noopener noreferrer"
                     className="text-xs font-semibold text-[#262626] dark:text-white hover:text-[#0095F6]"
                   >
-                    linkedin.com/in/{profileData.username}
+                    {profileData.linkedin.replace(/^https?:\/\/(www\.)?/, '')}
                   </a>
                 </div>
               </div>

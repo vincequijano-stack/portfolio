@@ -3,8 +3,7 @@ import {
   Home,
   Heart,
   Moon,
-  Sun,
-  Menu
+  Sun
 } from 'lucide-react';
 import { InstagramIcon, GithubIcon, LinkedinIcon } from './SocialIcons';
 import { profileData } from '../data/profile';
@@ -154,16 +153,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <GithubIcon className="w-5 h-5 transition-transform hover:scale-110" />
           </a>
 
-          {/* More / LinkedIn Menu (Replaced from below) */}
+          {/* LinkedIn Profile */}
           <a
             href={profileData.linkedin}
             target="_blank"
             rel="noopener noreferrer"
             className="p-3 text-[#262626] dark:text-[#F5F5F5] hover:bg-[#FAFAFA] dark:hover:bg-[#1A1A1A] rounded-xl transition-all"
-            title="LinkedIn Profile / More"
+            title="LinkedIn Profile"
             aria-label="LinkedIn"
           >
-            <Menu className="w-6 h-6 stroke-[1.75] transition-transform hover:scale-110" />
+            <LinkedinIcon className="w-5 h-5 transition-transform hover:scale-110" />
           </a>
         </nav>
       </div>

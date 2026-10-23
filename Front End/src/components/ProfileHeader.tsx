@@ -247,7 +247,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <div className="mt-1 flex items-center gap-1 text-xs font-semibold text-[#00376B] dark:text-[#0095F6] hover:underline">
               <ExternalLink className="w-3 h-3" />
               <a href={profileData.github} target="_blank" rel="noopener noreferrer">
-                github.com/{profileData.username}
+                {profileData.github.replace(/^https?:\/\//, '')}
               </a>
             </div>
           </div>
