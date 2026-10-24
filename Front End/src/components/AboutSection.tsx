@@ -1,5 +1,5 @@
 import React from 'react';
-import { GraduationCap, Code2, Trophy, Building2, Palette, Sparkles, MapPin } from 'lucide-react';
+import { GraduationCap, Code2, Building2, Palette, Sparkles, MapPin } from 'lucide-react';
 import { profileData } from '../data/profile';
 
 export const AboutSection: React.FC = () => {
@@ -98,31 +98,6 @@ export const AboutSection: React.FC = () => {
                   CRYPTITA PLAYS
                 </span>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Achievements Spotlight: ImaGnation 2026 */}
-        <div className="mt-6 p-6 bg-gradient-to-r from-[#FFFBEB] to-[#FEF3C7] dark:from-[#1C1917] dark:to-[#292524] border border-[#FDE68A] dark:border-[#44403C] rounded-xl text-left shadow-xs">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-full bg-[#FEF08A] dark:bg-[#78350F]/40 border border-[#FACC15] dark:border-[#B45309]/50 flex items-center justify-center text-[#B45309] dark:text-[#FCD34D] shrink-0 mt-0.5">
-              <Trophy className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm sm:text-base font-bold text-[#92400E] dark:text-[#FDE68A]">
-                  Achievements &amp; Recognition
-                </h3>
-                <span className="bg-[#F59E0B] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                  2026
-                </span>
-              </div>
-              <p className="text-xs sm:text-sm text-[#78350F] dark:text-[#E7E5E4] mt-1 font-semibold">
-                ImaGnation 2026 Participant
-              </p>
-              <p className="text-xs text-[#92400E]/80 dark:text-[#A8A29E] mt-0.5 leading-relaxed">
-                Recognized participant in ImaGnation 2026, engaging in technology innovation, design ideation, and collaborative problem solving.
-              </p>
             </div>
           </div>
         </div>
