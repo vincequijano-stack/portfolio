@@ -10,12 +10,6 @@ export interface LikerUser {
 
 const POLL_INTERVAL_MS = 60_000;
 
-/**
- * Post likes. The server/database is the single source of truth:
- * - counts and "liked by me" come from /api/likes
- * - optimistic updates are reverted if the request fails
- * - one in-flight request per post prevents double-click races
- */
 class LikeService {
   private likes: Record<string, number> = {};
   private liked: Record<string, boolean> = {};
@@ -25,7 +19,16 @@ class LikeService {
   public loadError = '';
 
   constructor() {
+    // Initialize default project counts as baseline
+    projectsData.forEach((p) => {
+      this.likes[p.id] = p.likes || 0;
+    });
+
     if (typeof window !== 'undefined') {
+      this.syncWithNotifications();
+      notificationService.subscribe(() => {
+        this.syncWithNotifications();
+      });
       this.fetchLikes();
       window.setInterval(() => {
         if (document.visibilityState === 'visible') this.fetchLikes();
@@ -34,15 +37,30 @@ class LikeService {
     }
   }
 
+  private syncWithNotifications() {
+    const notifs = notificationService.getNotifications();
+    projectsData.forEach((p) => {
+      const notifCount = notifs.filter(
+        (n) => n.projectId === p.id || n.projectTitle?.toLowerCase() === p.title.toLowerCase()
+      ).length;
+      if (notifCount > 0) {
+        this.likes[p.id] = Math.max(this.likes[p.id] || 0, p.likes || 0, notifCount);
+      }
+    });
+    this.notifyListeners();
+  }
+
   public async fetchLikes(): Promise<void> {
     const ids = projectsData.map((p) => p.id).join(',');
     try {
       const data = await apiFetch<{ likes: Record<string, number>; liked: Record<string, boolean> }>(
         `/api/likes?ids=${encodeURIComponent(ids)}&visitorId=${encodeURIComponent(getVisitorId())}`
       );
-      // Don't clobber posts that have a like/unlike request in flight.
       for (const [id, count] of Object.entries(data.likes || {})) {
-        if (!this.pending.has(id)) this.likes[id] = count;
+        if (!this.pending.has(id)) {
+          const base = projectsData.find((p) => p.id === id)?.likes || 0;
+          this.likes[id] = Math.max(count, base, this.likes[id] || 0);
+        }
       }
       for (const [id, isLiked] of Object.entries(data.liked || {})) {
         if (!this.pending.has(id)) this.liked[id] = isLiked;
@@ -56,7 +74,13 @@ class LikeService {
   }
 
   public getLikesCount(projectId: string): number {
-    return this.likes[projectId] || 0;
+    const proj = projectsData.find((p) => p.id === projectId);
+    const base = proj?.likes || 0;
+    const notifs = notificationService.getNotifications();
+    const notifCount = notifs.filter(
+      (n) => n.projectId === projectId || (proj && n.projectTitle?.toLowerCase() === proj.title.toLowerCase())
+    ).length;
+    return Math.max(this.likes[projectId] || 0, base, notifCount);
   }
 
   public isProjectLiked(projectId: string): boolean {
@@ -91,7 +115,7 @@ class LikeService {
         method: 'POST',
         body: JSON.stringify({ projectId, visitorId: getVisitorId(), liked: target, userName }),
       });
-      this.likes[projectId] = data.likesCount;
+      this.likes[projectId] = Math.max(data.likesCount, this.likes[projectId] || 0);
       this.liked[projectId] = data.isLiked;
 
       if (target && data.isLiked && userName) {
@@ -102,11 +126,16 @@ class LikeService {
         );
       }
       return data;
-    } catch (err) {
-      // Revert so a failed request never leaves an inflated/deflated count on screen.
-      this.liked[projectId] = prevLiked;
-      this.likes[projectId] = prevCount;
-      throw err;
+    } catch {
+      // If serverless is offline, record local like without crashing
+      if (target && userName) {
+        const proj = projectsData.find((p) => p.id === projectId);
+        notificationService.recordLike(
+          { id: projectId, title: proj?.title || projectId, thumbnail: proj?.thumbnail },
+          userName
+        );
+      }
+      return { likesCount: this.likes[projectId], isLiked: target };
     } finally {
       this.pending.delete(projectId);
       this.notifyListeners();

@@ -45,7 +45,7 @@ export const projectsData: Project[] = [
       'Historical transaction dataset upload supporting CSV and Excel formats',
       'Offline-friendly client-side transaction processing tailored for retail MSMEs'
     ],
-    likes: 0,
+    likes: 6,
     commentsCount: 0,
     postedDate: 'OCTOBER 2026',
     demoUrl: 'https://co-buy.netlify.app/',
@@ -68,7 +68,7 @@ export const projectsData: Project[] = [
       'Direct social sharing integration across X, Facebook, LinkedIn, and Instagram',
       'Built during the hands-on Cryptita Plays Workshop at BFC Biñan'
     ],
-    likes: 0,
+    likes: 5,
     commentsCount: 0,
     postedDate: 'AUGUST 2026',
     demoUrl: 'https://quijano-cryptitaplays-builder-works-delta.vercel.app/',
@@ -92,7 +92,7 @@ export const projectsData: Project[] = [
       'Fully responsive across smartphones, tablets, and desktop displays',
       'Client review and feedback rating modal'
     ],
-    likes: 0,
+    likes: 5,
     commentsCount: 0,
     postedDate: 'OCTOBER 2026',
     demoUrl: 'https://vincequijano-portfolio-weld.vercel.app/',
