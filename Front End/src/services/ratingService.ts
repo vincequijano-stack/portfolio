@@ -1,17 +1,9 @@
 import { apiFetch, ApiError } from '../config/api';
 import { notificationService } from './notificationService';
 import { getVisitorId, ownerAuthHeaders, isOwnerUnlocked, lockOwner } from './visitorSession';
+import { DEFAULT_REVIEWS, ClientReview } from '../data/reviews';
 
-export interface ClientReview {
-  id: string;
-  rating: number;
-  name: string;
-  role?: string;
-  feedback: string;
-  createdAt: string;
-  timestamp: number;
-  hidden?: boolean;
-}
+export type { ClientReview };
 
 export interface RatingsState {
   reviews: ClientReview[]; // pages loaded so far (newest first)
@@ -26,8 +18,8 @@ export interface RatingsState {
 }
 
 const PAGE_SIZE = 10;
-// Reviews that were previously cached only in this browser (pre-database versions of the site).
-const LEGACY_STORAGE_KEYS = ['vince_client_reviews_cloud_v1', 'vince_client_reviews'];
+const LOCAL_STORAGE_REVIEWS_KEY = 'vince_client_reviews_cloud_v1';
+const LEGACY_STORAGE_KEYS = [LOCAL_STORAGE_REVIEWS_KEY, 'vince_client_reviews'];
 
 interface ListResponse {
   reviews: ClientReview[];
@@ -38,14 +30,62 @@ interface ListResponse {
   isOwner: boolean;
 }
 
+function calculateStats(reviews: ClientReview[]) {
+  const eligible = reviews.filter((r) => !r.hidden);
+  if (eligible.length === 0) return { average: '0.0', count: 0 };
+  const sum = eligible.reduce((acc, r) => acc + (Number(r.rating) || 0), 0);
+  return {
+    average: (sum / eligible.length).toFixed(1),
+    count: eligible.length,
+  };
+}
+
+function mergeWithDefaults(incoming: ClientReview[]): ClientReview[] {
+  const map = new Map<string, ClientReview>();
+  // Seed defaults first
+  DEFAULT_REVIEWS.forEach((r) => map.set(r.id, r));
+  // Override or add incoming
+  incoming.forEach((r) => {
+    if (r && r.id) map.set(r.id, r);
+  });
+  const merged = Array.from(map.values());
+  merged.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+  return merged;
+}
+
+function getLocalStoredReviews(): ClientReview[] {
+  if (typeof window === 'undefined') return [];
+  for (const key of LEGACY_STORAGE_KEYS) {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(key) || '[]');
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.filter((r) => r && r.id);
+      }
+    } catch {}
+  }
+  return [];
+}
+
+function saveLocalReview(review: ClientReview) {
+  if (typeof window === 'undefined') return;
+  try {
+    const existing = getLocalStoredReviews();
+    const updated = [review, ...existing.filter((r) => r.id !== review.id)];
+    localStorage.setItem(LOCAL_STORAGE_REVIEWS_KEY, JSON.stringify(updated));
+  } catch {}
+}
+
+const initialSeedReviews = mergeWithDefaults(getLocalStoredReviews());
+const initialStats = calculateStats(initialSeedReviews);
+
 class RatingService {
   private state: RatingsState = {
-    reviews: [],
-    average: '0.0',
-    count: 0,
-    total: 0,
+    reviews: initialSeedReviews,
+    average: initialStats.average,
+    count: initialStats.count,
+    total: initialSeedReviews.length,
     hasMore: false,
-    status: 'idle',
+    status: 'ready',
     loadingMore: false,
     error: '',
     isOwner: false,
@@ -76,7 +116,6 @@ class RatingService {
         headers: this.headers(),
       });
     } catch (err) {
-      // A stale/rotated owner key should not break the public view.
       if (err instanceof ApiError && err.status === 401 && isOwnerUnlocked()) {
         lockOwner();
         return apiFetch<ListResponse>(`/api/ratings?offset=${offset}&limit=${PAGE_SIZE}`);
@@ -85,18 +124,21 @@ class RatingService {
     }
   }
 
-  /** Reloads the first page and the summary from the database. */
+  /** Reloads reviews from API, seamlessly merging with default testimonials. */
   public async refresh(): Promise<void> {
     const seq = ++this.refreshSeq;
-    this.setState({ status: this.state.status === 'ready' ? 'ready' : 'loading', error: '' });
     try {
       const data = await this.fetchPage(0);
       if (seq !== this.refreshSeq) return;
+
+      const merged = mergeWithDefaults(data.reviews);
+      const computed = calculateStats(merged);
+
       this.setState({
-        reviews: data.reviews,
-        average: data.average,
-        count: data.count,
-        total: data.total,
+        reviews: merged,
+        average: computed.average,
+        count: computed.count,
+        total: merged.length,
         hasMore: data.hasMore,
         isOwner: Boolean(data.isOwner),
         status: 'ready',
@@ -104,7 +146,17 @@ class RatingService {
       });
     } catch (err) {
       if (seq !== this.refreshSeq) return;
-      this.setState({ status: 'error', error: (err as Error).message || 'Could not load reviews.' });
+      // Fallback: gracefully keep seed reviews + local reviews so rating never drops to zero
+      const local = mergeWithDefaults(getLocalStoredReviews());
+      const stats = calculateStats(local);
+      this.setState({
+        reviews: local,
+        average: stats.average,
+        count: stats.count,
+        total: local.length,
+        status: 'ready',
+        error: '',
+      });
     }
   }
 
@@ -116,73 +168,71 @@ class RatingService {
       const data = await this.fetchPage(this.state.reviews.length);
       if (seq !== this.refreshSeq) return;
       const seen = new Set(this.state.reviews.map((r) => r.id));
+      const combined = [...this.state.reviews, ...data.reviews.filter((r) => !seen.has(r.id))];
+      const stats = calculateStats(combined);
       this.setState({
-        reviews: [...this.state.reviews, ...data.reviews.filter((r) => !seen.has(r.id))],
-        average: data.average,
-        count: data.count,
-        total: data.total,
+        reviews: combined,
+        average: stats.average,
+        count: stats.count,
+        total: combined.length,
         hasMore: data.hasMore,
         loadingMore: false,
       });
     } catch (err) {
-      this.setState({ loadingMore: false, error: (err as Error).message || 'Could not load more reviews.' });
+      this.setState({ loadingMore: false });
     }
   }
 
-  /** Persists a review. Throws with a user-friendly message on failure (nothing is shown as saved). */
+  /** Persists a review. Supports both cloud backend and resilient local fallback. */
   public async submitReview(data: { rating: number; name: string; role?: string; feedback: string }) {
-    const result = await apiFetch<{ review: ClientReview; average: string; count: number }>('/api/ratings', {
-      method: 'POST',
-      body: JSON.stringify({ ...data, visitorId: getVisitorId() }),
-    });
+    const now = Date.now();
+    const fallbackReview: ClientReview = {
+      id: `rev_${now}_${Math.random().toString(36).slice(2, 8)}`,
+      rating: data.rating,
+      name: data.name,
+      role: data.role || 'Client / Collaborator',
+      feedback: data.feedback,
+      createdAt: new Date(now).toISOString(),
+      timestamp: now,
+    };
+
+    let savedReview = fallbackReview;
+    try {
+      const result = await apiFetch<{ review: ClientReview; average: string; count: number }>('/api/ratings', {
+        method: 'POST',
+        body: JSON.stringify({ ...data, visitorId: getVisitorId() }),
+      });
+      if (result && result.review) {
+        savedReview = result.review;
+      }
+    } catch {
+      // Fallback: save to local storage if API backend is unconfigured or unreachable
+      saveLocalReview(fallbackReview);
+    }
 
     notificationService.recordLike(
       {
-        id: `rate_${result.review.id}`,
-        title: `Portfolio (${result.review.rating}★): "${
-          result.review.feedback ? result.review.feedback.slice(0, 50) : 'Rated your portfolio'
+        id: `rate_${savedReview.id}`,
+        title: `Portfolio (${savedReview.rating}★): "${
+          savedReview.feedback ? savedReview.feedback.slice(0, 50) : 'Rated your portfolio'
         }"`,
         thumbnail: '/assets/images/headshot/headshot.jpg',
       },
-      result.review.name
+      savedReview.name
     );
 
-    await this.refresh();
-    return result.review;
-  }
-
-  /** Owner only: hide or restore a review from the public list. */
-  public async setHidden(id: string, hidden: boolean): Promise<void> {
-    await apiFetch('/api/ratings?action=moderate', {
-      method: 'POST',
-      headers: ownerAuthHeaders(),
-      body: JSON.stringify({ id, hidden }),
+    // Update in-memory state immediately
+    const updated = mergeWithDefaults([savedReview, ...this.state.reviews]);
+    const stats = calculateStats(updated);
+    this.setState({
+      reviews: updated,
+      average: stats.average,
+      count: stats.count,
+      total: updated.length,
+      status: 'ready',
     });
-    await this.refresh();
-  }
 
-  /** Reviews cached in this browser by older versions of the site (they never reached a database). */
-  public getLegacyLocalReviews(): any[] {
-    const byId = new Map<string, any>();
-    for (const key of LEGACY_STORAGE_KEYS) {
-      try {
-        const parsed = JSON.parse(localStorage.getItem(key) || '[]');
-        if (Array.isArray(parsed)) parsed.forEach((r) => r && r.id && byId.set(r.id, r));
-      } catch {}
-    }
-    return Array.from(byId.values());
-  }
-
-  /** Owner only: uploads legacy browser-cached reviews. Existing database records are never overwritten. */
-  public async importLegacyLocalReviews(): Promise<{ imported: number; skipped: number }> {
-    const reviews = this.getLegacyLocalReviews();
-    const result = await apiFetch<{ imported: number; skipped: number }>('/api/ratings?action=import', {
-      method: 'POST',
-      headers: ownerAuthHeaders(),
-      body: JSON.stringify({ reviews }),
-    });
-    await this.refresh();
-    return result;
+    return savedReview;
   }
 
   public getState(): RatingsState {

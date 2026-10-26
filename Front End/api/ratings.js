@@ -52,7 +52,38 @@ function stats(reviews) {
   return { average: (sum / reviews.length).toFixed(1), count: reviews.length };
 }
 
-const newestFirst = (a, b) => (b.timestamp || 0) - (a.timestamp || 0) || String(b.id).localeCompare(String(a.id));
+const SEED_REVIEWS = [
+  {
+    id: 'rev_raziel_sevilla',
+    rating: 5,
+    name: 'Raziel Sevilla',
+    role: 'Client / Collaborator',
+    feedback: 'If Vince is on your team, you can breathe easy. Unmatched reliability, zero friction, and consistent, high-quality execution every single time.',
+    createdAt: '2026-10-26T15:45:00.000Z',
+    timestamp: 1793029500000,
+    hidden: false,
+  },
+  {
+    id: 'rev_1793029406291_6ece00c99e',
+    rating: 5,
+    name: 'Kier',
+    role: 'Client',
+    feedback: 'He helps me create a design for our website.',
+    createdAt: '2026-10-26T15:43:26.291Z',
+    timestamp: 1793029406291,
+    hidden: false,
+  },
+  {
+    id: 'rev_ezon',
+    rating: 5,
+    name: 'Ezon',
+    role: 'Groupmate',
+    feedback: 'solved my problem in our capstone system',
+    createdAt: '2026-10-26T15:40:00.000Z',
+    timestamp: 1793029200000,
+    hidden: false,
+  },
+];
 
 async function listReviews(req, res, store) {
   const query = getQuery(req);
@@ -60,7 +91,15 @@ async function listReviews(req, res, store) {
   const limit = clampInt(query.limit, 1, 50, 10);
   const owner = isOwnerRequest(req);
 
-  const all = (await store.listReviews()).filter((r) => r && r.id && parseRating(r.rating));
+  const raw = store ? await store.listReviews() : [];
+  const dbReviews = (raw || []).filter((r) => r && r.id && parseRating(r.rating));
+  
+  // Merge DB reviews with SEED_REVIEWS (DB records take precedence)
+  const map = new Map();
+  SEED_REVIEWS.forEach((r) => map.set(r.id, r));
+  dbReviews.forEach((r) => map.set(r.id, r));
+  const all = Array.from(map.values());
+
   all.sort(newestFirst);
   const eligible = all.filter((r) => !r.hidden);
   const visible = owner ? all : eligible;
@@ -165,7 +204,12 @@ async function importReviews(req, res, store) {
 export default async function handler(req, res) {
   try {
     if (req.method === 'OPTIONS') return send(res, 204, {});
-    const store = getStore();
+    let store = null;
+    try {
+      store = getStore();
+    } catch (storeErr) {
+      if (req.method !== 'GET') throw storeErr;
+    }
     if (req.method === 'GET') return await listReviews(req, res, store);
     if (req.method === 'POST') {
       const action = getQuery(req).action;
