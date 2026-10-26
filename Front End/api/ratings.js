@@ -94,11 +94,16 @@ async function listReviews(req, res, store) {
   const raw = store ? await store.listReviews() : [];
   const dbReviews = (raw || []).filter((r) => r && r.id && parseRating(r.rating));
   
-  // Merge DB reviews with SEED_REVIEWS (DB records take precedence)
-  const map = new Map();
-  SEED_REVIEWS.forEach((r) => map.set(r.id, r));
-  dbReviews.forEach((r) => map.set(r.id, r));
-  const all = Array.from(map.values());
+  // Merge DB reviews with SEED_REVIEWS (DB records take precedence, deduplicated by reviewer name)
+  const byName = new Map();
+  dbReviews.forEach((r) => {
+    if (r && r.name) byName.set(r.name.trim().toLowerCase(), r);
+  });
+  SEED_REVIEWS.forEach((r) => {
+    const key = r.name.trim().toLowerCase();
+    if (!byName.has(key)) byName.set(key, r);
+  });
+  const all = Array.from(byName.values());
 
   all.sort(newestFirst);
   const eligible = all.filter((r) => !r.hidden);

@@ -41,14 +41,27 @@ function calculateStats(reviews: ClientReview[]) {
 }
 
 function mergeWithDefaults(incoming: ClientReview[]): ClientReview[] {
-  const map = new Map<string, ClientReview>();
-  // Seed defaults first
-  DEFAULT_REVIEWS.forEach((r) => map.set(r.id, r));
-  // Override or add incoming
+  const byName = new Map<string, ClientReview>();
+  
+  // Real database / local cache reviews take precedence
   incoming.forEach((r) => {
-    if (r && r.id) map.set(r.id, r);
+    if (r && r.name) {
+      const key = r.name.trim().toLowerCase();
+      if (!byName.has(key)) {
+        byName.set(key, r);
+      }
+    }
   });
-  const merged = Array.from(map.values());
+
+  // Only fall back to seed reviews for missing reviewers
+  DEFAULT_REVIEWS.forEach((r) => {
+    const key = r.name.trim().toLowerCase();
+    if (!byName.has(key)) {
+      byName.set(key, r);
+    }
+  });
+
+  const merged = Array.from(byName.values());
   merged.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
   return merged;
 }
