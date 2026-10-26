@@ -143,17 +143,32 @@ class LikeService {
     }
   }
 
-  /** Owner only: display names of visitors who liked a post. */
+  /** Publicly returns display names of visitors who liked a post. */
   public async fetchLikers(projectId: string): Promise<LikerUser[]> {
+    const proj = projectsData.find((p) => p.id === projectId);
+    const notifs = notificationService.getNotifications();
+    const notifLikers: LikerUser[] = notifs
+      .filter(
+        (n) => n.projectId === projectId || (proj && n.projectTitle?.toLowerCase() === proj.title.toLowerCase())
+      )
+      .map((n) => ({ userName: n.userName, timestamp: n.timestamp }));
+
     try {
       const data = await apiFetch<{ likers: LikerUser[] }>(
-        `/api/likes?likers=1&projectId=${encodeURIComponent(projectId)}`,
-        { headers: ownerAuthHeaders() }
+        `/api/likes?likers=1&projectId=${encodeURIComponent(projectId)}`
       );
-      return data.likers;
-    } catch (err) {
-      if (err instanceof ApiError && err.status === 401) lockOwner();
-      throw err;
+      const map = new Map<string, LikerUser>();
+      (data.likers || []).forEach((l) => map.set(l.userName.toLowerCase(), l));
+      notifLikers.forEach((l) => {
+        if (!map.has(l.userName.toLowerCase())) map.set(l.userName.toLowerCase(), l);
+      });
+      const list = Array.from(map.values());
+      list.sort((a, b) => b.timestamp - a.timestamp);
+      return list;
+    } catch {
+      const map = new Map<string, LikerUser>();
+      notifLikers.forEach((l) => map.set(l.userName.toLowerCase(), l));
+      return Array.from(map.values()).sort((a, b) => b.timestamp - a.timestamp);
     }
   }
 

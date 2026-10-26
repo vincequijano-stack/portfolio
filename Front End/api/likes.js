@@ -47,7 +47,6 @@ async function getLikes(req, res, store) {
   const query = getQuery(req);
 
   if (query.likers) {
-    requireOwner(req);
     if (!isValidProjectId(query.projectId)) throw new HttpError(400, 'Invalid projectId.');
     const raw = store ? await store.listLikers(query.projectId) : [];
     const likers = (raw.length > 0 ? raw : SEED_LIKERS[query.projectId] || [])
