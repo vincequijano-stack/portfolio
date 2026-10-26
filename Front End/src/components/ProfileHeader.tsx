@@ -25,14 +25,18 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   onOpenStoryModal,
 }) => {
   const [isRateModalOpen, setIsRateModalOpen] = useState(false);
-  const [reviews, setReviews] = useState<ClientReview[]>(() => ratingService.getReviews());
+  const [rateModalInitialTab, setRateModalInitialTab] = useState<'rate' | 'all'>('rate');
+  const [ratingsState, setRatingsState] = useState(() => ratingService.getState());
 
   React.useEffect(() => {
-    const unsubscribe = ratingService.subscribe((list) => {
-      setReviews(list);
+    const unsubscribe = ratingService.subscribe((state) => {
+      setRatingsState(state);
     });
     return () => unsubscribe();
   }, []);
+
+  const averageRating = ratingsState.average;
+  const totalReviews = ratingsState.count;
 
   // Real-time editable Note (persists in localStorage)
   const [note, setNote] = useState<string>(() => {
@@ -54,21 +58,6 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       localStorage.setItem('vince_profile_note', trimmed);
     } catch {}
   };
-
-  const handleAddReview = (newRev: Omit<ClientReview, 'id' | 'date' | 'timestamp'>) => {
-    ratingService.submitReview(newRev);
-  };
-
-  const { averageRating, totalReviews } = React.useMemo(() => {
-    if (!reviews || reviews.length === 0) {
-      return { averageRating: '0.0', totalReviews: 0 };
-    }
-    const sum = reviews.reduce((acc, r) => acc + (Number(r.rating) || 0), 0);
-    return {
-      averageRating: (sum / reviews.length).toFixed(1),
-      totalReviews: reviews.length,
-    };
-  }, [reviews]);
 
   const handleDownloadCV = () => {
     const link = document.createElement('a');
@@ -177,7 +166,14 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               <span className="font-bold text-sm text-black dark:text-white">{profileData.stats.certificates}</span>
               <span className="text-[11px] text-[#737373] dark:text-[#A8A8A8]">certs</span>
             </button>
-            <button onClick={() => setIsRateModalOpen(true)} className="flex flex-col items-center">
+            <button
+              onClick={() => {
+                setRateModalInitialTab('all');
+                setIsRateModalOpen(true);
+              }}
+              className="flex flex-col items-center cursor-pointer"
+              title="View Client Reviews"
+            >
               <span className="font-bold text-sm text-black dark:text-white flex items-center gap-0.5">
                 <Star className="w-3 h-3 fill-[#F59E0B] text-[#F59E0B]" />
                 {averageRating}
@@ -228,7 +224,10 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
             {/* Client Feedback Rating */}
             <button
-              onClick={() => setIsRateModalOpen(true)}
+              onClick={() => {
+                setRateModalInitialTab('all');
+                setIsRateModalOpen(true);
+              }}
               className="text-left hover:opacity-75 transition-opacity flex items-center gap-1 cursor-pointer"
               title="Client Feedback"
             >
@@ -272,7 +271,10 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         </button>
 
         <button
-          onClick={() => setIsRateModalOpen(true)}
+          onClick={() => {
+            setRateModalInitialTab('rate');
+            setIsRateModalOpen(true);
+          }}
           className="py-1.5 px-3 sm:px-4 rounded-lg bg-[#EFEFEF] dark:bg-[#262626] hover:bg-[#DBDBDB] dark:hover:bg-[#333333] text-xs sm:text-sm font-semibold text-[#0095F6] dark:text-[#0095F6] transition-colors text-center flex items-center justify-center gap-1 cursor-pointer"
         >
           <Star className="w-3.5 h-3.5 fill-current" />
@@ -284,8 +286,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       <RateModal
         isOpen={isRateModalOpen}
         onClose={() => setIsRateModalOpen(false)}
-        reviews={reviews}
-        onSubmitReview={handleAddReview}
+        initialTab={rateModalInitialTab}
       />
     </section>
   );

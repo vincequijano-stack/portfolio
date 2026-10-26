@@ -7,7 +7,8 @@
 
 'use strict';
 
-require('dotenv').config();
+const path       = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const express    = require('express');
 const cors       = require('cors');
@@ -15,6 +16,7 @@ const rateLimit  = require('express-rate-limit');
 const contactRoute = require('./routes/contact');
 const likesRoute   = require('./routes/likes');
 const ratingsRoute = require('./routes/ratings');
+const { loadApiHandler } = require('./routes/apiBridge');
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -66,6 +68,7 @@ app.get('/health', (req, res) => res.json({ status: 'ok', time: new Date().toISO
 app.use('/api/contact', contactLimiter, contactRoute);
 app.use('/api/likes', likesRoute);
 app.use('/api/ratings', ratingsRoute);
+app.get('/api/owner', loadApiHandler('owner'));
 
 // ── 404 Handler ───────────────────────────────────────────────
 app.use((req, res) => {

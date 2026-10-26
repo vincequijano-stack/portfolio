@@ -14,9 +14,8 @@ import {
 import { GithubIcon } from './SocialIcons';
 import { Project } from '../data/projects';
 import { profileData } from '../data/profile';
-import { notificationService, getVisitorName, hasVisitorName } from '../services/notificationService';
+import { ensureVisitorName, getSessionName } from '../services/visitorSession';
 import { likeService } from '../services/likeService';
-import { VisitorNameModal } from './VisitorNameModal';
 import { LikersModal } from './LikersModal';
 
 interface ProjectModalProps {
@@ -37,7 +36,6 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
     { user: string; text: string; time: string; avatar: string }[]
   >([]);
   const [newComment, setNewComment] = useState('');
-  const [isNameModalOpen, setIsNameModalOpen] = useState(false);
   const [isLikersModalOpen, setIsLikersModalOpen] = useState(false);
 
   useEffect(() => {
@@ -77,30 +75,33 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
 
   if (!project) return null;
 
-  const performLike = async (customName?: string) => {
-    if (!project) return;
-    const res = await likeService.toggleLike(project.id, customName);
-    setLikesCount(res.likesCount);
-    setIsLiked(res.isLiked);
-  };
-
-  const handleLikeToggle = () => {
+  const handleLikeToggle = async () => {
     if (!project) return;
     if (isLiked) {
-      performLike();
+      try {
+        await likeService.toggleLike(project.id);
+      } catch (err: any) {
+        console.warn('Unlike failed:', err);
+      }
     } else {
-      if (!hasVisitorName()) {
-        setIsNameModalOpen(true);
-      } else {
-        performLike();
+      // Must provide visitor name before first like
+      const name = await ensureVisitorName();
+      if (!name) {
+        // Visitor cancelled the modal — do not submit the pending like!
+        return;
+      }
+      try {
+        await likeService.toggleLike(project.id, name);
+      } catch (err: any) {
+        alert(err?.message || 'Could not save like. Please try again.');
       }
     }
   };
 
-  const handleAddComment = (e: React.FormEvent) => {
+  const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!project || !newComment.trim()) return;
-    const currentVisitor = getVisitorName() || 'guest_visitor';
+    const currentVisitor = (await ensureVisitorName()) || getSessionName() || 'Visitor';
     const updated = [
       ...comments,
       {
@@ -394,23 +395,13 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
         </div>
       </div>
 
-      {/* Name Prompt only if an external guest likes for the first time */}
-      <VisitorNameModal
-        isOpen={isNameModalOpen}
-        onClose={(name) => {
-          setIsNameModalOpen(false);
-          if (name) {
-            performLike(name);
-          }
-        }}
-      />
-
       {/* Likers List Modal (Clicking "X likes") */}
       <LikersModal
         isOpen={isLikersModalOpen}
         onClose={() => setIsLikersModalOpen(false)}
+        projectId={project.id}
         projectTitle={project.title}
-        likers={likeService.getLikers(project.id)}
+        likesCount={likesCount}
       />
     </div>
   );

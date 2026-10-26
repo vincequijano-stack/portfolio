@@ -17,6 +17,7 @@ import { Play, Heart } from 'lucide-react';
 import { notificationService, LikeNotification } from './services/notificationService';
 import { ActivityModal } from './components/ActivityModal';
 import { LikeNotificationToast } from './components/LikeNotificationToast';
+import { VisitorNamePromptHost } from './components/VisitorNameModal';
 
 import { projectsData, Project, CategoryType, categoryList } from './data/projects';
 import { profileData } from './data/profile';
@@ -171,7 +172,6 @@ export default function App() {
           <ProfileHeader
             onNavigate={handleNavigate}
             onOpenStoryModal={(storyId) => setActiveStoryId(storyId)}
-            onOpenVisitorNameModal={() => setIsVisitorModalOpen(true)}
           />
 
           {/* Story Highlights Bar (About, Skills, Projects, Organization, Certificates, + New) */}
@@ -263,6 +263,7 @@ export default function App() {
         }}
       />
       <LikeNotificationToast onOpenActivity={() => setIsActivityOpen(true)} />
+      <VisitorNamePromptHost />
     </div>
   );
 }

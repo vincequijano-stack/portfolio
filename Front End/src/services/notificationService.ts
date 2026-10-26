@@ -8,71 +8,27 @@ export interface LikeNotification {
   read: boolean;
 }
 
+import { getSessionName, setSessionName, isOwnerUnlocked } from './visitorSession';
+
 const STORAGE_KEY = 'portfolio_notifications_v2';
-const VISITOR_NAME_KEY = 'portfolio_visitor_name';
-const OWNER_EMAIL_KEY = 'portfolio_owner_email';
-const OWNER_MATCH = 'vincelawrencequijano';
 const NTFY_TOPIC = 'vince_quijano_portfolio_likes_live';
 
+// Owner status is verified by the server (OWNER_KEY) — see visitorSession.unlockOwner().
 export function isOwner(): boolean {
-  try {
-    if (typeof window !== 'undefined') {
-      const savedEmail = (localStorage.getItem(OWNER_EMAIL_KEY) || '').toLowerCase().trim();
-      if (savedEmail.includes(OWNER_MATCH)) return true;
-
-      const savedName = (localStorage.getItem(VISITOR_NAME_KEY) || '').toLowerCase().trim();
-      if (savedName.includes(OWNER_MATCH)) return true;
-
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return true;
-      }
-    }
-  } catch {}
-  return false;
-}
-
-export function setOwnerEmail(emailOrUser: string): boolean {
-  try {
-    if (typeof window !== 'undefined') {
-      const clean = emailOrUser.toLowerCase().trim();
-      if (clean.includes(OWNER_MATCH)) {
-        localStorage.setItem(OWNER_EMAIL_KEY, clean);
-        localStorage.setItem(VISITOR_NAME_KEY, 'Vince Quijano');
-        window.dispatchEvent(new CustomEvent('portfolio_owner_status_changed', { detail: true }));
-        return true;
-      }
-    }
-  } catch {}
-  return false;
+  return isOwnerUnlocked();
 }
 
 export function getVisitorName(): string {
-  try {
-    if (typeof window !== 'undefined') {
-      if (isOwner()) return 'Vince Quijano';
-      return localStorage.getItem(VISITOR_NAME_KEY) || '';
-    }
-  } catch {}
-  return '';
+  return getSessionName();
 }
 
 export function setVisitorName(name: string): void {
-  try {
-    if (typeof window !== 'undefined') {
-      const trimmed = name.trim();
-      if (trimmed.toLowerCase().includes(OWNER_MATCH)) {
-        setOwnerEmail(trimmed);
-        return;
-      }
-      localStorage.setItem(VISITOR_NAME_KEY, trimmed);
-      window.dispatchEvent(new CustomEvent('portfolio_visitor_name_changed', { detail: trimmed }));
-    }
-  } catch {}
+  const trimmed = name.trim();
+  if (trimmed) setSessionName(trimmed);
 }
 
 export function hasVisitorName(): boolean {
-  if (isOwner()) return true;
-  return Boolean(getVisitorName());
+  return Boolean(getSessionName());
 }
 
 class NotificationService {
@@ -250,11 +206,10 @@ class NotificationService {
   public recordLike(
     project: { id: string; title: string; thumbnail?: string },
     customUserName?: string
-  ): LikeNotification {
-    const finalUserName =
-      customUserName?.trim() ||
-      getVisitorName() ||
-      `Guest_${Math.floor(1000 + Math.random() * 9000)}`;
+  ): LikeNotification | null {
+    // Only real, visitor-supplied names are used — never fabricated placeholders.
+    const finalUserName = customUserName?.trim() || getVisitorName();
+    if (!finalUserName) return null;
 
     const newNotif: LikeNotification = {
       id: `like_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,

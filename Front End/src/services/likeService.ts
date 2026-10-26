@@ -1,262 +1,131 @@
-import { API_BASE_URL } from '../config/api';
-import { notificationService, getVisitorName } from './notificationService';
+import { apiFetch, ApiError } from '../config/api';
+import { notificationService } from './notificationService';
+import { getVisitorId, ownerAuthHeaders, lockOwner } from './visitorSession';
 import { projectsData } from '../data/projects';
 
 export interface LikerUser {
-  visitorId?: string;
   userName: string;
   timestamp: number;
 }
 
-// Generate or retrieve persistent visitor ID for unique likes
-function getVisitorId(): string {
-  try {
-    if (typeof window !== 'undefined') {
-      let id = localStorage.getItem('portfolio_visitor_uuid');
-      if (!id) {
-        id = `vis_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-        localStorage.setItem('portfolio_visitor_uuid', id);
-      }
-      return id;
-    }
-  } catch {}
-  return 'guest_visitor';
-}
+const POLL_INTERVAL_MS = 60_000;
 
+/**
+ * Post likes. The server/database is the single source of truth:
+ * - counts and "liked by me" come from /api/likes
+ * - optimistic updates are reverted if the request fails
+ * - one in-flight request per post prevents double-click races
+ */
 class LikeService {
   private likes: Record<string, number> = {};
-  private likers: Record<string, LikerUser[]> = {};
-  private listeners: Set<() => void> = new Set();
-  private isLoaded = false;
+  private liked: Record<string, boolean> = {};
+  private pending = new Set<string>();
+  private listeners = new Set<() => void>();
+  public loaded = false;
+  public loadError = '';
 
   constructor() {
-    // Initialize default project counts as baseline (0 for clean start)
-    projectsData.forEach((p) => {
-      this.likes[p.id] = typeof p.likes === 'number' ? p.likes : 0;
-      this.likers[p.id] = [];
-    });
-
-    this.loadFromStorage();
-    this.fetchLikes();
-  }
-
-  private loadFromStorage() {
-    try {
-      if (typeof window !== 'undefined') {
-        // Clear out any legacy hardcoded mock likes (28, 18, 14, etc.)
-        const resetKey = 'portfolio_likes_v3_clean_real';
-        if (!localStorage.getItem(resetKey)) {
-          localStorage.removeItem('portfolio_cached_likes');
-          localStorage.removeItem('portfolio_cached_likers');
-          localStorage.setItem(resetKey, 'true');
-        }
-
-        const storedLikes = localStorage.getItem('portfolio_cached_likes');
-        if (storedLikes) {
-          const parsed = JSON.parse(storedLikes);
-          this.likes = { ...this.likes, ...parsed };
-        }
-
-        const storedLikers = localStorage.getItem('portfolio_cached_likers');
-        if (storedLikers) {
-          const parsed = JSON.parse(storedLikers);
-          this.likers = { ...this.likers, ...parsed };
-        }
-      }
-    } catch {}
-  }
-
-  private saveToStorage() {
-    try {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('portfolio_cached_likes', JSON.stringify(this.likes));
-        localStorage.setItem('portfolio_cached_likers', JSON.stringify(this.likers));
-      }
-    } catch {}
-  }
-
-  public async fetchLikes(): Promise<Record<string, number>> {
-    if (!API_BASE_URL) return { ...this.likes };
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/likes`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && data.likes) {
-          this.likes = { ...this.likes, ...data.likes };
-          if (data.likers) {
-            this.likers = { ...this.likers, ...data.likers };
-          }
-          this.isLoaded = true;
-          this.saveToStorage();
-          this.notifyListeners();
-        }
-      }
-    } catch {
-      // Backend offline: use cached local counts
+    if (typeof window !== 'undefined') {
+      this.fetchLikes();
+      window.setInterval(() => {
+        if (document.visibilityState === 'visible') this.fetchLikes();
+      }, POLL_INTERVAL_MS);
+      window.addEventListener('focus', () => this.fetchLikes());
     }
-    return { ...this.likes };
+  }
+
+  public async fetchLikes(): Promise<void> {
+    const ids = projectsData.map((p) => p.id).join(',');
+    try {
+      const data = await apiFetch<{ likes: Record<string, number>; liked: Record<string, boolean> }>(
+        `/api/likes?ids=${encodeURIComponent(ids)}&visitorId=${encodeURIComponent(getVisitorId())}`
+      );
+      // Don't clobber posts that have a like/unlike request in flight.
+      for (const [id, count] of Object.entries(data.likes || {})) {
+        if (!this.pending.has(id)) this.likes[id] = count;
+      }
+      for (const [id, isLiked] of Object.entries(data.liked || {})) {
+        if (!this.pending.has(id)) this.liked[id] = isLiked;
+      }
+      this.loaded = true;
+      this.loadError = '';
+    } catch (err) {
+      this.loadError = (err as Error).message || 'Could not load likes.';
+    }
+    this.notifyListeners();
   }
 
   public getLikesCount(projectId: string): number {
-    const list = this.getLikers(projectId);
-    const storedCount = this.likes[projectId] !== undefined ? this.likes[projectId] : 0;
-    return Math.max(storedCount, list.length);
-  }
-
-  public getLikers(projectId: string): LikerUser[] {
-    const map = new Map<string, LikerUser>();
-
-    // 1. From likers stored in this service
-    const existing = this.likers[projectId] || [];
-    existing.forEach((u) => {
-      if (u && u.userName) {
-        map.set(u.userName.toLowerCase(), u);
-      }
-    });
-
-    // 2. From notifications for this project
-    const notifs = notificationService.getNotifications();
-    notifs
-      .filter((n) => n.projectId === projectId)
-      .forEach((n) => {
-        const key = n.userName.toLowerCase();
-        if (!map.has(key)) {
-          map.set(key, {
-            userName: n.userName,
-            timestamp: n.timestamp,
-          });
-        }
-      });
-
-    // 3. If current user liked the project, ensure their name is in the list
-    if (this.isProjectLiked(projectId)) {
-      const currentVisitor = getVisitorName() || 'You';
-      const key = currentVisitor.toLowerCase();
-      if (!map.has(key)) {
-        map.set(key, {
-          userName: currentVisitor,
-          timestamp: Date.now(),
-        });
-      }
-    }
-
-    return Array.from(map.values()).sort((a, b) => b.timestamp - a.timestamp);
+    return this.likes[projectId] || 0;
   }
 
   public isProjectLiked(projectId: string): boolean {
-    try {
-      if (typeof window !== 'undefined') {
-        return localStorage.getItem(`project_liked_${projectId}`) === 'true';
-      }
-    } catch {}
-    return false;
+    return Boolean(this.liked[projectId]);
   }
 
-  public async toggleLike(
-    projectId: string,
-    customUserName?: string
-  ): Promise<{ likesCount: number; isLiked: boolean }> {
-    const currentlyLiked = this.isProjectLiked(projectId);
-    const targetLiked = !currentlyLiked;
-    const visitorId = getVisitorId();
-    const visitorName = customUserName || getVisitorName() || 'Guest Visitor';
+  public isPending(projectId: string): boolean {
+    return this.pending.has(projectId);
+  }
 
-    // 1. Optimistic local update
-    try {
-      if (typeof window !== 'undefined') {
-        if (targetLiked) {
-          localStorage.setItem(`project_liked_${projectId}`, 'true');
-        } else {
-          localStorage.removeItem(`project_liked_${projectId}`);
-        }
-      }
-    } catch {}
-
-    if (!Array.isArray(this.likers[projectId])) {
-      this.likers[projectId] = [];
+  /**
+   * Likes or unlikes a post. `userName` is required when liking.
+   * Returns the authoritative state from the server; throws (after reverting) on failure.
+   */
+  public async toggleLike(projectId: string, userName?: string): Promise<{ likesCount: number; isLiked: boolean }> {
+    if (this.pending.has(projectId)) {
+      return { likesCount: this.getLikesCount(projectId), isLiked: this.isProjectLiked(projectId) };
     }
+    const prevLiked = this.isProjectLiked(projectId);
+    const prevCount = this.getLikesCount(projectId);
+    const target = !prevLiked;
+    if (target && !userName) throw new Error('A display name is required to like a post.');
 
-    if (targetLiked) {
-      const alreadyHas = this.likers[projectId].some(
-        (u) => u.userName.toLowerCase() === visitorName.toLowerCase()
-      );
-      if (!alreadyHas) {
-        this.likers[projectId].unshift({
-          visitorId,
-          userName: visitorName,
-          timestamp: Date.now(),
-        });
-      }
-      this.likes[projectId] = Math.max((this.likes[projectId] || 0) + 1, this.likers[projectId].length);
-    } else {
-      this.likers[projectId] = this.likers[projectId].filter(
-        (u) => u.visitorId !== visitorId && u.userName.toLowerCase() !== visitorName.toLowerCase()
-      );
-      this.likes[projectId] = Math.max(0, (this.likes[projectId] || 0) - 1);
-    }
-
-    this.saveToStorage();
+    // Optimistic update
+    this.pending.add(projectId);
+    this.liked[projectId] = target;
+    this.likes[projectId] = Math.max(0, prevCount + (target ? 1 : -1));
     this.notifyListeners();
 
-    if (targetLiked) {
-      const proj = projectsData.find((p) => p.id === projectId);
-      notificationService.recordLike(
-        {
-          id: projectId,
-          title: proj?.title || projectId,
-          thumbnail: proj?.thumbnail,
-        },
-        visitorName
-      );
-    }
+    try {
+      const data = await apiFetch<{ likesCount: number; isLiked: boolean }>('/api/likes', {
+        method: 'POST',
+        body: JSON.stringify({ projectId, visitorId: getVisitorId(), liked: target, userName }),
+      });
+      this.likes[projectId] = data.likesCount;
+      this.liked[projectId] = data.isLiked;
 
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(
-        new CustomEvent('project_interaction_updated', {
-          detail: {
-            projectId,
-            likesCount: this.getLikesCount(projectId),
-            isLiked: targetLiked,
-            likers: this.getLikers(projectId),
-          },
-        })
-      );
-    }
-
-    // 2. Persist to Express backend database if API is configured
-    if (API_BASE_URL) {
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/likes`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            projectId,
-            visitorId,
-            isLiked: targetLiked,
-            userName: visitorName,
-          }),
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success) {
-            if (typeof data.likesCount === 'number') {
-              this.likes[projectId] = data.likesCount;
-            }
-            if (Array.isArray(data.likers)) {
-              this.likers[projectId] = data.likers;
-            }
-            this.saveToStorage();
-            this.notifyListeners();
-            return { likesCount: this.getLikesCount(projectId), isLiked: data.isLiked };
-          }
-        }
-      } catch (e) {
-        console.warn('Backend like update failed, using optimistic state', e);
+      if (target && data.isLiked && userName) {
+        const proj = projectsData.find((p) => p.id === projectId);
+        notificationService.recordLike(
+          { id: projectId, title: proj?.title || projectId, thumbnail: proj?.thumbnail },
+          userName
+        );
       }
+      return data;
+    } catch (err) {
+      // Revert so a failed request never leaves an inflated/deflated count on screen.
+      this.liked[projectId] = prevLiked;
+      this.likes[projectId] = prevCount;
+      throw err;
+    } finally {
+      this.pending.delete(projectId);
+      this.notifyListeners();
+      window.dispatchEvent(new CustomEvent('project_interaction_updated', { detail: { projectId } }));
     }
+  }
 
-    return { likesCount: this.getLikesCount(projectId), isLiked: targetLiked };
+  /** Owner only: display names of visitors who liked a post. */
+  public async fetchLikers(projectId: string): Promise<LikerUser[]> {
+    try {
+      const data = await apiFetch<{ likers: LikerUser[] }>(
+        `/api/likes?likers=1&projectId=${encodeURIComponent(projectId)}`,
+        { headers: ownerAuthHeaders() }
+      );
+      return data.likers;
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) lockOwner();
+      throw err;
+    }
   }
 
   public subscribe(listener: () => void) {

@@ -1,13 +1,31 @@
 {
   "likes": {
-    "cobuy-pattern-mining": 0,
+    "cobuy-pattern-mining": 1,
     "cryptita-plays-builder-workshop": 0,
     "personal-portfolio": 0
   },
   "likedBy": {
-    "cobuy-pattern-mining": [],
+    "cobuy-pattern-mining": [
+      {
+        "visitorId": "vis_44f228234b8d4a529ab4e7077baf7564",
+        "userName": "Kier",
+        "timestamp": 1793029527178
+      }
+    ],
     "cryptita-plays-builder-workshop": [],
     "personal-portfolio": []
   },
-  "reviews": []
+  "reviews": [
+    {
+      "id": "rev_1793029406291_6ece00c99e",
+      "rating": 5,
+      "name": "Kier",
+      "role": "Founder, Startup",
+      "feedback": "He helps me create a design for our website.",
+      "visitorId": "vis_44f228234b8d4a529ab4e7077baf7564",
+      "timestamp": 1793029406291,
+      "createdAt": "2026-10-26T15:43:26.291Z",
+      "hidden": false
+    }
+  ]
 }
