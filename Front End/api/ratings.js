@@ -85,6 +85,8 @@ const SEED_REVIEWS = [
   },
 ];
 
+const newestFirst = (a, b) => (b.timestamp || 0) - (a.timestamp || 0);
+
 async function listReviews(req, res, store) {
   const query = getQuery(req);
   const offset = clampInt(query.offset, 0, 100000, 0);
@@ -97,7 +99,10 @@ async function listReviews(req, res, store) {
   // Merge DB reviews with SEED_REVIEWS (DB records take precedence, deduplicated by reviewer name)
   const byName = new Map();
   dbReviews.forEach((r) => {
-    if (r && r.name) byName.set(r.name.trim().toLowerCase(), r);
+    if (r && r.name) {
+      const key = r.name.trim().toLowerCase();
+      if (!byName.has(key)) byName.set(key, r);
+    }
   });
   SEED_REVIEWS.forEach((r) => {
     const key = r.name.trim().toLowerCase();

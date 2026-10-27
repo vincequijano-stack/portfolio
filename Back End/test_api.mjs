@@ -143,7 +143,7 @@ async function run() {
     console.log(`✓ GET /api/likes returned count: ${data.likes[testProject]}, liked: ${data.liked[testProject]}`);
   }
 
-  // 8. GET /api/likes?likers=1 - Unauthenticated request MUST be rejected (401)
+  // 8. GET /api/likes?likers=1 - Public endpoint allows visitors to view likers
   {
     const req = createReq({
       method: 'GET',
@@ -151,10 +151,11 @@ async function run() {
     });
     const res = createRes();
     await likesHandler(req, res);
-    if (res.statusCode !== 401) {
-      throw new Error(`Expected 401 for unauthenticated likers query, got ${res.statusCode}`);
+    const data = res.json();
+    if (res.statusCode !== 200 || !data.success || !Array.isArray(data.likers)) {
+      throw new Error(`Expected 200 for public likers query, got ${res.statusCode}`);
     }
-    console.log('✓ GET /api/likes?likers=1 correctly refused without owner authorization (401)');
+    console.log(`✓ GET /api/likes?likers=1 returned ${data.likers.length} likers publicly`);
   }
 
   // 9. GET /api/likes?likers=1 - Authenticated with OWNER_KEY returns liker display names

@@ -1,58 +1,43 @@
 {
   "likes": {
-    "cobuy-pattern-mining": 6,
-    "cryptita-plays-builder-workshop": 5,
-    "personal-portfolio": 5
+    "cobuy-pattern-mining": 2,
+    "cryptita-plays-builder-workshop": 2,
+    "personal-portfolio": 2
   },
   "likedBy": {
     "cobuy-pattern-mining": [
       {
-        "visitorId": "vis_44f228234b8d4a529ab4e7077baf7564",
-        "userName": "Kier",
-        "timestamp": 1793029527178
-      },
-      {
         "visitorId": "vis_raziel",
         "userName": "Raziel Sevilla",
         "timestamp": 1792943127000
       },
       {
-        "visitorId": "vis_ezon",
-        "userName": "Ezon",
-        "timestamp": 1792511127000
+        "visitorId": "vis_44f228234b8d4a529ab4e7077baf7564",
+        "userName": "Kier",
+        "timestamp": 1793029527178
       }
     ],
     "cryptita-plays-builder-workshop": [
       {
-        "visitorId": "vis_44f228234b8d4a529ab4e7077baf7564",
-        "userName": "Kier",
+        "visitorId": "vis_raziel",
+        "userName": "Raziel Sevilla",
         "timestamp": 1792943127000
       },
       {
-        "visitorId": "vis_ezon",
-        "userName": "Ezon",
-        "timestamp": 1792511127000
-      },
-      {
-        "visitorId": "vis_raziel",
-        "userName": "Raziel Sevilla",
+        "visitorId": "vis_44f228234b8d4a529ab4e7077baf7564",
+        "userName": "Kier",
         "timestamp": 1792943127000
       }
     ],
     "personal-portfolio": [
       {
-        "visitorId": "vis_44f228234b8d4a529ab4e7077baf7564",
-        "userName": "Kier",
+        "visitorId": "vis_raziel",
+        "userName": "Raziel Sevilla",
         "timestamp": 1792943127000
       },
       {
-        "visitorId": "vis_ezon",
-        "userName": "Ezon",
-        "timestamp": 1792511127000
-      },
-      {
-        "visitorId": "vis_raziel",
-        "userName": "Raziel Sevilla",
+        "visitorId": "vis_44f228234b8d4a529ab4e7077baf7564",
+        "userName": "Kier",
         "timestamp": 1792943127000
       }
     ]

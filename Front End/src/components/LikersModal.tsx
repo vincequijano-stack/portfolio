@@ -72,7 +72,7 @@ export const LikersModal: React.FC<LikersModalProps> = ({
     });
   };
 
-  const currentCount = typeof likesCount === 'number' ? likesCount : likers.length;
+  const currentCount = !loading ? likers.length : (typeof likesCount === 'number' ? likesCount : likers.length);
 
   return (
     <div

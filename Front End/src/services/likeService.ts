@@ -40,11 +40,14 @@ class LikeService {
   private syncWithNotifications() {
     const notifs = notificationService.getNotifications();
     projectsData.forEach((p) => {
-      const notifCount = notifs.filter(
+      const projNotifs = notifs.filter(
         (n) => n.projectId === p.id || n.projectTitle?.toLowerCase() === p.title.toLowerCase()
-      ).length;
-      if (notifCount > 0) {
-        this.likes[p.id] = Math.max(this.likes[p.id] || 0, p.likes || 0, notifCount);
+      );
+      const uniqueNames = new Set(
+        projNotifs.map((n) => n.userName?.trim().toLowerCase()).filter(Boolean)
+      );
+      if (uniqueNames.size > 0 && !this.loaded) {
+        this.likes[p.id] = Math.max(this.likes[p.id] || 0, uniqueNames.size);
       }
     });
     this.notifyListeners();
@@ -58,8 +61,7 @@ class LikeService {
       );
       for (const [id, count] of Object.entries(data.likes || {})) {
         if (!this.pending.has(id)) {
-          const base = projectsData.find((p) => p.id === id)?.likes || 0;
-          this.likes[id] = Math.max(count, base, this.likes[id] || 0);
+          this.likes[id] = count;
         }
       }
       for (const [id, isLiked] of Object.entries(data.liked || {})) {
@@ -74,13 +76,11 @@ class LikeService {
   }
 
   public getLikesCount(projectId: string): number {
+    if (typeof this.likes[projectId] === 'number') {
+      return this.likes[projectId];
+    }
     const proj = projectsData.find((p) => p.id === projectId);
-    const base = proj?.likes || 0;
-    const notifs = notificationService.getNotifications();
-    const notifCount = notifs.filter(
-      (n) => n.projectId === projectId || (proj && n.projectTitle?.toLowerCase() === proj.title.toLowerCase())
-    ).length;
-    return Math.max(this.likes[projectId] || 0, base, notifCount);
+    return proj?.likes || 0;
   }
 
   public isProjectLiked(projectId: string): boolean {
@@ -115,7 +115,7 @@ class LikeService {
         method: 'POST',
         body: JSON.stringify({ projectId, visitorId: getVisitorId(), liked: target, userName }),
       });
-      this.likes[projectId] = Math.max(data.likesCount, this.likes[projectId] || 0);
+      this.likes[projectId] = data.likesCount;
       this.liked[projectId] = data.isLiked;
 
       if (target && data.isLiked && userName) {
@@ -153,23 +153,34 @@ class LikeService {
       )
       .map((n) => ({ userName: n.userName, timestamp: n.timestamp }));
 
+    let list: LikerUser[] = [];
     try {
       const data = await apiFetch<{ likers: LikerUser[] }>(
         `/api/likes?likers=1&projectId=${encodeURIComponent(projectId)}`
       );
       const map = new Map<string, LikerUser>();
-      (data.likers || []).forEach((l) => map.set(l.userName.toLowerCase(), l));
-      notifLikers.forEach((l) => {
-        if (!map.has(l.userName.toLowerCase())) map.set(l.userName.toLowerCase(), l);
+      (data.likers || []).forEach((l) => {
+        if (l.userName) map.set(l.userName.toLowerCase(), l);
       });
-      const list = Array.from(map.values());
-      list.sort((a, b) => b.timestamp - a.timestamp);
-      return list;
+      notifLikers.forEach((l) => {
+        if (l.userName && !map.has(l.userName.toLowerCase())) {
+          map.set(l.userName.toLowerCase(), l);
+        }
+      });
+      list = Array.from(map.values());
     } catch {
       const map = new Map<string, LikerUser>();
-      notifLikers.forEach((l) => map.set(l.userName.toLowerCase(), l));
-      return Array.from(map.values()).sort((a, b) => b.timestamp - a.timestamp);
+      notifLikers.forEach((l) => {
+        if (l.userName) map.set(l.userName.toLowerCase(), l);
+      });
+      list = Array.from(map.values());
     }
+
+    list.sort((a, b) => b.timestamp - a.timestamp);
+    // Keep internal likes count strictly in sync with actual unique likers
+    this.likes[projectId] = list.length;
+    this.notifyListeners();
+    return list;
   }
 
   public subscribe(listener: () => void) {

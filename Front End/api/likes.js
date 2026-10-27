@@ -19,27 +19,18 @@ import { validateDisplayName, isValidVisitorId, isValidProjectId } from './_lib/
 
 const MAX_IDS = 50;
 
-const SEED_LIKES = {
-  'cobuy-pattern-mining': 6,
-  'cryptita-plays-builder-workshop': 5,
-  'personal-portfolio': 5,
-};
-
 const SEED_LIKERS = {
   'cobuy-pattern-mining': [
-    { userName: 'Kier', timestamp: 1793029527178 },
     { userName: 'Raziel Sevilla', timestamp: 1792943127000 },
-    { userName: 'Ezon', timestamp: 1792511127000 },
+    { userName: 'Kier', timestamp: 1793029527178 },
   ],
   'cryptita-plays-builder-workshop': [
-    { userName: 'Kier', timestamp: 1792943127000 },
-    { userName: 'Ezon', timestamp: 1792511127000 },
     { userName: 'Raziel Sevilla', timestamp: 1792943127000 },
+    { userName: 'Kier', timestamp: 1792943127000 },
   ],
   'personal-portfolio': [
-    { userName: 'Kier', timestamp: 1792943127000 },
-    { userName: 'Ezon', timestamp: 1792511127000 },
     { userName: 'Raziel Sevilla', timestamp: 1792943127000 },
+    { userName: 'Kier', timestamp: 1792943127000 },
   ],
 };
 
@@ -67,7 +58,12 @@ async function getLikes(req, res, store) {
   const rawLikes = store ? await store.countLikes(ids) : {};
   const likes = {};
   ids.forEach((id) => {
-    likes[id] = Math.max(rawLikes[id] || 0, SEED_LIKES[id] || 0);
+    const seedCount = (SEED_LIKERS[id] || []).length;
+    if (store && typeof rawLikes[id] === 'number' && rawLikes[id] > 0) {
+      likes[id] = rawLikes[id];
+    } else {
+      likes[id] = seedCount;
+    }
   });
   const liked = isValidVisitorId(query.visitorId) && store ? await store.likedBy(ids, query.visitorId) : {};
   return send(res, 200, { success: true, likes, liked });
@@ -95,19 +91,21 @@ async function setLike(req, res, store) {
       store.countLikes([projectId]),
       store.likedBy([projectId], visitorId),
     ]);
+    const finalCount = counts[projectId] ?? (SEED_LIKERS[projectId]?.length || 0);
     return send(res, 200, {
       success: true,
       projectId,
-      likesCount: Math.max(counts[projectId] || 0, SEED_LIKES[projectId] || 0),
+      likesCount: finalCount,
       isLiked: Boolean(liked[projectId]),
     });
   }
 
   // Fallback when storage is not configured
+  const seedCount = (SEED_LIKERS[projectId] || []).length;
   return send(res, 200, {
     success: true,
     projectId,
-    likesCount: (SEED_LIKES[projectId] || 0) + (body.liked ? 1 : 0),
+    likesCount: Math.max(0, seedCount + (body.liked ? 1 : 0)),
     isLiked: body.liked,
   });
 }
