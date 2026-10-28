@@ -19,6 +19,7 @@ export class StorageNotConfiguredError extends Error {
 const KEY_PREFIX = 'pf:';
 const REVIEWS_KEY = `${KEY_PREFIX}reviews`;
 const likesKey = (projectId) => `${KEY_PREFIX}likes:${projectId}`;
+const commentsKey = (projectId) => `${KEY_PREFIX}comments:${projectId}`;
 const rateKey = (key) => `${KEY_PREFIX}rl:${key}`;
 
 function redisConfig() {
@@ -102,6 +103,27 @@ function createRedisStore({ url, token }) {
       return (values || []).map(safeParse).filter(Boolean);
     },
 
+    async listComments(projectId) {
+      const [values] = await pipeline([['HVALS', commentsKey(projectId)]]);
+      return (values || []).map(safeParse).filter(Boolean).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+    },
+
+    async insertComment(projectId, comment) {
+      const [added] = await pipeline([['HSET', commentsKey(projectId), comment.id, JSON.stringify(comment)]]);
+      return added === 1;
+    },
+
+    async deleteComment(projectId, commentId) {
+      const [removed] = await pipeline([['HDEL', commentsKey(projectId), commentId]]);
+      return removed === 1;
+    },
+
+    async countComments(projectIds) {
+      if (projectIds.length === 0) return {};
+      const results = await pipeline(projectIds.map((id) => ['HLEN', commentsKey(id)]));
+      return Object.fromEntries(projectIds.map((id, i) => [id, Number(results[i]) || 0]));
+    },
+
     /** Fixed-window counter. Returns the hit count for the current window. */
     async hit(key, windowSec) {
       const k = rateKey(key);
@@ -141,16 +163,22 @@ function createFileStore(filePath) {
         )
         .filter((item) => item && item.visitorId);
     }
+    const comments = {};
+    for (const [pid, list] of Object.entries(data.comments || {})) {
+      comments[pid] = Array.isArray(list) ? list : [];
+    }
     return {
       likes: data.likes || {},
       likedBy,
       reviews: Array.isArray(data.reviews) ? data.reviews : [],
+      comments,
     };
   }
 
   async function write(db) {
     // Keep the legacy `likes` counters in sync with the authoritative likedBy lists.
     for (const pid of Object.keys(db.likedBy)) db.likes[pid] = db.likedBy[pid].length;
+    db.comments = db.comments || {};
     await fs.mkdir(path.dirname(filePath), { recursive: true });
     const tmp = `${filePath}.${process.pid}.tmp`;
     await fs.writeFile(tmp, JSON.stringify(db, null, 2), 'utf-8');
@@ -218,6 +246,43 @@ function createFileStore(filePath) {
       }),
 
     listLikers: (projectId) => withLock(async () => (await read()).likedBy[projectId] || []),
+
+    listComments: (projectId) =>
+      withLock(async () => {
+        const db = await read();
+        const list = (db.comments && db.comments[projectId]) || [];
+        return list.slice().sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+      }),
+
+    insertComment: (projectId, comment) =>
+      withLock(async () => {
+        const db = await read();
+        db.comments = db.comments || {};
+        const list = (db.comments[projectId] = db.comments[projectId] || []);
+        list.push(comment);
+        await write(db);
+        return true;
+      }),
+
+    deleteComment: (projectId, commentId) =>
+      withLock(async () => {
+        const db = await read();
+        if (!db.comments || !db.comments[projectId]) return false;
+        const initial = db.comments[projectId].length;
+        db.comments[projectId] = db.comments[projectId].filter((c) => c.id !== commentId);
+        if (db.comments[projectId].length !== initial) {
+          await write(db);
+          return true;
+        }
+        return false;
+      }),
+
+    countComments: (projectIds) =>
+      withLock(async () => {
+        const db = await read();
+        const comments = db.comments || {};
+        return Object.fromEntries(projectIds.map((id) => [id, (comments[id] || []).length]));
+      }),
 
     async hit(key, windowSec) {
       const now = Date.now();

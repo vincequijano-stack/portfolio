@@ -41,7 +41,7 @@ export default function App() {
 
   const [showIntro, setShowIntro] = useState<boolean>(() => {
     try {
-      return !sessionStorage.getItem('ig_intro_shown');
+      return !sessionStorage.getItem('ig_intro_shown') || !sessionStorage.getItem('portfolio_session_display_name');
     } catch {
       return true;
     }

@@ -16,6 +16,7 @@ const rateLimit  = require('express-rate-limit');
 const contactRoute = require('./routes/contact');
 const likesRoute   = require('./routes/likes');
 const ratingsRoute = require('./routes/ratings');
+const commentsRoute = require('./routes/comments');
 const { loadApiHandler } = require('./routes/apiBridge');
 
 const app  = express();
@@ -68,6 +69,7 @@ app.get('/health', (req, res) => res.json({ status: 'ok', time: new Date().toISO
 app.use('/api/contact', contactLimiter, contactRoute);
 app.use('/api/likes', likesRoute);
 app.use('/api/ratings', ratingsRoute);
+app.use('/api/comments', commentsRoute);
 app.get('/api/owner', loadApiHandler('owner'));
 
 // ── 404 Handler ───────────────────────────────────────────────
@@ -87,5 +89,6 @@ app.listen(PORT, () => {
   console.log(`   Health check: http://localhost:${PORT}/health`);
   console.log(`   Likes API:    GET/POST http://localhost:${PORT}/api/likes`);
   console.log(`   Ratings API:  GET/POST http://localhost:${PORT}/api/ratings`);
+  console.log(`   Comments API: GET/POST/DELETE http://localhost:${PORT}/api/comments`);
   console.log(`   Contact API:  POST http://localhost:${PORT}/api/contact\n`);
 });

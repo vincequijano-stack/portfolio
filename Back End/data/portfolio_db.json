@@ -44,6 +44,17 @@
   },
   "reviews": [
     {
+      "id": "rev_1793187513120_a8a72a0643",
+      "rating": 5,
+      "name": "Kier",
+      "role": "Founder",
+      "feedback": "He helps me create a design for our website.",
+      "visitorId": "vis_test_integration_user_1793187513119",
+      "timestamp": 1793187513120,
+      "createdAt": "2026-10-28T11:38:33.120Z",
+      "hidden": false
+    },
+    {
       "id": "rev_raziel_sevilla",
       "rating": 5,
       "name": "Raziel Sevilla",
@@ -76,5 +87,53 @@
       "createdAt": "2026-10-26T15:40:00.000Z",
       "hidden": false
     }
-  ]
+  ],
+  "comments": {
+    "cobuy-pattern-mining": [
+      {
+        "id": "cmt_seed_1",
+        "projectId": "cobuy-pattern-mining",
+        "visitorId": "vis_raziel",
+        "userName": "Raziel Sevilla",
+        "text": "The association network graph makes interpreting item bundles intuitive. Excellent work!",
+        "avatar": "💡",
+        "timestamp": 1792944000000,
+        "createdAt": "2026-10-25T16:00:00.000Z"
+      },
+      {
+        "id": "cmt_seed_2",
+        "projectId": "cobuy-pattern-mining",
+        "visitorId": "vis_44f228234b8d4a529ab4e7077baf7564",
+        "userName": "Kier",
+        "text": "Very impressive thesis project! Can small shops test this with real POS exports?",
+        "avatar": "📊",
+        "timestamp": 1792951200000,
+        "createdAt": "2026-10-25T18:00:00.000Z"
+      }
+    ],
+    "cryptita-plays-builder-workshop": [
+      {
+        "id": "cmt_seed_3",
+        "projectId": "cryptita-plays-builder-workshop",
+        "visitorId": "vis_44f228234b8d4a529ab4e7077baf7564",
+        "userName": "Kier",
+        "text": "The UI responsiveness and interactive layout are super sleek!",
+        "avatar": "🚀",
+        "timestamp": 1792945000000,
+        "createdAt": "2026-10-25T16:15:00.000Z"
+      }
+    ],
+    "personal-portfolio": [
+      {
+        "id": "cmt_seed_4",
+        "projectId": "personal-portfolio",
+        "visitorId": "vis_raziel",
+        "userName": "Raziel Sevilla",
+        "text": "Clean Instagram-inspired design with great micro-interactions. Love the dark mode!",
+        "avatar": "✨",
+        "timestamp": 1792946000000,
+        "createdAt": "2026-10-25T16:30:00.000Z"
+      }
+    ]
+  }
 }

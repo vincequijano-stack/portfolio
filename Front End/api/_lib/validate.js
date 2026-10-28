@@ -57,6 +57,18 @@ export function isValidReviewId(id) {
   return typeof id === 'string' && /^rev_[A-Za-z0-9_]{1,80}$/.test(id);
 }
 
+export function isValidCommentId(id) {
+  return typeof id === 'string' && /^cmt_[A-Za-z0-9_]{1,80}$/.test(id);
+}
+
+export function validateCommentText(raw) {
+  if (typeof raw !== 'string') return { ok: false, error: 'Comment text is required.' };
+  const value = cleanMultiline(raw, 500);
+  if (!value) return { ok: false, error: 'Comment text cannot be empty.' };
+  if (value.length < 2) return { ok: false, error: 'Comment must be at least 2 characters.' };
+  return { ok: true, value };
+}
+
 export function parseRating(raw) {
   const n = Number(raw);
   return Number.isInteger(n) && n >= 1 && n <= 5 ? n : null;
@@ -67,3 +79,4 @@ export function clampInt(raw, min, max, fallback) {
   if (!Number.isFinite(n)) return fallback;
   return Math.min(max, Math.max(min, n));
 }
+

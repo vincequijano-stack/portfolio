@@ -9,14 +9,34 @@ import {
   Bookmark,
   Send,
   Sparkles,
-  Info
+  Info,
+  Trash2,
+  Loader2,
+  Smile,
 } from 'lucide-react';
 import { GithubIcon } from './SocialIcons';
 import { Project } from '../data/projects';
 import { profileData } from '../data/profile';
-import { ensureVisitorName, getSessionName } from '../services/visitorSession';
+import { ensureVisitorName, getSessionName, getVisitorId, isOwnerUnlocked } from '../services/visitorSession';
 import { likeService } from '../services/likeService';
+import { commentService, ProjectComment } from '../services/commentService';
 import { LikersModal } from './LikersModal';
+
+function formatRelativeTime(timestamp?: number | string): string {
+  if (!timestamp) return 'Just now';
+  const num = typeof timestamp === 'number' ? timestamp : Date.parse(timestamp);
+  if (isNaN(num)) return typeof timestamp === 'string' ? timestamp : 'Recently';
+
+  const diffMs = Date.now() - num;
+  if (diffMs < 45_000) return 'Just now';
+  const mins = Math.floor(diffMs / 60_000);
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(num).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
 
 interface ProjectModalProps {
   project: Project | null;
@@ -32,36 +52,42 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
-  const [comments, setComments] = useState<
-    { user: string; text: string; time: string; avatar: string }[]
-  >([]);
+  const [comments, setComments] = useState<ProjectComment[]>([]);
   const [newComment, setNewComment] = useState('');
+  const [selectedEmoji, setSelectedEmoji] = useState('💬');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [commentError, setCommentError] = useState('');
   const [isLikersModalOpen, setIsLikersModalOpen] = useState(false);
+  const commentsEndRef = React.useRef<HTMLDivElement>(null);
+
+  const currentVisitorId = getVisitorId();
+  const isOwner = isOwnerUnlocked();
 
   useEffect(() => {
     if (project) {
-      try {
-        const savedComments = localStorage.getItem(`project_comments_${project.id}`);
-        setIsLiked(likeService.isProjectLiked(project.id));
-        setLikesCount(likeService.getLikesCount(project.id));
-        setComments(savedComments ? JSON.parse(savedComments) : []);
-      } catch {
-        setIsLiked(false);
-        setLikesCount(likeService.getLikesCount(project.id));
-        setComments([]);
-      }
+      setIsLiked(likeService.isProjectLiked(project.id));
+      setLikesCount(likeService.getLikesCount(project.id));
+      setComments(commentService.getComments(project.id));
+      commentService.fetchComments(project.id);
       setIsSaved(false);
       setNewComment('');
+      setCommentError('');
     }
   }, [project]);
 
   useEffect(() => {
     if (!project) return;
-    const unsubscribe = likeService.subscribe(() => {
+    const unsubLikes = likeService.subscribe(() => {
       setLikesCount(likeService.getLikesCount(project.id));
       setIsLiked(likeService.isProjectLiked(project.id));
     });
-    return () => unsubscribe();
+    const unsubComments = commentService.subscribe(() => {
+      setComments(commentService.getComments(project.id));
+    });
+    return () => {
+      unsubLikes();
+      unsubComments();
+    };
   }, [project]);
 
   // Handle ESC key to close modal
@@ -100,23 +126,34 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!project || !newComment.trim()) return;
-    const currentVisitor = (await ensureVisitorName()) || getSessionName() || 'Visitor';
-    const updated = [
-      ...comments,
-      {
-        user: currentVisitor,
-        text: newComment.trim(),
-        time: 'Just now',
-        avatar: '👋',
-      },
-    ];
-    setComments(updated);
+    if (!project || !newComment.trim() || isSubmitting) return;
+
+    const visitorName = await ensureVisitorName();
+    if (!visitorName) return; // Visitor cancelled the prompt modal
+
+    setIsSubmitting(true);
+    setCommentError('');
     try {
-      localStorage.setItem(`project_comments_${project.id}`, JSON.stringify(updated));
-    } catch {}
-    window.dispatchEvent(new CustomEvent('project_interaction_updated', { detail: { projectId: project.id } }));
-    setNewComment('');
+      await commentService.addComment(project.id, visitorName, newComment.trim(), selectedEmoji);
+      setNewComment('');
+      setTimeout(() => {
+        commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } catch (err: any) {
+      setCommentError(err?.message || 'Could not post comment. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!project) return;
+    if (!confirm('Are you sure you want to delete this comment?')) return;
+    try {
+      await commentService.deleteComment(project.id, commentId);
+    } catch (err: any) {
+      alert(err?.message || 'Could not delete comment.');
+    }
   };
 
   return (
@@ -254,25 +291,71 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
 
             {/* Comments List */}
             <div className="pt-3 border-t border-[#EFEFEF] dark:border-[#262626]">
-              <h4 className="text-[11px] font-bold uppercase tracking-wide text-[#8E8E8E] dark:text-[#737373] mb-2">
-                Community Feedback ({comments.length})
-              </h4>
-              {comments.length === 0 ? (
-                <p className="text-xs text-[#8E8E8E] dark:text-[#737373] italic py-2">
-                  No comments or inquiries yet. Leave a question or feedback below!
-                </p>
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-[11px] font-bold uppercase tracking-wide text-[#8E8E8E] dark:text-[#737373] flex items-center gap-1.5">
+                  <MessageCircle className="w-3.5 h-3.5 text-[#0095F6]" />
+                  <span>Client &amp; Community Thoughts ({comments.length})</span>
+                </h4>
+                <span className="text-[10px] text-[#8E8E8E] dark:text-[#737373]">Live Discussion</span>
+              </div>
+
+              {commentService.isLoading(project.id) && comments.length === 0 ? (
+                <div className="flex items-center justify-center py-6 text-xs text-[#8E8E8E] dark:text-[#737373] gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-[#0095F6]" />
+                  <span>Loading comments...</span>
+                </div>
+              ) : comments.length === 0 ? (
+                <div className="p-4 rounded-xl border border-dashed border-[#DBDBDB] dark:border-[#333333] bg-[#F9F9F9]/50 dark:bg-[#1A1A1A]/40 text-center my-1">
+                  <p className="text-xs font-semibold text-[#262626] dark:text-[#E0E0E0]">No thoughts shared yet</p>
+                  <p className="text-[11px] text-[#8E8E8E] dark:text-[#737373] mt-0.5">
+                    Are you a client, recruiter, or collaborator? Leave your feedback or inquiry below!
+                  </p>
+                </div>
               ) : (
-                <div className="space-y-2">
-                  {comments.map((c, i) => (
-                    <div key={i} className="flex items-start gap-2 text-xs">
-                      <span className="text-sm select-none">{c.avatar}</span>
-                      <div className="flex-1">
-                        <span className="font-bold text-[#262626] dark:text-white mr-1.5">{c.user}</span>
-                        <span className="text-[#4A4A4A] dark:text-[#D1D5DB]">{c.text}</span>
-                        <p className="text-[10px] text-[#8E8E8E] dark:text-[#737373] mt-0.5">{c.time}</p>
+                <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1 scrollbar-thin">
+                  {comments.map((c) => {
+                    const isAuthor = c.visitorId === currentVisitorId;
+                    const canDelete = isAuthor || isOwner;
+                    return (
+                      <div
+                        key={c.id}
+                        className="group flex items-start gap-2.5 text-xs p-2 rounded-lg transition-colors hover:bg-[#F2F2F2]/60 dark:hover:bg-[#1F1F1F]/60"
+                      >
+                        <div className="w-7 h-7 rounded-full bg-[#EFEFEF] dark:bg-[#262626] border border-[#DBDBDB]/40 dark:border-[#333333] flex items-center justify-center text-sm shrink-0 select-none shadow-2xs">
+                          {c.avatar || '💬'}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-bold text-[#262626] dark:text-white truncate">
+                              {c.userName}
+                            </span>
+                            {isAuthor && (
+                              <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-[#0095F6]/10 text-[#0095F6] font-semibold">
+                                You
+                              </span>
+                            )}
+                            <span className="text-[10px] text-[#8E8E8E] dark:text-[#737373]">
+                              • {formatRelativeTime(c.timestamp || c.createdAt)}
+                            </span>
+                          </div>
+                          <p className="text-[#333333] dark:text-[#E0E0E0] mt-0.5 leading-relaxed break-words whitespace-pre-wrap">
+                            {c.text}
+                          </p>
+                        </div>
+                        {canDelete && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteComment(c.id)}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-[#8E8E8E] hover:text-[#ED4956] dark:text-[#737373] dark:hover:text-[#ED4956] rounded shrink-0 focus:opacity-100"
+                            title={isOwner && !isAuthor ? 'Delete comment (Owner)' : 'Delete your comment'}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
+                  <div ref={commentsEndRef} />
                 </div>
               )}
             </div>
@@ -374,23 +457,73 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
             </div>
 
             {/* Add Comment Input */}
-            <form onSubmit={handleAddComment} className="flex items-center gap-2 mt-3 pt-2 border-t border-[#EFEFEF] dark:border-[#262626]">
-              <input
-                id="comment-input"
-                type="text"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Add a comment or inquiry..."
-                className="w-full text-xs text-[#262626] dark:text-[#F5F5F5] placeholder-[#8E8E8E] dark:placeholder-[#737373] bg-transparent focus:outline-none"
-              />
-              <button
-                type="submit"
-                disabled={!newComment.trim()}
-                className="text-xs font-bold text-[#0095F6] hover:text-[#1877F2] disabled:opacity-40"
-              >
-                Post
-              </button>
-            </form>
+            <div className="mt-3 pt-2 border-t border-[#EFEFEF] dark:border-[#262626]">
+              {commentError && (
+                <p className="text-[11px] text-[#ED4956] font-medium mb-1.5">{commentError}</p>
+              )}
+              {/* Quick Reactions & Suggestion Chips */}
+              <div className="flex items-center justify-between gap-1 mb-2">
+                <div className="flex items-center gap-1">
+                  {['💬', '💡', '🚀', '👏', '💼'].map((emoji) => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      onClick={() => setSelectedEmoji(emoji)}
+                      className={`text-xs p-1 rounded-md transition-all ${
+                        selectedEmoji === emoji
+                          ? 'bg-[#0095F6]/15 ring-1 ring-[#0095F6] scale-110'
+                          : 'hover:bg-[#EFEFEF] dark:hover:bg-[#262626]'
+                      }`}
+                      title={`Select ${emoji} icon`}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+                <div className="hidden sm:flex items-center gap-1">
+                  {[
+                    'Great project!',
+                    'Interested in collaborating',
+                    'Clean UI!',
+                  ].map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      type="button"
+                      onClick={() => setNewComment(suggestion)}
+                      className="text-[10px] px-2 py-0.5 rounded-full bg-[#EFEFEF] dark:bg-[#262626] text-[#737373] dark:text-[#8E8E8E] hover:text-[#262626] dark:hover:text-white transition-colors"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <form onSubmit={handleAddComment} className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <input
+                    id="comment-input"
+                    type="text"
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Share your thoughts or inquiry..."
+                    maxLength={500}
+                    disabled={isSubmitting}
+                    className="w-full text-xs text-[#262626] dark:text-[#F5F5F5] placeholder-[#8E8E8E] dark:placeholder-[#737373] bg-[#EFEFEF]/50 dark:bg-[#262626]/40 px-3 py-2 rounded-lg border border-transparent focus:border-[#0095F6] focus:bg-transparent transition-all focus:outline-none"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={!newComment.trim() || isSubmitting}
+                  className="flex items-center gap-1 px-3 py-2 rounded-lg bg-[#0095F6] hover:bg-[#1877F2] text-white text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-xs"
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <span>Post</span>
+                  )}
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </div>
