@@ -153,14 +153,21 @@ export const VisitorNameModal: React.FC<VisitorNameModalProps> = ({ isOpen, onCl
             </button>
           </div>
 
+          <button
+            type="button"
+            onClick={() => onClose(profileData.name)}
+            className="w-full text-center text-[11px] text-[#8E8E8E] hover:text-[#0095F6] dark:hover:text-[#0095F6] pt-1 transition-colors cursor-pointer"
+          >
+            I&apos;m {profileData.name} (Portfolio Owner)
+          </button>
+
           <p
             id="visitor-name-privacy"
             className="flex items-start gap-1.5 text-[10.5px] text-[#8E8E8E] dark:text-[#737373] text-left leading-snug pt-1"
           >
             <ShieldCheck className="w-3.5 h-3.5 flex-shrink-0 mt-px" />
             <span>
-              The name you enter will be displayed alongside your public review or associated with your post likes.
-              It is remembered only for this browser session. Please don't enter private information.
+              This prompt is for visiting clients &amp; collaborators so the portfolio owner can see who liked or commented on a project.
             </span>
           </p>
         </form>

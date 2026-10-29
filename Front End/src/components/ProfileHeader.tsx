@@ -56,6 +56,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     setIsEditingNote(false);
     try {
       localStorage.setItem('vince_profile_note', trimmed);
+      localStorage.setItem('portfolio_is_owner', 'true');
     } catch {}
   };
 

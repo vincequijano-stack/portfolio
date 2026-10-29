@@ -18,6 +18,7 @@ import { notificationService, LikeNotification } from './services/notificationSe
 import { ActivityModal } from './components/ActivityModal';
 import { LikeNotificationToast } from './components/LikeNotificationToast';
 import { VisitorNamePromptHost } from './components/VisitorNameModal';
+import { isOwnerUnlocked, getSessionName } from './services/visitorSession';
 
 import { projectsData, Project, CategoryType, categoryList } from './data/projects';
 import { profileData } from './data/profile';
@@ -41,7 +42,12 @@ export default function App() {
 
   const [showIntro, setShowIntro] = useState<boolean>(() => {
     try {
-      return !sessionStorage.getItem('ig_intro_shown') || !sessionStorage.getItem('portfolio_session_display_name');
+      // Owner is never asked for a name on entrance
+      if (isOwnerUnlocked()) {
+        return false;
+      }
+      // Visitors who are not the owner see the name entrance until they provide a name
+      return !sessionStorage.getItem('ig_intro_shown') || !getSessionName();
     } catch {
       return true;
     }

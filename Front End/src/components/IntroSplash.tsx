@@ -1,26 +1,42 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { InstagramIcon } from './SocialIcons';
-import { CheckCircle2, ArrowRight, User, Sparkles } from 'lucide-react';
+import { CheckCircle2, ArrowRight, User } from 'lucide-react';
 import { profileData } from '../data/profile';
-import { setSessionName, validateDisplayName, getSessionName } from '../services/visitorSession';
+import {
+  setSessionName,
+  validateDisplayName,
+  getSessionName,
+  isOwnerUnlocked,
+} from '../services/visitorSession';
 
 interface IntroSplashProps {
   onComplete: () => void;
 }
 
 export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
+  const isOwner = isOwnerUnlocked();
   const [visitorName, setVisitorNameInput] = useState(() => getSessionName() || '');
   const [error, setError] = useState('');
   const [isFadingOut, setIsFadingOut] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Focus the input immediately on mount
+    // If owner replays intro, auto-dismiss without asking for a name
+    if (isOwner) {
+      const fadeTimer = setTimeout(() => setIsFadingOut(true), 1300);
+      const doneTimer = setTimeout(() => onComplete(), 1650);
+      return () => {
+        clearTimeout(fadeTimer);
+        clearTimeout(doneTimer);
+      };
+    }
+
+    // Focus the name input immediately for visitors
     const timer = setTimeout(() => {
       inputRef.current?.focus();
     }, 150);
     return () => clearTimeout(timer);
-  }, []);
+  }, [isOwner, onComplete]);
 
   const handleFinish = (finalName: string) => {
     setSessionName(finalName);
@@ -33,7 +49,7 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const result = validateDisplayName(visitorName);
-    if (!result.ok) {
+    if (result.ok === false) {
       setError(result.error);
       inputRef.current?.focus();
       return;
@@ -43,6 +59,13 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
 
   const handleContinueAsGuest = () => {
     handleFinish('Guest');
+  };
+
+  const handleEnterAsOwner = () => {
+    try {
+      localStorage.setItem('portfolio_is_owner', 'true');
+    } catch {}
+    handleFinish(profileData.name);
   };
 
   return (
@@ -58,10 +81,10 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
       <div className="w-full flex justify-end max-w-sm sm:max-w-md">
         <button
           type="button"
-          onClick={handleContinueAsGuest}
-          className="text-xs font-medium text-[#8E8E8E] hover:text-[#262626] dark:hover:text-white px-3.5 py-1.5 rounded-full border border-[#DBDBDB]/60 dark:border-[#262626] transition-colors"
+          onClick={isOwner ? () => onComplete() : handleContinueAsGuest}
+          className="text-xs font-medium text-[#8E8E8E] hover:text-[#262626] dark:hover:text-white px-3.5 py-1.5 rounded-full border border-[#DBDBDB]/60 dark:border-[#262626] transition-colors cursor-pointer"
         >
-          <span>Skip as Guest</span>
+          <span>{isOwner ? 'Skip Intro' : 'Skip as Guest'}</span>
         </button>
       </div>
 
@@ -86,68 +109,80 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
           Personal Portfolio &amp; Developer Profile
         </p>
 
-        {/* Name Prompt Box */}
-        <div className="w-full mt-6 p-5 sm:p-6 bg-white dark:bg-[#121212] rounded-2xl border border-[#DBDBDB] dark:border-[#262626] shadow-xl text-left">
-          <div className="text-center mb-4">
-            <h2 className="text-base font-bold text-[#262626] dark:text-white">
-              Welcome to my portfolio!
-            </h2>
-            <p className="text-xs text-[#8E8E8E] dark:text-[#A8A8A8] mt-1 leading-relaxed">
-              What is your name? Entering your name lets me know who is visiting, liking, or commenting on projects.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-3.5">
-            <div>
-              <label htmlFor="intro-visitor-name" className="sr-only">
-                Your Name
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#8E8E8E] dark:text-[#737373]">
-                  <User className="w-4 h-4" />
-                </div>
-                <input
-                  id="intro-visitor-name"
-                  ref={inputRef}
-                  type="text"
-                  value={visitorName}
-                  onChange={(e) => {
-                    setVisitorNameInput(e.target.value);
-                    if (error) setError('');
-                  }}
-                  placeholder="Enter your name (e.g. Alex, Sarah, Recruiter)..."
-                  maxLength={40}
-                  className={`w-full text-xs sm:text-sm pl-10 pr-3.5 py-2.5 rounded-xl bg-[#FAFAFA] dark:bg-[#1A1A1A] text-[#262626] dark:text-white placeholder-[#8E8E8E] dark:placeholder-[#737373] border transition-all focus:outline-none ${
-                    error
-                      ? 'border-[#ED4956] ring-1 ring-[#ED4956]'
-                      : 'border-[#DBDBDB] dark:border-[#333333] focus:border-[#0095F6] focus:ring-1 focus:ring-[#0095F6]'
-                  }`}
-                />
-              </div>
-              {error && (
-                <p className="text-[11px] text-[#ED4956] font-medium mt-1.5 pl-1">
-                  {error}
-                </p>
-              )}
+        {/* Name Prompt Box — ONLY shown to visitors who are NOT the owner */}
+        {!isOwner && (
+          <div className="w-full mt-6 p-5 sm:p-6 bg-white dark:bg-[#121212] rounded-2xl border border-[#DBDBDB] dark:border-[#262626] shadow-xl text-left">
+            <div className="text-center mb-4">
+              <h2 className="text-base font-bold text-[#262626] dark:text-white">
+                Welcome to my portfolio!
+              </h2>
+              <p className="text-xs text-[#8E8E8E] dark:text-[#A8A8A8] mt-1 leading-relaxed">
+                What is your name? Entering your name lets me know who is visiting, liking, or commenting on projects.
+              </p>
             </div>
 
-            <button
-              type="submit"
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#0095F6] hover:bg-[#1877F2] active:scale-[0.98] text-white text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-md"
-            >
-              <span>Enter Portfolio</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <form onSubmit={handleSubmit} className="space-y-3.5">
+              <div>
+                <label htmlFor="intro-visitor-name" className="sr-only">
+                  Your Name
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#8E8E8E] dark:text-[#737373]">
+                    <User className="w-4 h-4" />
+                  </div>
+                  <input
+                    id="intro-visitor-name"
+                    ref={inputRef}
+                    type="text"
+                    value={visitorName}
+                    onChange={(e) => {
+                      setVisitorNameInput(e.target.value);
+                      if (error) setError('');
+                    }}
+                    placeholder="Enter your name (e.g. Alex, Sarah, Recruiter)..."
+                    maxLength={40}
+                    className={`w-full text-xs sm:text-sm pl-10 pr-3.5 py-2.5 rounded-xl bg-[#FAFAFA] dark:bg-[#1A1A1A] text-[#262626] dark:text-white placeholder-[#8E8E8E] dark:placeholder-[#737373] border transition-all focus:outline-none ${
+                      error
+                        ? 'border-[#ED4956] ring-1 ring-[#ED4956]'
+                        : 'border-[#DBDBDB] dark:border-[#333333] focus:border-[#0095F6] focus:ring-1 focus:ring-[#0095F6]'
+                    }`}
+                  />
+                </div>
+                {error && (
+                  <p className="text-[11px] text-[#ED4956] font-medium mt-1.5 pl-1">
+                    {error}
+                  </p>
+                )}
+              </div>
 
-            <button
-              type="button"
-              onClick={handleContinueAsGuest}
-              className="w-full text-center text-xs text-[#8E8E8E] hover:text-[#262626] dark:hover:text-white py-1 transition-colors cursor-pointer"
-            >
-              or continue as Guest
-            </button>
-          </form>
-        </div>
+              <button
+                type="submit"
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#0095F6] hover:bg-[#1877F2] active:scale-[0.98] text-white text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-md"
+              >
+                <span>Enter Portfolio</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <div className="flex items-center justify-between pt-1">
+                <button
+                  type="button"
+                  onClick={handleContinueAsGuest}
+                  className="text-xs text-[#8E8E8E] hover:text-[#262626] dark:hover:text-white transition-colors cursor-pointer"
+                >
+                  Continue as Guest
+                </button>
+                <button
+                  type="button"
+                  onClick={handleEnterAsOwner}
+                  className="text-xs font-medium text-[#8E8E8E] hover:text-[#0095F6] dark:hover:text-[#0095F6] transition-colors cursor-pointer"
+                  title="Remember this device as the portfolio owner"
+                >
+                  I&apos;m the Owner
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
       </div>
 
       {/* Bottom: Meta-style footer */}

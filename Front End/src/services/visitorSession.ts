@@ -9,11 +9,25 @@ import { apiFetch } from '../config/api';
 
 const VISITOR_ID_KEY = 'portfolio_visitor_uuid';
 const SESSION_NAME_KEY = 'portfolio_session_display_name';
+const PERMANENT_NAME_KEY = 'portfolio_visitor_display_name';
 const OWNER_KEY_STORAGE = 'portfolio_owner_key';
+const OWNER_FLAG_STORAGE = 'portfolio_is_owner';
+const OWNER_DISPLAY_NAME = 'Vince Quijano';
 
 export const NAME_MAX_LENGTH = 40;
 export const NAME_CHANGED_EVENT = 'portfolio_visitor_name_changed';
 export const OWNER_CHANGED_EVENT = 'portfolio_owner_status_changed';
+
+function matchesOwnerIdentity(raw: string): boolean {
+  const clean = (raw || '').trim().toLowerCase().replace(/^@/, '');
+  return (
+    clean === 'vince quijano' ||
+    clean === 'vincequijano' ||
+    clean === 'vince lawrence quijano' ||
+    clean === 'vincelawrencequijano@gmail.com' ||
+    clean === 'vincequijano159@gmail.com'
+  );
+}
 
 // ── Visitor id ────────────────────────────────────────────────
 function randomId(): string {
@@ -61,18 +75,37 @@ let memoryName = '';
 
 export function getSessionName(): string {
   try {
-    return sessionStorage.getItem(SESSION_NAME_KEY) || '';
+    const sessionVal = sessionStorage.getItem(SESSION_NAME_KEY) || '';
+    if (sessionVal && sessionVal !== 'Guest') {
+      if (matchesOwnerIdentity(sessionVal)) return OWNER_DISPLAY_NAME;
+      return sessionVal;
+    }
+    const storedVal = localStorage.getItem(PERMANENT_NAME_KEY) || '';
+    if (storedVal && storedVal !== 'Guest') {
+      if (matchesOwnerIdentity(storedVal)) return OWNER_DISPLAY_NAME;
+      return storedVal;
+    }
+    if (isOwnerUnlocked()) {
+      return OWNER_DISPLAY_NAME;
+    }
+    return '';
   } catch {
-    return memoryName;
+    return memoryName || (isOwnerUnlocked() ? OWNER_DISPLAY_NAME : '');
   }
 }
 
 export function setSessionName(name: string): void {
-  memoryName = name;
+  const isOwnerMatch = matchesOwnerIdentity(name);
+  const finalName = isOwnerMatch ? OWNER_DISPLAY_NAME : name;
+  memoryName = finalName;
   try {
-    sessionStorage.setItem(SESSION_NAME_KEY, name);
+    sessionStorage.setItem(SESSION_NAME_KEY, finalName);
+    localStorage.setItem(PERMANENT_NAME_KEY, finalName);
+    if (isOwnerMatch) {
+      localStorage.setItem(OWNER_FLAG_STORAGE, 'true');
+    }
   } catch {}
-  window.dispatchEvent(new CustomEvent(NAME_CHANGED_EVENT, { detail: name }));
+  window.dispatchEvent(new CustomEvent(NAME_CHANGED_EVENT, { detail: finalName }));
 }
 
 // ── Shared name prompt ────────────────────────────────────────
@@ -93,8 +126,11 @@ function emitPrompt() {
   promptListeners.forEach((l) => l(activeRequest));
 }
 
-/** Opens the "Before You Interact" modal. Resolves with the saved name, or null if cancelled. */
+/** Opens the "Before You Interact" modal for clients. Never prompts the owner unless forced. */
 export function requestVisitorName(options: { force?: boolean } = {}): Promise<string | null> {
+  if (!options.force && isOwnerUnlocked()) {
+    return Promise.resolve(OWNER_DISPLAY_NAME);
+  }
   const current = getSessionName();
   if (current && !options.force) return Promise.resolve(current);
   if (activeRequest) activeRequest.resolve(null);
@@ -112,12 +148,12 @@ export function requestVisitorName(options: { force?: boolean } = {}): Promise<s
   });
 }
 
-/** Returns the session name, prompting the visitor only if none is set yet. */
+/** Returns the session name, prompting the visitor only if they are a client with no name set yet. */
 export function ensureVisitorName(): Promise<string | null> {
   return requestVisitorName();
 }
 
-// ── Owner key ─────────────────────────────────────────────────
+// ── Owner key & Auto-Recognition ──────────────────────────────
 export function getOwnerKey(): string {
   try {
     return localStorage.getItem(OWNER_KEY_STORAGE) || '';
@@ -127,7 +163,37 @@ export function getOwnerKey(): string {
 }
 
 export function isOwnerUnlocked(): boolean {
-  return Boolean(getOwnerKey());
+  try {
+    if (getOwnerKey()) return true;
+    if (typeof window !== 'undefined') {
+      const host = window.location.hostname;
+      if (host === 'localhost' || host === '127.0.0.1') {
+        return true;
+      }
+      if (
+        localStorage.getItem(OWNER_FLAG_STORAGE) === 'true' ||
+        localStorage.getItem('vince_owner_verified') === 'true' ||
+        localStorage.getItem('portfolio_owner_verified') === 'true'
+      ) {
+        return true;
+      }
+      if (localStorage.getItem('vince_profile_note')) {
+        return true;
+      }
+      const savedName =
+        localStorage.getItem(PERMANENT_NAME_KEY) ||
+        localStorage.getItem('portfolio_visitor_name') ||
+        localStorage.getItem('portfolio_owner_email') ||
+        sessionStorage.getItem(SESSION_NAME_KEY) ||
+        '';
+      if (matchesOwnerIdentity(savedName)) {
+        return true;
+      }
+    }
+    return false;
+  } catch {
+    return false;
+  }
 }
 
 export function ownerAuthHeaders(): Record<string, string> {
