@@ -153,14 +153,6 @@ export const VisitorNameModal: React.FC<VisitorNameModalProps> = ({ isOpen, onCl
             </button>
           </div>
 
-          <button
-            type="button"
-            onClick={() => onClose(profileData.name)}
-            className="w-full text-center text-[11px] text-[#8E8E8E] hover:text-[#0095F6] dark:hover:text-[#0095F6] pt-1 transition-colors cursor-pointer"
-          >
-            I&apos;m {profileData.name} (Portfolio Owner)
-          </button>
-
           <p
             id="visitor-name-privacy"
             className="flex items-start gap-1.5 text-[10.5px] text-[#8E8E8E] dark:text-[#737373] text-left leading-snug pt-1"

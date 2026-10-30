@@ -61,13 +61,6 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
     handleFinish('Guest');
   };
 
-  const handleEnterAsOwner = () => {
-    try {
-      localStorage.setItem('portfolio_is_owner', 'true');
-    } catch {}
-    handleFinish(profileData.name);
-  };
-
   return (
     <div
       className={`fixed inset-0 z-100 flex flex-col items-center justify-between py-10 px-4 bg-white/95 dark:bg-black/95 backdrop-blur-md transition-opacity duration-350 select-none ${
@@ -163,23 +156,13 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
                 <ArrowRight className="w-4 h-4" />
               </button>
 
-              <div className="flex items-center justify-between pt-1">
-                <button
-                  type="button"
-                  onClick={handleContinueAsGuest}
-                  className="text-xs text-[#8E8E8E] hover:text-[#262626] dark:hover:text-white transition-colors cursor-pointer"
-                >
-                  Continue as Guest
-                </button>
-                <button
-                  type="button"
-                  onClick={handleEnterAsOwner}
-                  className="text-xs font-medium text-[#8E8E8E] hover:text-[#0095F6] dark:hover:text-[#0095F6] transition-colors cursor-pointer"
-                  title="Remember this device as the portfolio owner"
-                >
-                  I&apos;m the Owner
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={handleContinueAsGuest}
+                className="w-full text-center text-xs text-[#8E8E8E] hover:text-[#262626] dark:hover:text-white py-1 transition-colors cursor-pointer"
+              >
+                or continue as Guest
+              </button>
             </form>
           </div>
         )}
