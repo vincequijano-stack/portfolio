@@ -21,7 +21,7 @@ const resumeModules = import.meta.glob<string>(
   '../../../Photo/**/*.{pdf,PDF}',
   { eager: true, import: 'default' }
 );
-const discoveredResumeUrl = Object.values(resumeModules)[0] || '/assets/resume/Resume.pdf';
+const discoveredResumeUrl = '/assets/resume/Resume.pdf' || Object.values(resumeModules)[0];
 
 interface ProfileHeaderProps {
   onNavigate: (sectionId: string) => void;

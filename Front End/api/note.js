@@ -65,3 +65,4 @@ export default async function handler(req, res) {
     return handleError(res, err, 'note');
   }
 }
+
