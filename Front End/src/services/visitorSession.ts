@@ -64,6 +64,9 @@ export function validateDisplayName(raw: string): { ok: true; value: string } | 
     .replace(/\s+/g, ' ')
     .trim();
   if (!value) return { ok: false, error: 'Please enter your name.' };
+  if (value.toLowerCase() === 'guest') {
+    return { ok: false, error: 'Please enter your actual name (Guest is not allowed).' };
+  }
   if (value.length > NAME_MAX_LENGTH) {
     return { ok: false, error: `Name must be ${NAME_MAX_LENGTH} characters or fewer.` };
   }
@@ -75,18 +78,12 @@ let memoryName = '';
 
 export function getSessionName(): string {
   try {
-    const sessionVal = sessionStorage.getItem(SESSION_NAME_KEY) || '';
-    if (sessionVal && sessionVal !== 'Guest') {
-      if (matchesOwnerIdentity(sessionVal)) return OWNER_DISPLAY_NAME;
-      return sessionVal;
-    }
-    const storedVal = localStorage.getItem(PERMANENT_NAME_KEY) || '';
-    if (storedVal && storedVal !== 'Guest') {
-      if (matchesOwnerIdentity(storedVal)) return OWNER_DISPLAY_NAME;
-      return storedVal;
-    }
     if (isOwnerUnlocked()) {
       return OWNER_DISPLAY_NAME;
+    }
+    const sessionVal = sessionStorage.getItem(SESSION_NAME_KEY) || '';
+    if (sessionVal && sessionVal.toLowerCase() !== 'guest') {
+      return sessionVal;
     }
     return '';
   } catch {
@@ -100,9 +97,9 @@ export function setSessionName(name: string): void {
   memoryName = finalName;
   try {
     sessionStorage.setItem(SESSION_NAME_KEY, finalName);
-    localStorage.setItem(PERMANENT_NAME_KEY, finalName);
     if (isOwnerMatch) {
       localStorage.setItem(OWNER_FLAG_STORAGE, 'true');
+      localStorage.setItem(PERMANENT_NAME_KEY, OWNER_DISPLAY_NAME);
     }
   } catch {}
   window.dispatchEvent(new CustomEvent(NAME_CHANGED_EVENT, { detail: finalName }));

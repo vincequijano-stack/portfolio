@@ -57,10 +57,6 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
     handleFinish(result.value);
   };
 
-  const handleContinueAsGuest = () => {
-    handleFinish('Guest');
-  };
-
   return (
     <div
       className={`fixed inset-0 z-100 flex flex-col items-center justify-between py-10 px-4 bg-white/95 dark:bg-black/95 backdrop-blur-md transition-opacity duration-350 select-none ${
@@ -71,14 +67,16 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
       aria-label="Welcome Entrance"
     >
       {/* Top spacer */}
-      <div className="w-full flex justify-end max-w-sm sm:max-w-md">
-        <button
-          type="button"
-          onClick={isOwner ? () => onComplete() : handleContinueAsGuest}
-          className="text-xs font-medium text-[#8E8E8E] hover:text-[#262626] dark:hover:text-white px-3.5 py-1.5 rounded-full border border-[#DBDBDB]/60 dark:border-[#262626] transition-colors cursor-pointer"
-        >
-          <span>{isOwner ? 'Skip Intro' : 'Skip as Guest'}</span>
-        </button>
+      <div className="w-full flex justify-end max-w-sm sm:max-w-md min-h-[28px]">
+        {isOwner && (
+          <button
+            type="button"
+            onClick={() => onComplete()}
+            className="text-xs font-medium text-[#8E8E8E] hover:text-[#262626] dark:hover:text-white px-3.5 py-1.5 rounded-full border border-[#DBDBDB]/60 dark:border-[#262626] transition-colors cursor-pointer"
+          >
+            <span>Skip Intro</span>
+          </button>
+        )}
       </div>
 
       {/* Center Welcome Card */}
@@ -151,14 +149,6 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
               >
                 <span>Enter Portfolio</span>
                 <ArrowRight className="w-4 h-4" />
-              </button>
-
-              <button
-                type="button"
-                onClick={handleContinueAsGuest}
-                className="w-full text-center text-xs text-[#8E8E8E] hover:text-[#262626] dark:hover:text-white py-1 transition-colors cursor-pointer"
-              >
-                or continue as Guest
               </button>
             </form>
           </div>
