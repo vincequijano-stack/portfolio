@@ -109,9 +109,6 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
               <h2 className="text-base font-bold text-[#262626] dark:text-white">
                 Welcome to my portfolio!
               </h2>
-              <p className="text-xs text-[#8E8E8E] dark:text-[#A8A8A8] mt-1 leading-relaxed">
-                What is your name? Entering your name lets me know who is visiting, liking, or commenting on projects.
-              </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-3.5">
