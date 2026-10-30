@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { RateModal } from './RateModal';
 import { ratingService, ClientReview } from '../services/ratingService';
+import { isOwnerUnlocked } from '../services/visitorSession';
 import { profileData } from '../data/profile';
 import { eventStories } from '../data/events';
 
@@ -38,25 +39,104 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   const averageRating = ratingsState.average;
   const totalReviews = ratingsState.count;
 
-  // Real-time editable Note (persists in localStorage)
+  const DEFAULT_NOTE = 'LF OJT';
+  const NOTE_CLOUD_TOPIC = 'vince_quijano_portfolio_note_live';
+  const isOwner = isOwnerUnlocked();
+
+  // Real-time editable Note (synced globally so all visitors see the owner's note)
   const [note, setNote] = useState<string>(() => {
     try {
-      return localStorage.getItem('vince_profile_note') || 'Available for work 🚀';
+      return (
+        localStorage.getItem('vince_profile_note') ||
+        localStorage.getItem('vince_public_note_cache') ||
+        DEFAULT_NOTE
+      );
     } catch {
-      return 'Available for work 🚀';
+      return DEFAULT_NOTE;
     }
   });
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [noteDraft, setNoteDraft] = useState(note);
 
+  // Fetch latest owner note & subscribe to live updates for all visitors
+  React.useEffect(() => {
+    let eventSource: EventSource | null = null;
+
+    // 1. Fetch latest published note from cloud history
+    fetch(`https://ntfy.sh/${NOTE_CLOUD_TOPIC}/json?poll=1&since=all`)
+      .then((res) => (res.ok ? res.text() : ''))
+      .then((text) => {
+        if (!text) return;
+        const lines = text.trim().split('\n');
+        let latestNote = '';
+        let latestTime = 0;
+        lines.forEach((line) => {
+          try {
+            const item = JSON.parse(line);
+            if (item.event === 'message' && item.message) {
+              const parsed = JSON.parse(item.message);
+              if (parsed && typeof parsed.note === 'string' && parsed.note.trim()) {
+                const ts = Number(parsed.timestamp) || Number(item.time) * 1000 || 0;
+                if (ts >= latestTime) {
+                  latestTime = ts;
+                  latestNote = parsed.note.trim();
+                }
+              }
+            }
+          } catch {}
+        });
+        if (latestNote) {
+          setNote(latestNote);
+          try {
+            localStorage.setItem('vince_public_note_cache', latestNote);
+          } catch {}
+        }
+      })
+      .catch(() => {});
+
+    // 2. Real-time SSE stream so visitors see note updates live
+    try {
+      eventSource = new EventSource(`https://ntfy.sh/${NOTE_CLOUD_TOPIC}/sse`);
+      eventSource.onmessage = (event) => {
+        try {
+          const item = JSON.parse(event.data);
+          if (item && item.event === 'message' && item.message) {
+            const parsed = JSON.parse(item.message);
+            if (parsed && typeof parsed.note === 'string' && parsed.note.trim()) {
+              const updated = parsed.note.trim();
+              setNote(updated);
+              try {
+                localStorage.setItem('vince_public_note_cache', updated);
+              } catch {}
+            }
+          }
+        } catch {}
+      };
+    } catch {}
+
+    return () => {
+      if (eventSource) eventSource.close();
+    };
+  }, []);
+
   const handleSaveNote = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    const trimmed = noteDraft.trim() || 'Available for work 🚀';
+    const trimmed = noteDraft.trim() || DEFAULT_NOTE;
     setNote(trimmed);
     setIsEditingNote(false);
     try {
       localStorage.setItem('vince_profile_note', trimmed);
+      localStorage.setItem('vince_public_note_cache', trimmed);
       localStorage.setItem('portfolio_is_owner', 'true');
+    } catch {}
+
+    // Publish note globally so all portfolio visitors see it immediately
+    try {
+      fetch(`https://ntfy.sh/${NOTE_CLOUD_TOPIC}`, {
+        method: 'POST',
+        body: JSON.stringify({ note: trimmed, timestamp: Date.now() }),
+        headers: { 'Content-Type': 'application/json' },
+      }).catch(() => {});
     } catch {}
   };
 
@@ -111,7 +191,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                     <X className="w-3 h-3" />
                   </button>
                 </form>
-              ) : (
+              ) : isOwner ? (
                 <div
                   onClick={() => {
                     setNoteDraft(note);
@@ -122,6 +202,13 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 >
                   <span className="max-w-[100px] sm:max-w-[130px] truncate">{note}</span>
                   <Pencil className="w-2.5 h-2.5 text-[#8E8E8E] dark:text-[#A8A8A8] opacity-60 group-hover/note:opacity-100 group-hover/note:text-[#0095F6] transition-opacity" />
+                </div>
+              ) : (
+                <div
+                  className="bg-white dark:bg-[#262626] border border-[#DBDBDB] dark:border-[#363636] text-[#262626] dark:text-white text-[10px] sm:text-[11px] font-medium px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-2xl shadow-xs flex items-center gap-1.5 select-none"
+                  title={`${profileData.name}'s note`}
+                >
+                  <span className="max-w-[110px] sm:max-w-[140px] truncate">{note}</span>
                 </div>
               )}
               {/* Small speech bubble pointer */}
