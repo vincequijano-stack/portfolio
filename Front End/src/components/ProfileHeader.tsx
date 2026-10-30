@@ -17,6 +17,12 @@ import { apiFetch } from '../config/api';
 import { profileData } from '../data/profile';
 import { eventStories } from '../data/events';
 
+const resumeModules = import.meta.glob<string>(
+  '../../../Photo/**/*.{pdf,PDF}',
+  { eager: true, import: 'default' }
+);
+const discoveredResumeUrl = Object.values(resumeModules)[0] || '/assets/resume/Resume.pdf';
+
 interface ProfileHeaderProps {
   onNavigate: (sectionId: string) => void;
   onOpenStoryModal: (storyId: string) => void;
@@ -190,7 +196,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
   const handleDownloadCV = () => {
     const link = document.createElement('a');
-    link.href = '/assets/images/certificates/Software-Engineering-Python.pdf';
+    link.href = discoveredResumeUrl;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     link.click();
