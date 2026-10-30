@@ -13,6 +13,7 @@ import {
 import { RateModal } from './RateModal';
 import { ratingService, ClientReview } from '../services/ratingService';
 import { isOwnerUnlocked } from '../services/visitorSession';
+import { apiFetch } from '../config/api';
 import { profileData } from '../data/profile';
 import { eventStories } from '../data/events';
 
@@ -58,43 +59,70 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [noteDraft, setNoteDraft] = useState(note);
 
-  // Fetch latest owner note & subscribe to live updates for all visitors
+  // Fetch latest owner note from database & cloud stream so all visitors always see the latest note
   React.useEffect(() => {
     let eventSource: EventSource | null = null;
+    let channel: BroadcastChannel | null = null;
+    let latestTime = 0;
 
-    // 1. Fetch latest published note from cloud history
-    fetch(`https://ntfy.sh/${NOTE_CLOUD_TOPIC}/json?poll=1&since=all`)
-      .then((res) => (res.ok ? res.text() : ''))
-      .then((text) => {
-        if (!text) return;
-        const lines = text.trim().split('\n');
-        let latestNote = '';
-        let latestTime = 0;
-        lines.forEach((line) => {
-          try {
-            const item = JSON.parse(line);
-            if (item.event === 'message' && item.message) {
-              const parsed = JSON.parse(item.message);
-              if (parsed && typeof parsed.note === 'string' && parsed.note.trim()) {
-                const ts = Number(parsed.timestamp) || Number(item.time) * 1000 || 0;
-                if (ts >= latestTime) {
-                  latestTime = ts;
-                  latestNote = parsed.note.trim();
+    const applyIncomingNote = (incomingNote: string, ts = 0) => {
+      const cleaned = (incomingNote || '').trim();
+      if (!cleaned) return;
+      if (ts > 0 && ts < latestTime) return;
+      if (ts > latestTime) latestTime = ts;
+      setNote(cleaned);
+      try {
+        localStorage.setItem('vince_public_note_cache', cleaned);
+      } catch {}
+    };
+
+    const syncNote = () => {
+      // 1. Fetch from persistent backend/database (/api/note)
+      apiFetch<{ note?: string; timestamp?: number }>('/api/note')
+        .then((data) => {
+          if (data && data.note) {
+            applyIncomingNote(data.note, Number(data.timestamp) || 0);
+          }
+        })
+        .catch(() => {});
+
+      // 2. Fetch latest published note from cloud history (ntfy.sh)
+      fetch(`https://ntfy.sh/${NOTE_CLOUD_TOPIC}/json?poll=1&since=all`)
+        .then((res) => (res.ok ? res.text() : ''))
+        .then((text) => {
+          if (!text) return;
+          const lines = text.trim().split('\n');
+          lines.forEach((line) => {
+            try {
+              const item = JSON.parse(line);
+              if (item.event === 'message' && item.message) {
+                const parsed = JSON.parse(item.message);
+                if (parsed && typeof parsed.note === 'string' && parsed.note.trim()) {
+                  const ts = Number(parsed.timestamp) || Number(item.time) * 1000 || 0;
+                  applyIncomingNote(parsed.note, ts);
                 }
               }
-            }
-          } catch {}
-        });
-        if (latestNote) {
-          setNote(latestNote);
-          try {
-            localStorage.setItem('vince_public_note_cache', latestNote);
-          } catch {}
-        }
-      })
-      .catch(() => {});
+            } catch {}
+          });
+        })
+        .catch(() => {});
+    };
 
-    // 2. Real-time SSE stream so visitors see note updates live
+    syncNote();
+
+    // 3. Cross-tab BroadcastChannel sync
+    try {
+      if ('BroadcastChannel' in window) {
+        channel = new BroadcastChannel('portfolio_note_channel');
+        channel.onmessage = (e) => {
+          if (e.data && typeof e.data.note === 'string') {
+            applyIncomingNote(e.data.note, Number(e.data.timestamp) || Date.now());
+          }
+        };
+      }
+    } catch {}
+
+    // 4. Real-time SSE stream so visitors across devices see note updates live
     try {
       eventSource = new EventSource(`https://ntfy.sh/${NOTE_CLOUD_TOPIC}/sse`);
       eventSource.onmessage = (event) => {
@@ -103,25 +131,30 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           if (item && item.event === 'message' && item.message) {
             const parsed = JSON.parse(item.message);
             if (parsed && typeof parsed.note === 'string' && parsed.note.trim()) {
-              const updated = parsed.note.trim();
-              setNote(updated);
-              try {
-                localStorage.setItem('vince_public_note_cache', updated);
-              } catch {}
+              applyIncomingNote(parsed.note, Number(parsed.timestamp) || Date.now());
             }
           }
         } catch {}
       };
     } catch {}
 
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === 'visible') syncNote();
+    }, 30_000);
+    window.addEventListener('focus', syncNote);
+
     return () => {
       if (eventSource) eventSource.close();
+      if (channel) channel.close();
+      window.clearInterval(interval);
+      window.removeEventListener('focus', syncNote);
     };
   }, []);
 
   const handleSaveNote = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const trimmed = noteDraft.trim() || DEFAULT_NOTE;
+    const now = Date.now();
     setNote(trimmed);
     setIsEditingNote(false);
     try {
@@ -130,11 +163,26 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       localStorage.setItem('portfolio_is_owner', 'true');
     } catch {}
 
-    // Publish note globally so all portfolio visitors see it immediately
+    // 1. Save permanently in backend/database (/api/note)
+    apiFetch('/api/note', {
+      method: 'POST',
+      body: JSON.stringify({ note: trimmed }),
+    }).catch(() => {});
+
+    // 2. Broadcast across tabs
+    try {
+      if ('BroadcastChannel' in window) {
+        const ch = new BroadcastChannel('portfolio_note_channel');
+        ch.postMessage({ note: trimmed, timestamp: now });
+        ch.close();
+      }
+    } catch {}
+
+    // 3. Publish note globally in real-time so all visitors see it immediately
     try {
       fetch(`https://ntfy.sh/${NOTE_CLOUD_TOPIC}`, {
         method: 'POST',
-        body: JSON.stringify({ note: trimmed, timestamp: Date.now() }),
+        body: JSON.stringify({ note: trimmed, timestamp: now }),
         headers: { 'Content-Type': 'application/json' },
       }).catch(() => {});
     } catch {}

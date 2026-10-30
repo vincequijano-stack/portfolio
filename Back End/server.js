@@ -70,6 +70,7 @@ app.use('/api/contact', contactLimiter, contactRoute);
 app.use('/api/likes', likesRoute);
 app.use('/api/ratings', ratingsRoute);
 app.use('/api/comments', commentsRoute);
+app.all('/api/note', loadApiHandler('note'));
 app.get('/api/owner', loadApiHandler('owner'));
 
 // ── 404 Handler ───────────────────────────────────────────────

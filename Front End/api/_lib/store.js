@@ -18,6 +18,7 @@ export class StorageNotConfiguredError extends Error {
 
 const KEY_PREFIX = 'pf:';
 const REVIEWS_KEY = `${KEY_PREFIX}reviews`;
+const NOTE_KEY = `${KEY_PREFIX}profile_note`;
 const likesKey = (projectId) => `${KEY_PREFIX}likes:${projectId}`;
 const commentsKey = (projectId) => `${KEY_PREFIX}comments:${projectId}`;
 const rateKey = (key) => `${KEY_PREFIX}rl:${key}`;
@@ -124,6 +125,16 @@ function createRedisStore({ url, token }) {
       return Object.fromEntries(projectIds.map((id, i) => [id, Number(results[i]) || 0]));
     },
 
+    async getNote() {
+      const [val] = await pipeline([['GET', NOTE_KEY]]);
+      return val ? safeParse(val) : null;
+    },
+
+    async setNote(noteData) {
+      await pipeline([['SET', NOTE_KEY, JSON.stringify(noteData)]]);
+      return noteData;
+    },
+
     /** Fixed-window counter. Returns the hit count for the current window. */
     async hit(key, windowSec) {
       const k = rateKey(key);
@@ -172,6 +183,7 @@ function createFileStore(filePath) {
       likedBy,
       reviews: Array.isArray(data.reviews) ? data.reviews : [],
       comments,
+      note: data.note || null,
     };
   }
 
@@ -282,6 +294,20 @@ function createFileStore(filePath) {
         const db = await read();
         const comments = db.comments || {};
         return Object.fromEntries(projectIds.map((id) => [id, (comments[id] || []).length]));
+      }),
+
+    getNote: () =>
+      withLock(async () => {
+        const db = await read();
+        return db.note || null;
+      }),
+
+    setNote: (noteData) =>
+      withLock(async () => {
+        const db = await read();
+        db.note = noteData;
+        await write(db);
+        return noteData;
       }),
 
     async hit(key, windowSec) {
