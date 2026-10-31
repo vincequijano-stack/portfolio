@@ -3,7 +3,11 @@ import {
   Home,
   Heart,
   Moon,
-  Sun
+  Sun,
+  Grid,
+  Code2,
+  Award,
+  Mail,
 } from 'lucide-react';
 import { InstagramIcon, GithubIcon, LinkedinIcon } from './SocialIcons';
 import { profileData } from '../data/profile';
@@ -25,57 +29,62 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const { theme, toggleTheme } = useTheme();
 
-  // Direct Gmail compose link for clients
-  const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
-    profileData.email
-  )}&su=${encodeURIComponent('Project Inquiry for Vince Quijano')}&body=${encodeURIComponent(
-    'Hi Vince,\n\nI visited your portfolio website and would like to discuss a project / opportunity...'
-  )}`;
-
-  const handleMessageMe = (e: React.MouseEvent) => {
-    e.preventDefault();
-    window.open(gmailComposeUrl, '_blank', 'noopener,noreferrer');
-  };
+  const navItems = [
+    { id: 'profile-top', label: 'Home', icon: Home },
+    { id: 'projects', label: 'Projects', icon: Grid },
+    { id: 'skills', label: 'Skills', icon: Code2 },
+    { id: 'certificates', label: 'Certs', icon: Award },
+    { id: 'contact', label: 'Contact', icon: Mail },
+  ];
 
   return (
     <aside
-      className="hidden md:flex flex-col w-[72px] h-screen fixed left-0 top-0 bg-white dark:bg-black border-r border-[#DBDBDB] dark:border-[#262626] z-40 py-6 items-center select-none transition-colors duration-200"
-      aria-label="Instagram Navigation"
+      className="hidden md:flex flex-col justify-between w-[76px] h-screen fixed left-0 top-0 bg-white dark:bg-black border-r border-[#DBDBDB] dark:border-[#262626] z-40 py-4 items-center select-none transition-colors duration-200 overflow-y-auto no-scrollbar"
+      aria-label="Portfolio Navigation"
     >
-      {/* 1. Top Instagram Camera Glyph */}
-      <div className="flex flex-col items-center gap-6 w-full">
+      {/* 1. Top Instagram Camera Glyph + Primary Section Links */}
+      <div className="flex flex-col items-center gap-2 w-full px-1.5">
         <a
           href="#profile-top"
           onClick={(e) => {
             e.preventDefault();
             onNavigate('profile-top');
           }}
-          className="p-3 text-black dark:text-white hover:scale-105 transition-transform"
+          className="p-2.5 mb-1 text-black dark:text-white hover:scale-105 transition-transform"
           aria-label="Instagram Home"
-          title="Instagram"
+          title="Back to Top"
         >
           <InstagramIcon className="w-6 h-6 stroke-[2]" />
         </a>
 
-        {/* 2. Navigation Icons (Search, Reels, and Plus replaced with Theme, GitHub, Menu) */}
-        <nav className="flex flex-col items-center gap-4 w-full">
-          {/* Home */}
-          <button
-            onClick={() => onNavigate('profile-top')}
-            className={`p-3 rounded-xl transition-all ${
-              activeSection === 'profile-top'
-                ? 'text-black dark:text-white bg-[#F2F2F2] dark:bg-[#1A1A1A]'
-                : 'text-[#262626] dark:text-[#F5F5F5] hover:bg-[#FAFAFA] dark:hover:bg-[#1A1A1A]'
-            }`}
-            title="Home"
-            aria-label="Home"
-          >
-            <Home
-              className={`w-6 h-6 transition-transform hover:scale-110 ${
-                activeSection === 'profile-top' ? 'stroke-[2.5] fill-current' : 'stroke-[1.75]'
-              }`}
-            />
-          </button>
+        <nav className="flex flex-col items-center gap-1 w-full">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeSection === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onNavigate(item.id)}
+                className={`relative w-full py-2 px-1 rounded-xl flex flex-col items-center justify-center gap-1 transition-all cursor-pointer group ${
+                  isActive
+                    ? 'text-[#0095F6] bg-[#0095F6]/10 dark:bg-[#0095F6]/15 font-bold'
+                    : 'text-[#262626] dark:text-[#F5F5F5] hover:bg-[#F2F2F2] dark:hover:bg-[#1A1A1A]'
+                }`}
+                title={item.label}
+                aria-label={item.label}
+              >
+                {isActive && (
+                  <span className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full bg-[#0095F6]" />
+                )}
+                <Icon
+                  className={`w-5 h-5 transition-transform group-hover:scale-110 ${
+                    isActive ? 'stroke-[2.5]' : 'stroke-[1.75]'
+                  }`}
+                />
+                <span className="text-[9.5px] leading-none tracking-tight">{item.label}</span>
+              </button>
+            );
+          })}
 
           {/* Notifications (Heart) with Real-Time Notification Badge */}
           <button
@@ -86,35 +95,43 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onNavigate('certificates');
               }
             }}
-            className="p-3 rounded-xl text-[#262626] dark:text-[#F5F5F5] hover:bg-[#FAFAFA] dark:hover:bg-[#1A1A1A] transition-all relative group"
+            className="w-full py-2 px-1 rounded-xl flex flex-col items-center justify-center gap-1 text-[#262626] dark:text-[#F5F5F5] hover:bg-[#F2F2F2] dark:hover:bg-[#1A1A1A] transition-all relative group cursor-pointer"
             title="Notifications / Activity"
             aria-label="Notifications"
           >
             <div className="relative">
-              <Heart className={`w-6 h-6 stroke-[1.75] transition-transform group-hover:scale-110 ${unreadCount > 0 ? 'text-[#ED4956]' : ''}`} />
+              <Heart
+                className={`w-5 h-5 stroke-[1.75] transition-transform group-hover:scale-110 ${
+                  unreadCount > 0 ? 'text-[#ED4956] fill-[#ED4956]/20' : ''
+                }`}
+              />
               {unreadCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-[#ED4956] text-white text-[9px] font-bold rounded-full min-w-4 h-4 px-1 flex items-center justify-center shadow-xs animate-pulse">
+                <span className="absolute -top-1.5 -right-2 bg-[#ED4956] text-white text-[9px] font-bold rounded-full min-w-4 h-4 px-1 flex items-center justify-center shadow-xs animate-pulse">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
             </div>
+            <span className="text-[9.5px] leading-none tracking-tight">Activity</span>
           </button>
 
-          {/* Profile (Mini Circular Avatar) */}
+          {/* Profile / About (Mini Circular Avatar) */}
           <button
             onClick={() => onNavigate('about')}
-            className={`p-2 rounded-xl transition-all ${
+            className={`relative w-full py-2 px-1 rounded-xl flex flex-col items-center justify-center gap-1 transition-all cursor-pointer group ${
               activeSection === 'about'
-                ? 'bg-[#F2F2F2] dark:bg-[#1A1A1A]'
-                : 'hover:bg-[#FAFAFA] dark:hover:bg-[#1A1A1A]'
+                ? 'text-[#0095F6] bg-[#0095F6]/10 dark:bg-[#0095F6]/15 font-bold'
+                : 'text-[#262626] dark:text-[#F5F5F5] hover:bg-[#F2F2F2] dark:hover:bg-[#1A1A1A]'
             }`}
-            title="Profile Details"
-            aria-label="Profile"
+            title="About Me"
+            aria-label="About Me"
           >
+            {activeSection === 'about' && (
+              <span className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full bg-[#0095F6]" />
+            )}
             <div
-              className={`w-7 h-7 rounded-full p-[1.5px] transition-transform hover:scale-110 ${
+              className={`w-6 h-6 rounded-full p-[1.5px] transition-transform group-hover:scale-110 ${
                 activeSection === 'about'
-                  ? 'border-2 border-black dark:border-white'
+                  ? 'border-2 border-[#0095F6]'
                   : 'border border-[#DBDBDB] dark:border-[#363636]'
               }`}
             >
@@ -125,46 +142,50 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 style={{ objectPosition: '0% 20%' }}
               />
             </div>
+            <span className="text-[9.5px] leading-none tracking-tight">About</span>
           </button>
+        </nav>
+      </div>
 
-          {/* Switch appearance (Theme toggle - Replaced from below) */}
-          <button
-            onClick={toggleTheme}
-            className="p-3 text-[#262626] dark:text-[#F5F5F5] hover:bg-[#FAFAFA] dark:hover:bg-[#1A1A1A] rounded-xl transition-all"
-            title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
-            aria-label="Switch appearance"
-          >
-            {theme === 'light' ? (
-              <Moon className="w-6 h-6 stroke-[1.75] transition-transform hover:-rotate-12" />
-            ) : (
-              <Sun className="w-6 h-6 text-amber-400 stroke-[1.75] transition-transform hover:rotate-45" />
-            )}
-          </button>
+      {/* 2. Bottom Utility & Social Links (Theme, GitHub, LinkedIn) */}
+      <div className="flex flex-col items-center gap-1 w-full px-1.5 pt-2 border-t border-[#EFEFEF] dark:border-[#262626]">
+        <button
+          onClick={toggleTheme}
+          className="w-full py-1.5 px-1 text-[#262626] dark:text-[#F5F5F5] hover:bg-[#F2F2F2] dark:hover:bg-[#1A1A1A] rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer group"
+          title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
+          aria-label="Switch appearance"
+        >
+          {theme === 'light' ? (
+            <Moon className="w-4 h-4 stroke-[1.75] transition-transform group-hover:-rotate-12" />
+          ) : (
+            <Sun className="w-4 h-4 text-amber-400 stroke-[1.75] transition-transform group-hover:rotate-45" />
+          )}
+          <span className="text-[9px] leading-none text-[#737373] dark:text-[#A8A8A8]">Theme</span>
+        </button>
 
-          {/* GitHub Profile (Replaced from below) */}
+        <div className="flex items-center justify-center gap-1 w-full pt-0.5">
           <a
             href={profileData.github}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-3 text-[#262626] dark:text-[#F5F5F5] hover:bg-[#FAFAFA] dark:hover:bg-[#1A1A1A] rounded-xl transition-all"
+            className="p-2 text-[#262626] dark:text-[#F5F5F5] hover:text-[#0095F6] dark:hover:text-[#0095F6] hover:bg-[#F2F2F2] dark:hover:bg-[#1A1A1A] rounded-xl transition-all"
             title="GitHub Profile"
             aria-label="GitHub"
           >
-            <GithubIcon className="w-5 h-5 transition-transform hover:scale-110" />
+            <GithubIcon className="w-4 h-4 transition-transform hover:scale-110" />
           </a>
 
-          {/* LinkedIn Profile */}
           <a
             href={profileData.linkedin}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-3 text-[#262626] dark:text-[#F5F5F5] hover:bg-[#FAFAFA] dark:hover:bg-[#1A1A1A] rounded-xl transition-all"
+            className="p-2 text-[#262626] dark:text-[#F5F5F5] hover:text-[#0095F6] dark:hover:text-[#0095F6] hover:bg-[#F2F2F2] dark:hover:bg-[#1A1A1A] rounded-xl transition-all"
             title="LinkedIn Profile"
             aria-label="LinkedIn"
           >
-            <LinkedinIcon className="w-5 h-5 transition-transform hover:scale-110" />
+            <LinkedinIcon className="w-4 h-4 transition-transform hover:scale-110" />
           </a>
-        </nav>
+        </div>
       </div>
     </aside>
   );

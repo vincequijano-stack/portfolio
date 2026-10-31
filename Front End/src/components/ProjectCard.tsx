@@ -71,6 +71,28 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) =>
         </svg>
       </div>
 
+      {/* Always-Visible Bottom Info Bar (so visitors on mobile & desktop know it's clickable) */}
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent p-2 sm:p-3 pt-6 flex items-end justify-between gap-2 z-10 pointer-events-none group-hover:opacity-0 transition-opacity duration-200">
+        <div className="text-left min-w-0 flex-1">
+          <h3 className="text-white text-[11px] sm:text-xs font-bold truncate drop-shadow-xs">
+            {project.title}
+          </h3>
+          <div className="flex items-center gap-2.5 text-white/90 text-[10px] font-semibold mt-0.5">
+            <span className="flex items-center gap-1">
+              <Heart className="w-3 h-3 fill-[#ED4956] text-[#ED4956]" />
+              {likesCount}
+            </span>
+            <span className="flex items-center gap-1">
+              <MessageCircle className="w-3 h-3 fill-white/80 text-white" />
+              {commentsCount}
+            </span>
+          </div>
+        </div>
+        <span className="shrink-0 text-[10px] font-bold bg-[#0095F6] text-white px-2 py-0.5 rounded-full shadow-xs">
+          View →
+        </span>
+      </div>
+
       {/* Instagram-Style Hover Overlay */}
       <div className="absolute inset-0 bg-black/55 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center p-4 text-center z-20">
         <h3 className="text-white text-sm font-bold drop-shadow line-clamp-2 px-2 mb-2">

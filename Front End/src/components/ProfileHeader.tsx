@@ -8,7 +8,8 @@ import {
   Check,
   Star,
   Pencil,
-  X
+  X,
+  Play
 } from 'lucide-react';
 import { RateModal } from './RateModal';
 import { ratingService, ClientReview } from '../services/ratingService';
@@ -287,40 +288,50 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 </div>
               </div>
 
-              {/* Live CS Tag */}
-              <span className="absolute bottom-0 right-1 sm:bottom-1 sm:right-2 bg-[#0095F6] text-white text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 rounded-full border-2 border-white dark:border-black shadow-xs">
-                CS
+              {/* Interactive Story Play Badge */}
+              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#FCAF45] via-[#FD1D1D] to-[#833AB4] text-white text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-white dark:border-black shadow-sm flex items-center gap-0.5 whitespace-nowrap group-hover:scale-105 transition-transform">
+                <Play className="w-2.5 h-2.5 fill-white" />
+                <span>Story</span>
               </span>
             </div>
           </div>
 
           {/* On Mobile Screens: 4 Stats columns beside avatar (Instagram Mobile App layout) */}
           <div className="flex sm:hidden flex-1 justify-around items-center text-center pl-2">
-            <button onClick={() => onNavigate('projects')} className="flex flex-col items-center">
+            <button
+              onClick={() => onNavigate('projects')}
+              className="flex flex-col items-center px-2 py-1 rounded-lg hover:bg-[#F2F2F2] dark:hover:bg-[#1F1F1F] active:scale-95 transition-all cursor-pointer"
+            >
               <span className="font-bold text-sm text-black dark:text-white">{profileData.stats.projects}</span>
-              <span className="text-[11px] text-[#737373] dark:text-[#A8A8A8]">projects</span>
+              <span className="text-[11px] text-[#0095F6] font-medium">projects</span>
             </button>
-            <button onClick={() => onNavigate('skills')} className="flex flex-col items-center">
+            <button
+              onClick={() => onNavigate('skills')}
+              className="flex flex-col items-center px-2 py-1 rounded-lg hover:bg-[#F2F2F2] dark:hover:bg-[#1F1F1F] active:scale-95 transition-all cursor-pointer"
+            >
               <span className="font-bold text-sm text-black dark:text-white">{profileData.stats.skills}</span>
-              <span className="text-[11px] text-[#737373] dark:text-[#A8A8A8]">skills</span>
+              <span className="text-[11px] text-[#0095F6] font-medium">skills</span>
             </button>
-            <button onClick={() => onNavigate('certificates')} className="flex flex-col items-center">
+            <button
+              onClick={() => onNavigate('certificates')}
+              className="flex flex-col items-center px-2 py-1 rounded-lg hover:bg-[#F2F2F2] dark:hover:bg-[#1F1F1F] active:scale-95 transition-all cursor-pointer"
+            >
               <span className="font-bold text-sm text-black dark:text-white">{profileData.stats.certificates}</span>
-              <span className="text-[11px] text-[#737373] dark:text-[#A8A8A8]">certs</span>
+              <span className="text-[11px] text-[#0095F6] font-medium">certs</span>
             </button>
             <button
               onClick={() => {
                 setRateModalInitialTab('all');
                 setIsRateModalOpen(true);
               }}
-              className="flex flex-col items-center cursor-pointer"
+              className="flex flex-col items-center px-2 py-1 rounded-lg hover:bg-[#F2F2F2] dark:hover:bg-[#1F1F1F] active:scale-95 transition-all cursor-pointer"
               title="View Client Reviews"
             >
               <span className="font-bold text-sm text-black dark:text-white flex items-center gap-0.5">
                 <Star className="w-3 h-3 fill-[#F59E0B] text-[#F59E0B]" />
                 {averageRating}
               </span>
-              <span className="text-[11px] text-[#737373] dark:text-[#A8A8A8]">({totalReviews})</span>
+              <span className="text-[11px] text-[#0095F6] font-medium">({totalReviews})</span>
             </button>
           </div>
         </div>
@@ -340,28 +351,31 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             {profileData.badge}
           </p>
 
-          {/* Row 3: Desktop Statistics (Projects, Skills, Certificates, Client Rating) */}
-          <div className="hidden sm:flex items-center gap-6 sm:gap-8 text-sm text-[#262626] dark:text-[#F5F5F5] py-0.5">
+          {/* Row 3: Desktop Statistics (Clickable Pill Shortcuts) */}
+          <div className="hidden sm:flex items-center gap-3 text-sm text-[#262626] dark:text-[#F5F5F5] py-0.5 flex-wrap">
             <button
               onClick={() => onNavigate('projects')}
-              className="text-left hover:opacity-75 transition-opacity cursor-pointer"
+              className="px-3 py-1 rounded-full bg-[#FAFAFA] dark:bg-[#1A1A1A] border border-[#DBDBDB]/70 dark:border-[#262626] hover:border-[#0095F6] dark:hover:border-[#0095F6] hover:bg-[#0095F6]/5 transition-all cursor-pointer flex items-center gap-1.5"
+              title="Jump to Projects"
             >
-              <span className="font-semibold text-black dark:text-white">{profileData.stats.projects}</span>{' '}
-              <span className="text-[#262626] dark:text-[#D1D5DB]">projects</span>
+              <span className="font-bold text-black dark:text-white">{profileData.stats.projects}</span>
+              <span className="text-xs font-medium text-[#262626] dark:text-[#D1D5DB]">projects</span>
             </button>
             <button
               onClick={() => onNavigate('skills')}
-              className="text-left hover:opacity-75 transition-opacity cursor-pointer"
+              className="px-3 py-1 rounded-full bg-[#FAFAFA] dark:bg-[#1A1A1A] border border-[#DBDBDB]/70 dark:border-[#262626] hover:border-[#0095F6] dark:hover:border-[#0095F6] hover:bg-[#0095F6]/5 transition-all cursor-pointer flex items-center gap-1.5"
+              title="Jump to Skills"
             >
-              <span className="font-semibold text-black dark:text-white">{profileData.stats.skills}</span>{' '}
-              <span className="text-[#262626] dark:text-[#D1D5DB]">skills</span>
+              <span className="font-bold text-black dark:text-white">{profileData.stats.skills}</span>
+              <span className="text-xs font-medium text-[#262626] dark:text-[#D1D5DB]">skills</span>
             </button>
             <button
               onClick={() => onNavigate('certificates')}
-              className="text-left hover:opacity-75 transition-opacity cursor-pointer"
+              className="px-3 py-1 rounded-full bg-[#FAFAFA] dark:bg-[#1A1A1A] border border-[#DBDBDB]/70 dark:border-[#262626] hover:border-[#0095F6] dark:hover:border-[#0095F6] hover:bg-[#0095F6]/5 transition-all cursor-pointer flex items-center gap-1.5"
+              title="Jump to Certificates"
             >
-              <span className="font-semibold text-black dark:text-white">{profileData.stats.certificates}</span>{' '}
-              <span className="text-[#262626] dark:text-[#D1D5DB]">certificates</span>
+              <span className="font-bold text-black dark:text-white">{profileData.stats.certificates}</span>
+              <span className="text-xs font-medium text-[#262626] dark:text-[#D1D5DB]">certificates</span>
             </button>
 
             {/* Client Feedback Rating */}
@@ -370,12 +384,14 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 setRateModalInitialTab('all');
                 setIsRateModalOpen(true);
               }}
-              className="text-left hover:opacity-75 transition-opacity flex items-center gap-1 cursor-pointer"
-              title="Client Feedback"
+              className="px-3 py-1 rounded-full bg-[#FEF3C7]/40 dark:bg-[#78350F]/25 border border-[#F59E0B]/40 hover:border-[#F59E0B] transition-all flex items-center gap-1 cursor-pointer"
+              title="Click to view Client Reviews"
             >
               <Star className="w-3.5 h-3.5 fill-[#F59E0B] text-[#F59E0B]" />
-              <span className="font-semibold text-black dark:text-white">{averageRating}</span>
-              <span className="text-[#737373] dark:text-[#8E8E8E] text-xs">({totalReviews})</span>
+              <span className="font-bold text-black dark:text-white">{averageRating}</span>
+              <span className="text-[#737373] dark:text-[#A8A8A8] text-xs font-medium">
+                ({totalReviews} reviews)
+              </span>
             </button>
           </div>
 
@@ -395,21 +411,23 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         </div>
       </div>
 
-      {/* Row Below: Full-Width Gray Action Buttons (Responsive on Mobile and Desktop) */}
-      <div className="flex items-center gap-2 mt-4 sm:mt-5">
+      {/* Row Below: Standout Action Buttons with Clear Icons & Visual Hierarchy */}
+      <div className="flex items-center gap-2 sm:gap-2.5 mt-4 sm:mt-5">
         <button
           onClick={() => onNavigate('contact')}
-          className="flex-1 py-1.5 px-3 sm:px-4 rounded-lg bg-[#EFEFEF] dark:bg-[#262626] hover:bg-[#DBDBDB] dark:hover:bg-[#333333] text-xs sm:text-sm font-semibold text-[#262626] dark:text-white transition-colors text-center cursor-pointer"
+          className="flex-1 py-2 px-3 sm:px-4 rounded-xl bg-[#0095F6] hover:bg-[#1877F2] active:scale-[0.98] text-xs sm:text-sm font-semibold text-white shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
         >
-          Connect / Inquire
+          <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+          <span>Connect / Inquire</span>
         </button>
 
         <button
           onClick={handleDownloadCV}
-          className="flex-1 py-1.5 px-3 sm:px-4 rounded-lg bg-[#EFEFEF] dark:bg-[#262626] hover:bg-[#DBDBDB] dark:hover:bg-[#333333] text-xs sm:text-sm font-semibold text-[#262626] dark:text-white transition-colors text-center cursor-pointer"
-          title="Download CV"
+          className="flex-1 py-2 px-3 sm:px-4 rounded-xl bg-[#EFEFEF] dark:bg-[#262626] hover:bg-[#DBDBDB] dark:hover:bg-[#333333] border border-[#DBDBDB] dark:border-[#363636] active:scale-[0.98] text-xs sm:text-sm font-semibold text-[#262626] dark:text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+          title="Open Resume PDF"
         >
-          View Resume
+          <FileDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-[#0095F6]" />
+          <span>View Resume</span>
         </button>
 
         <button
@@ -417,9 +435,9 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             setRateModalInitialTab('rate');
             setIsRateModalOpen(true);
           }}
-          className="py-1.5 px-3 sm:px-4 rounded-lg bg-[#EFEFEF] dark:bg-[#262626] hover:bg-[#DBDBDB] dark:hover:bg-[#333333] text-xs sm:text-sm font-semibold text-[#0095F6] dark:text-[#0095F6] transition-colors text-center flex items-center justify-center gap-1 cursor-pointer"
+          className="py-2 px-3 sm:px-4 rounded-xl bg-[#EFEFEF] dark:bg-[#262626] hover:bg-[#DBDBDB] dark:hover:bg-[#333333] border border-[#DBDBDB] dark:border-[#363636] active:scale-[0.98] text-xs sm:text-sm font-semibold text-[#0095F6] dark:text-[#0095F6] transition-all flex items-center justify-center gap-1 cursor-pointer"
         >
-          <Star className="w-3.5 h-3.5 fill-current" />
+          <Star className="w-3.5 h-3.5 fill-[#F59E0B] text-[#F59E0B] shrink-0" />
           <span>Rate ({totalReviews})</span>
         </button>
       </div>
