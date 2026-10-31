@@ -423,10 +423,10 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
         <button
           onClick={handleDownloadCV}
-          className="flex-1 py-2 px-3 sm:px-4 rounded-xl bg-[#EFEFEF] dark:bg-[#262626] hover:bg-[#DBDBDB] dark:hover:bg-[#333333] border border-[#DBDBDB] dark:border-[#363636] active:scale-[0.98] text-xs sm:text-sm font-semibold text-[#262626] dark:text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+          className="flex-1 py-2 px-3 sm:px-4 rounded-xl bg-[#0095F6] hover:bg-[#1877F2] active:scale-[0.98] text-xs sm:text-sm font-semibold text-white shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
           title="Open Resume PDF"
         >
-          <FileDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-[#0095F6]" />
+          <FileDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-white" />
           <span>View Resume</span>
         </button>
 
@@ -435,9 +435,9 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             setRateModalInitialTab('rate');
             setIsRateModalOpen(true);
           }}
-          className="py-2 px-3 sm:px-4 rounded-xl bg-[#EFEFEF] dark:bg-[#262626] hover:bg-[#DBDBDB] dark:hover:bg-[#333333] border border-[#DBDBDB] dark:border-[#363636] active:scale-[0.98] text-xs sm:text-sm font-semibold text-[#0095F6] dark:text-[#0095F6] transition-all flex items-center justify-center gap-1 cursor-pointer"
+          className="py-2 px-3.5 sm:px-4 rounded-xl bg-[#F59E0B] hover:bg-[#D97706] active:scale-[0.98] text-xs sm:text-sm font-bold text-white shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
         >
-          <Star className="w-3.5 h-3.5 fill-[#F59E0B] text-[#F59E0B] shrink-0" />
+          <Star className="w-3.5 h-3.5 fill-white text-white shrink-0" />
           <span>Rate ({totalReviews})</span>
         </button>
       </div>

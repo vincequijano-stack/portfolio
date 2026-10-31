@@ -116,6 +116,9 @@ export const RateModal: React.FC<RateModalProps> = ({
     }
   };
 
+  const isReviewsOnly = initialTab === 'all';
+  const currentView = isReviewsOnly ? 'all' : activeTab;
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200"
@@ -134,7 +137,7 @@ export const RateModal: React.FC<RateModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-bold text-[#262626] dark:text-white">
-                  Client Feedback &amp; Ratings
+                  {isReviewsOnly ? 'Client Reviews' : 'Rate My Portfolio'}
                 </h3>
               </div>
               <p className="text-[11px] text-[#8E8E8E] dark:text-[#737373]">
@@ -154,33 +157,35 @@ export const RateModal: React.FC<RateModalProps> = ({
           </button>
         </div>
 
-        {/* Tab Toggle */}
-        <div className="flex border-b border-[#EFEFEF] dark:border-[#262626] text-xs font-semibold">
-          <button
-            onClick={() => setActiveTab('rate')}
-            className={`flex-1 py-2.5 text-center transition-colors border-b-2 cursor-pointer ${
-              activeTab === 'rate'
-                ? 'border-[#0095F6] text-[#0095F6]'
-                : 'border-transparent text-[#737373] dark:text-[#8E8E8E] hover:text-[#262626] dark:hover:text-white'
-            }`}
-          >
-            ★ Leave a Rating
-          </button>
-          <button
-            onClick={() => setActiveTab('all')}
-            className={`flex-1 py-2.5 text-center transition-colors border-b-2 cursor-pointer ${
-              activeTab === 'all'
-                ? 'border-[#0095F6] text-[#0095F6]'
-                : 'border-transparent text-[#737373] dark:text-[#8E8E8E] hover:text-[#262626] dark:hover:text-white'
-            }`}
-          >
-            All Reviews ({ratingsState.total})
-          </button>
-        </div>
+        {/* Tab Toggle — ONLY shown when opened via the Rate button */}
+        {!isReviewsOnly && (
+          <div className="flex border-b border-[#EFEFEF] dark:border-[#262626] text-xs font-semibold">
+            <button
+              onClick={() => setActiveTab('rate')}
+              className={`flex-1 py-2.5 text-center transition-colors border-b-2 cursor-pointer ${
+                activeTab === 'rate'
+                  ? 'border-[#0095F6] text-[#0095F6]'
+                  : 'border-transparent text-[#737373] dark:text-[#8E8E8E] hover:text-[#262626] dark:hover:text-white'
+              }`}
+            >
+              ★ Leave a Rating
+            </button>
+            <button
+              onClick={() => setActiveTab('all')}
+              className={`flex-1 py-2.5 text-center transition-colors border-b-2 cursor-pointer ${
+                activeTab === 'all'
+                  ? 'border-[#0095F6] text-[#0095F6]'
+                  : 'border-transparent text-[#737373] dark:text-[#8E8E8E] hover:text-[#262626] dark:hover:text-white'
+              }`}
+            >
+              All Reviews ({ratingsState.total})
+            </button>
+          </div>
+        )}
 
         {/* Body Content */}
         <div className="p-5 overflow-y-auto flex-1">
-          {activeTab === 'rate' ? (
+          {currentView === 'rate' ? (
             isSuccess ? (
               <div className="py-8 text-center flex flex-col items-center">
                 <CheckCircle2 className="w-12 h-12 text-[#10B981] mb-2 animate-bounce" />
@@ -325,14 +330,7 @@ export const RateModal: React.FC<RateModalProps> = ({
                 </div>
               ) : ratingsState.reviews.length === 0 ? (
                 <div className="py-8 text-center text-xs text-[#8E8E8E] dark:text-[#737373]">
-                  <p>No client ratings received yet.</p>
-                  <p className="mt-1">Be the first client to submit a rating!</p>
-                  <button
-                    onClick={() => setActiveTab('rate')}
-                    className="mt-3 px-3.5 py-1.5 rounded-lg bg-[#0095F6] text-white text-xs font-semibold cursor-pointer"
-                  >
-                    Rate Now
-                  </button>
+                  <p>No client reviews received yet.</p>
                 </div>
               ) : (
                 <>

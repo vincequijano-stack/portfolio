@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Grid, Award, Mail, Moon, Sun } from 'lucide-react';
+import { Home, Heart, Moon, Sun } from 'lucide-react';
 import { profileData } from '../data/profile';
 import { useTheme } from '../context/ThemeContext';
 
@@ -13,11 +13,13 @@ interface MobileNavProps {
 export const MobileNav: React.FC<MobileNavProps> = ({
   activeSection,
   onNavigate,
+  onOpenActivity,
+  unreadCount = 0,
 }) => {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-black/95 backdrop-blur-md border-t border-[#DBDBDB] dark:border-[#262626] px-2 py-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] flex items-center justify-around select-none shadow-md">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-black/95 backdrop-blur-md border-t border-[#DBDBDB] dark:border-[#262626] px-4 py-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] flex items-center justify-around select-none shadow-md">
       {/* 1. Home */}
       <button
         onClick={() => onNavigate('profile-top')}
@@ -30,37 +32,36 @@ export const MobileNav: React.FC<MobileNavProps> = ({
         <span className="text-[9px]">Home</span>
       </button>
 
-      {/* 2. Projects */}
+      {/* 2. Real-Time Heart Notifications */}
       <button
-        onClick={() => onNavigate('projects')}
-        className={`flex flex-col items-center justify-center min-w-[48px] min-h-[40px] gap-0.5 transition-colors cursor-pointer ${
-          activeSection === 'projects' ? 'text-[#0095F6] font-bold' : 'text-[#737373] dark:text-[#A8A8A8]'
-        }`}
-        aria-label="Projects"
+        onClick={() => {
+          if (onOpenActivity) {
+            onOpenActivity();
+          } else {
+            onNavigate('certificates');
+          }
+        }}
+        className="flex flex-col items-center justify-center min-w-[48px] min-h-[40px] gap-0.5 text-[#737373] dark:text-[#A8A8A8] relative cursor-pointer"
+        aria-label="Activity and notifications"
       >
-        <Grid className={`w-5 h-5 ${activeSection === 'projects' ? 'stroke-[2.5]' : 'stroke-[1.75]'}`} />
-        <span className="text-[9px]">Projects</span>
+        <div className="relative">
+          <Heart className={`w-5 h-5 ${unreadCount > 0 ? 'text-[#ED4956] stroke-[2]' : 'stroke-[1.75]'}`} />
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 bg-[#ED4956] text-white text-[8px] font-bold rounded-full min-w-3.5 h-3.5 px-0.5 flex items-center justify-center shadow-xs animate-pulse">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </div>
+        <span className="text-[9px] font-semibold">Activity</span>
       </button>
 
-      {/* 3. Certificates */}
-      <button
-        onClick={() => onNavigate('certificates')}
-        className={`flex flex-col items-center justify-center min-w-[48px] min-h-[40px] gap-0.5 transition-colors cursor-pointer ${
-          activeSection === 'certificates' ? 'text-[#0095F6] font-bold' : 'text-[#737373] dark:text-[#A8A8A8]'
-        }`}
-        aria-label="Certificates"
-      >
-        <Award className={`w-5 h-5 ${activeSection === 'certificates' ? 'stroke-[2.5]' : 'stroke-[1.75]'}`} />
-        <span className="text-[9px]">Certs</span>
-      </button>
-
-      {/* 4. Mini Profile / About */}
+      {/* 3. Mini Profile with Story Ring */}
       <button
         onClick={() => onNavigate('about')}
         className={`flex flex-col items-center justify-center min-w-[48px] min-h-[40px] gap-0.5 transition-colors cursor-pointer ${
           activeSection === 'about' ? 'text-[#0095F6] font-bold' : 'text-[#737373] dark:text-[#A8A8A8]'
         }`}
-        aria-label="About"
+        aria-label="Profile"
       >
         <div
           className={`w-5 h-5 rounded-full p-[1.5px] ${
@@ -78,22 +79,10 @@ export const MobileNav: React.FC<MobileNavProps> = ({
             />
           </div>
         </div>
-        <span className="text-[9px]">About</span>
+        <span className="text-[9px]">Profile</span>
       </button>
 
-      {/* 5. Contact */}
-      <button
-        onClick={() => onNavigate('contact')}
-        className={`flex flex-col items-center justify-center min-w-[48px] min-h-[40px] gap-0.5 transition-colors cursor-pointer ${
-          activeSection === 'contact' ? 'text-[#0095F6] font-bold' : 'text-[#737373] dark:text-[#A8A8A8]'
-        }`}
-        aria-label="Contact"
-      >
-        <Mail className={`w-5 h-5 ${activeSection === 'contact' ? 'stroke-[2.5]' : 'stroke-[1.75]'}`} />
-        <span className="text-[9px]">Contact</span>
-      </button>
-
-      {/* 6. Theme Toggle */}
+      {/* 4. Theme Toggle */}
       <button
         onClick={toggleTheme}
         className="flex flex-col items-center justify-center min-w-[48px] min-h-[40px] gap-0.5 text-[#737373] dark:text-[#A8A8A8] cursor-pointer"
