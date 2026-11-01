@@ -7,7 +7,6 @@ import { ProjectGallery } from './components/ProjectGallery';
 import { ProjectModal } from './components/ProjectModal';
 import { AboutSection } from './components/AboutSection';
 import { SkillsSection } from './components/SkillsSection';
-import { CertificatesSection } from './components/CertificatesSection';
 import { ContactSection } from './components/ContactSection';
 import { StoryModal } from './components/StoryModal';
 import { MobileNav } from './components/MobileNav';
@@ -85,8 +84,12 @@ export default function App() {
     return projectsData.filter((p) => p.categories.includes(activeCategory));
   }, [activeCategory]);
 
-  // Smooth scroll to target section
+  // Smooth scroll to target section (or open Certificates Story Highlight)
   const handleNavigate = (sectionId: string) => {
+    if (sectionId === 'certificates') {
+      setActiveStoryId('certificates');
+      return;
+    }
     setActiveSection(sectionId);
     const element = document.getElementById(sectionId);
     if (element) {
@@ -103,7 +106,7 @@ export default function App() {
 
   // IntersectionObserver to update active section on scroll
   useEffect(() => {
-    const sectionIds = ['profile-top', 'projects', 'about', 'skills', 'certificates', 'contact'];
+    const sectionIds = ['profile-top', 'projects', 'about', 'skills', 'contact'];
     const observers: IntersectionObserver[] = [];
 
     sectionIds.forEach((id) => {
@@ -203,7 +206,6 @@ export default function App() {
           {/* Structured Portfolio Details */}
           <AboutSection />
           <SkillsSection />
-          <CertificatesSection />
           <ContactSection />
         </main>
 

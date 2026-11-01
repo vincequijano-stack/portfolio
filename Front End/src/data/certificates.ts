@@ -13,17 +13,6 @@ export interface Certificate {
 
 export const certificatesData: Certificate[] = [
   {
-    id: 'imaganation-2026',
-    title: 'ImaGnation 2026 Participant',
-    issuer: 'ImaGnation 2026',
-    date: '2026',
-    badgeColor: '#F59E0B',
-    tag: 'Achievement · Tech Event',
-    credentialId: 'IMG-2026-PART',
-    description: 'Official participant in ImaGnation 2026, engaging in design thinking, software development challenges, and collaborative technology innovation.',
-    skillsCovered: ['Innovation', 'Ideation', 'Full-Stack Development', 'Teamwork'],
-  },
-  {
     id: 'ai-fluency',
     title: 'AI Fluency Certification',
     issuer: 'Certiport',
@@ -58,16 +47,5 @@ export const certificatesData: Certificate[] = [
     credentialId: 'COUR-PY-55421',
     description: 'Mastery of object-oriented design patterns, modular code architecture, automated testing suites (pytest), documentation standards, and versioned package delivery.',
     skillsCovered: ['OOP in Python', 'Unit Testing', 'Clean Architecture', 'Refactoring'],
-  },
-  {
-    id: 'database-systems-honor',
-    title: 'Relational Database Design & SQL Honor',
-    issuer: 'University Academic Department',
-    date: 'May 2026',
-    badgeColor: '#059669',
-    tag: 'Academic Distinction',
-    credentialId: 'ACAD-CS310-DIST',
-    description: 'Academic recognition for excellence in relational database modeling, normalization up to BCNF, advanced SQL query optimization, and transaction concurrency.',
-    skillsCovered: ['Database Normalization', 'Query Profiling', 'PostgreSQL', 'ACID Transactions'],
   },
 ];

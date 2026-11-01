@@ -13,9 +13,12 @@ import {
   MapPin,
   ExternalLink,
   Users,
+  Maximize2,
+  CheckCircle,
 } from 'lucide-react';
 import { profileData } from '../data/profile';
 import { eventStories } from '../data/events';
+import { certificatesData, Certificate } from '../data/certificates';
 
 interface StoryModalProps {
   storyId: string | null;
@@ -28,7 +31,7 @@ export const StoryModal: React.FC<StoryModalProps> = ({
   onClose,
   onNavigateSection,
 }) => {
-  // 1. Classic Highlight Story Cards (About, Skills, Projects, Organization, Certificates, Achievements)
+  // 1. Classic Highlight Story Cards (About, Skills, Projects, Organization, Achievements)
   const infoStories = [
     {
       id: 'about',
@@ -89,21 +92,6 @@ export const StoryModal: React.FC<StoryModalProps> = ({
       gradient: 'from-cyan-600 to-blue-700',
     },
     {
-      id: 'certificates',
-      title: 'Verified Certificates',
-      subtitle: 'Credentials & Accreditations',
-      icon: Award,
-      bullets: [
-        'Certiport: AI Fluency Certification',
-        'Anthropic: Claude 101 AI Foundations',
-        'Coursera: Software Engineering Principles in Python',
-        'University Academic Honor in Database Systems',
-      ],
-      ctaText: 'View Certifications',
-      targetSection: 'certificates',
-      gradient: 'from-amber-500 to-orange-600',
-    },
-    {
       id: 'achievements',
       title: 'Achievements',
       subtitle: 'Recognition & Milestones',
@@ -117,34 +105,42 @@ export const StoryModal: React.FC<StoryModalProps> = ({
     },
   ];
 
-  // Determine whether this is MyDay (real event photos) or a Highlight story
+  // Determine story mode: MyDay (real event photos), Certificates Highlight, or Classic Info Highlight
   const isMyDay = storyId === 'myday';
+  const isCertificates = storyId === 'certificates';
 
-  const activeStories = isMyDay ? eventStories : infoStories;
+  const activeStories = isMyDay
+    ? eventStories
+    : isCertificates
+    ? certificatesData
+    : infoStories;
 
-  const initialIndex = isMyDay
-    ? 0
-    : Math.max(
-        0,
-        infoStories.findIndex((s) => s.id === storyId)
-      );
+  const initialIndex =
+    isMyDay || isCertificates
+      ? 0
+      : Math.max(
+          0,
+          infoStories.findIndex((s) => s.id === storyId)
+        );
 
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [expandedCert, setExpandedCert] = useState<Certificate | null>(null);
   const progressTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     setCurrentIndex(initialIndex);
     setProgress(0);
+    setExpandedCert(null);
   }, [storyId, initialIndex]);
 
   // Story progress auto-advance timer
   useEffect(() => {
-    if (!storyId || isPaused) return;
+    if (!storyId || isPaused || expandedCert) return;
 
     const stepMs = 50;
-    const totalDuration = isMyDay ? 7000 : 5500;
+    const totalDuration = isMyDay || isCertificates ? 7500 : 5500;
     const increment = (stepMs / totalDuration) * 100;
 
     progressTimerRef.current = window.setInterval(() => {
@@ -165,23 +161,27 @@ export const StoryModal: React.FC<StoryModalProps> = ({
     return () => {
       if (progressTimerRef.current) clearInterval(progressTimerRef.current);
     };
-  }, [storyId, currentIndex, isPaused, onClose, isMyDay, activeStories.length]);
+  }, [storyId, currentIndex, isPaused, expandedCert, onClose, isMyDay, isCertificates, activeStories.length]);
 
   // Keyboard controls
   useEffect(() => {
     if (!storyId) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose();
-      } else if (e.key === 'ArrowLeft') {
+        if (expandedCert) {
+          setExpandedCert(null);
+        } else {
+          onClose();
+        }
+      } else if (!expandedCert && e.key === 'ArrowLeft') {
         handlePrev();
-      } else if (e.key === 'ArrowRight') {
+      } else if (!expandedCert && e.key === 'ArrowRight') {
         handleNext();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [storyId, currentIndex, activeStories.length]);
+  }, [storyId, currentIndex, activeStories.length, expandedCert]);
 
   if (!storyId) return null;
 
@@ -389,7 +389,267 @@ export const StoryModal: React.FC<StoryModalProps> = ({
     );
   }
 
-  // 2. Render Classic Highlight Story Card (About, Skills, Projects, Organization, Certificates, Achievements)
+  // 2. Render Certificates Story Highlight (Multi-slide Certificate Viewer)
+  if (isCertificates) {
+    const currentCert = certificatesData[currentIndex] || certificatesData[0];
+
+    return (
+      <div
+        className="fixed inset-0 z-60 bg-black/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-modal-in select-none"
+        onClick={onClose}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 sm:top-6 sm:right-6 text-white/90 hover:text-white p-2.5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md transition-all z-70 cursor-pointer"
+          aria-label="Close certificate stories"
+        >
+          <X className="w-6 h-6" />
+        </button>
+
+        <div
+          className="relative flex items-center justify-center w-full max-w-[440px]"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Desktop Chevron Left */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handlePrev();
+            }}
+            disabled={currentIndex === 0}
+            className="hidden sm:flex absolute -left-14 top-1/2 -translate-y-1/2 w-11 h-11 items-center justify-center text-white/90 hover:text-white disabled:opacity-0 disabled:pointer-events-none z-70 bg-white/15 hover:bg-white/25 rounded-full backdrop-blur-md transition-all cursor-pointer shadow-lg"
+            aria-label="Previous certificate"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+
+          {/* Desktop Chevron Right */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNext();
+            }}
+            className="hidden sm:flex absolute -right-14 top-1/2 -translate-y-1/2 w-11 h-11 items-center justify-center text-white/90 hover:text-white z-70 bg-white/15 hover:bg-white/25 rounded-full backdrop-blur-md transition-all cursor-pointer shadow-lg"
+            aria-label="Next certificate"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+
+          {/* Certificate Story Card */}
+          <div
+            className="relative w-full h-[730px] max-h-[92vh] rounded-2xl overflow-hidden shadow-2xl flex flex-col justify-between border border-white/15 bg-gradient-to-br from-[#1C1917] via-[#0F172A] to-[#1E1B4B]"
+            onClick={handleCardClick}
+            onMouseDown={() => setIsPaused(true)}
+            onMouseUp={() => setIsPaused(false)}
+            onTouchStart={() => setIsPaused(true)}
+            onTouchEnd={() => setIsPaused(false)}
+          >
+            {/* Top Progress Bars & Header */}
+            <div className="relative z-20 p-3.5 sm:p-4 pb-2 pointer-events-none">
+              <div className="flex items-center gap-1.5 w-full mb-3">
+                {certificatesData.map((cert, idx) => (
+                  <div key={cert.id} className="h-1 flex-1 bg-white/30 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-[#F59E0B] transition-all duration-75"
+                      style={{
+                        width:
+                          idx < currentIndex
+                            ? '100%'
+                            : idx === currentIndex
+                            ? `${progress}%`
+                            : '0%',
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <img
+                    src="/assets/images/headshot/headshot.jpg"
+                    alt={profileData.name}
+                    className="w-9 h-9 rounded-full border-2 border-[#F59E0B] object-cover shadow-sm"
+                    style={{ objectPosition: '0% 20%' }}
+                  />
+                  <div className="text-left leading-tight">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-white tracking-wide">
+                        {profileData.username}
+                      </span>
+                      <span className="text-[10px] text-white/75">• {currentCert.date}</span>
+                    </div>
+                    <span className="text-[11px] text-[#FBBF24] font-semibold block">
+                      {currentCert.issuer} · {currentCert.tag}
+                    </span>
+                  </div>
+                </div>
+
+                <span className="text-[10px] font-semibold text-white/90 px-2.5 py-0.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20">
+                  {currentIndex + 1} / {certificatesData.length}
+                </span>
+              </div>
+            </div>
+
+            {/* Embedded Certificate PDF Frame */}
+            <div
+              className="relative z-20 mx-3.5 sm:mx-4 my-1 flex-1 min-h-[240px] max-h-[330px] rounded-xl overflow-hidden border border-white/20 bg-[#0F172A] shadow-xl group pointer-events-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {currentCert.pdfUrl && (
+                <>
+                  <iframe
+                    key={currentCert.id}
+                    src={`${currentCert.pdfUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
+                    title={currentCert.title}
+                    className="w-full h-full pointer-events-none opacity-95 bg-white"
+                  />
+                  <div
+                    onClick={() => setExpandedCert(currentCert)}
+                    className="absolute inset-0 bg-black/25 hover:bg-black/45 transition-colors flex items-center justify-center cursor-pointer"
+                  >
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedCert(currentCert);
+                      }}
+                      className="px-3.5 py-2 rounded-full bg-white/95 text-[#262626] text-xs font-bold flex items-center gap-1.5 shadow-lg hover:scale-105 transition-transform cursor-pointer"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5 text-[#D97706]" />
+                      <span>View Certificate PDF</span>
+                    </button>
+                  </div>
+                </>
+              )}
+
+              <div className="absolute top-2.5 left-2.5 bg-black/70 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-white/15 flex items-center gap-1 pointer-events-none">
+                <Award className="w-3 h-3 text-[#FBBF24]" />
+                <span>{currentCert.tag}</span>
+              </div>
+            </div>
+
+            {/* Certificate Details & CTA Footer */}
+            <div
+              className="relative z-20 p-4 sm:p-5 pt-2 pointer-events-auto text-left"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between text-[11px] text-white/75 mb-1">
+                <span className="font-semibold text-[#FBBF24] flex items-center gap-1">
+                  <CheckCircle className="w-3.5 h-3.5 text-[#10B981]" />
+                  Issued by {currentCert.issuer}
+                </span>
+                {currentCert.credentialId && (
+                  <span className="font-mono text-[10px] text-white/60">
+                    ID: {currentCert.credentialId}
+                  </span>
+                )}
+              </div>
+
+              <h3 className="text-base sm:text-lg font-black text-white tracking-tight leading-snug">
+                {currentCert.title}
+              </h3>
+
+              <p className="text-xs text-white/80 mt-1.5 leading-relaxed line-clamp-2">
+                {currentCert.description}
+              </p>
+
+              {/* Skills Covered Pills */}
+              <div className="flex flex-wrap gap-1.5 mt-3 mb-4">
+                {currentCert.skillsCovered.map((skill) => (
+                  <span
+                    key={skill}
+                    className="text-[10px] font-semibold bg-white/10 border border-white/15 text-white/90 px-2 py-0.5 rounded-full"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2">
+                {currentCert.pdfUrl && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setExpandedCert(currentCert)}
+                      className="flex-1 py-2.5 px-4 rounded-xl bg-[#F59E0B] hover:bg-[#D97706] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-transform active:scale-95 shadow-lg cursor-pointer"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5" />
+                      <span>Full Preview</span>
+                    </button>
+                    <a
+                      href={currentCert.pdfUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="py-2.5 px-3.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold flex items-center justify-center gap-1.5 border border-white/20 transition-colors cursor-pointer"
+                      title="Open Certificate PDF in New Tab"
+                    >
+                      <span>Open PDF</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Full Certificate PDF Lightbox Modal */}
+        {expandedCert && expandedCert.pdfUrl && (
+          <div
+            className="fixed inset-0 z-80 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-modal-in"
+            onClick={(e) => {
+              e.stopPropagation();
+              setExpandedCert(null);
+            }}
+          >
+            <div
+              className="bg-white dark:bg-[#1C1C1C] border border-[#DBDBDB] dark:border-[#262626] rounded-xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-4 border-b border-[#DBDBDB] dark:border-[#262626] flex items-center justify-between bg-[#FAFAFA] dark:bg-[#141414]">
+                <div className="text-left">
+                  <h3 className="text-sm font-bold text-[#262626] dark:text-white">
+                    {expandedCert.title}
+                  </h3>
+                  <p className="text-xs text-[#8E8E8E] dark:text-[#737373]">
+                    Issued by {expandedCert.issuer} · {expandedCert.date}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={expandedCert.pdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#0095F6] text-white hover:bg-[#1877F2] transition-colors flex items-center gap-1"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Open Tab</span>
+                  </a>
+                  <button
+                    onClick={() => setExpandedCert(null)}
+                    className="p-1.5 rounded-lg text-[#8E8E8E] hover:text-[#262626] dark:hover:text-white hover:bg-[#EFEFEF] dark:hover:bg-[#262626] cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+              <div className="flex-1 bg-[#1E293B]">
+                <iframe
+                  src={expandedCert.pdfUrl}
+                  title={expandedCert.title}
+                  className="w-full h-full border-none"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // 3. Render Classic Highlight Story Card (About, Skills, Projects, Organization, Achievements)
   const currentStory = infoStories[currentIndex] || infoStories[0];
   const Icon = currentStory.icon;
 
