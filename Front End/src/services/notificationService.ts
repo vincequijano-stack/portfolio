@@ -11,7 +11,16 @@ export interface LikeNotification {
 import { getSessionName, setSessionName, isOwnerUnlocked } from './visitorSession';
 
 const STORAGE_KEY = 'portfolio_notifications_v2';
+const DELETED_LIKERS_KEY = 'portfolio_deleted_likers_v1';
 const NTFY_TOPIC = 'vince_quijano_portfolio_likes_live';
+
+function isLegacyPlaceholderName(userName?: string): boolean {
+  const clean = (userName || '').trim();
+  if (!clean) return true;
+  if (clean === 'tech_enthusiast' || clean === 'web3_builder') return true;
+  if (/^visitor_\d+$/i.test(clean)) return true;
+  return false;
+}
 
 // Owner status is verified by the server (OWNER_KEY) — see visitorSession.unlockOwner().
 export function isOwner(): boolean {
@@ -33,15 +42,47 @@ export function hasVisitorName(): boolean {
 
 class NotificationService {
   private notifications: LikeNotification[] = [];
+  private deletedLikers: Set<string> = new Set();
   private listeners: Set<(notifications: LikeNotification[]) => void> = new Set();
   private broadcastChannel: BroadcastChannel | null = null;
   private eventSource: EventSource | null = null;
 
   constructor() {
+    this.loadDeletedLikers();
     this.loadFromStorage();
     this.initBroadcastChannel();
     this.initRealtimeStream();
     this.fetchCloudHistory();
+  }
+
+  private makeLikerKey(projectId: string, userName: string): string {
+    return `${(projectId || '').trim().toLowerCase()}::${(userName || '').trim().toLowerCase()}`;
+  }
+
+  private loadDeletedLikers() {
+    try {
+      const raw = localStorage.getItem(DELETED_LIKERS_KEY);
+      if (raw) {
+        const arr: string[] = JSON.parse(raw);
+        if (Array.isArray(arr)) {
+          this.deletedLikers = new Set(arr);
+        }
+      }
+    } catch {}
+  }
+
+  private saveDeletedLikers() {
+    try {
+      localStorage.setItem(DELETED_LIKERS_KEY, JSON.stringify(Array.from(this.deletedLikers)));
+    } catch {}
+  }
+
+  public isLikerRemoved(projectId: string, userName: string): boolean {
+    if (isLegacyPlaceholderName(userName)) return true;
+    return (
+      this.deletedLikers.has(this.makeLikerKey(projectId, userName)) ||
+      this.deletedLikers.has(this.makeLikerKey('*', userName))
+    );
   }
 
   private loadFromStorage() {
@@ -53,9 +94,12 @@ class NotificationService {
       const data = localStorage.getItem(STORAGE_KEY);
       if (data) {
         const parsed: LikeNotification[] = JSON.parse(data);
-        // Keep genuine notifications (ignore legacy mock data)
+        // Keep genuine notifications (ignore legacy mock data and removed likers)
         this.notifications = parsed.filter(
-          (n) => !n.id.startsWith('init_') && n.userName !== 'tech_enthusiast' && n.userName !== 'web3_builder'
+          (n) =>
+            !n.id.startsWith('init_') &&
+            !isLegacyPlaceholderName(n.userName) &&
+            !this.isLikerRemoved(n.projectId, n.userName)
         );
       } else {
         this.notifications = [];
@@ -114,12 +158,14 @@ class NotificationService {
             const item = JSON.parse(line);
             if (item.event === 'message' && item.message) {
               const notifData = JSON.parse(item.message);
-              if (
+              if (notifData && notifData.type === 'DELETE_LIKE' && notifData.projectId && notifData.userName) {
+                this.applyRemoveLiker(notifData.projectId, notifData.userName, false);
+              } else if (
                 notifData &&
                 notifData.id &&
                 !notifData.id.startsWith('init_') &&
-                notifData.userName !== 'tech_enthusiast' &&
-                notifData.userName !== 'web3_builder'
+                !isLegacyPlaceholderName(notifData.userName) &&
+                !this.isLikerRemoved(notifData.projectId, notifData.userName)
               ) {
                 this.handleIncomingNotification(notifData, false);
               }
@@ -143,12 +189,14 @@ class NotificationService {
           const parsed = JSON.parse(event.data);
           if (parsed && parsed.event === 'message' && parsed.message) {
             const notifData = JSON.parse(parsed.message);
-            if (
+            if (notifData && notifData.type === 'DELETE_LIKE' && notifData.projectId && notifData.userName) {
+              this.applyRemoveLiker(notifData.projectId, notifData.userName, false);
+            } else if (
               notifData &&
               notifData.id &&
               !notifData.id.startsWith('init_') &&
-              notifData.userName !== 'tech_enthusiast' &&
-              notifData.userName !== 'web3_builder'
+              !isLegacyPlaceholderName(notifData.userName) &&
+              !this.isLikerRemoved(notifData.projectId, notifData.userName)
             ) {
               this.handleIncomingNotification(notifData, false);
             }
@@ -167,6 +215,13 @@ class NotificationService {
   }
 
   private handleIncomingNotification(notification: LikeNotification, broadcast = true) {
+    if (
+      !notification ||
+      isLegacyPlaceholderName(notification.userName) ||
+      this.isLikerRemoved(notification.projectId, notification.userName)
+    ) {
+      return;
+    }
     // Avoid duplicates
     if (this.notifications.some((n) => n.id === notification.id)) return;
 
@@ -235,6 +290,45 @@ class NotificationService {
     this.notifications = [];
     this.saveToStorage();
     this.notifyListeners();
+  }
+
+  private applyRemoveLiker(projectId: string, userName: string, broadcast = false) {
+    const key = this.makeLikerKey(projectId, userName);
+    this.deletedLikers.add(key);
+    this.saveDeletedLikers();
+
+    const targetName = (userName || '').trim().toLowerCase();
+    const targetPid = (projectId || '').trim().toLowerCase();
+    this.notifications = this.notifications.filter((n) => {
+      const sameUser = (n.userName || '').trim().toLowerCase() === targetName;
+      const sameProj = (n.projectId || '').trim().toLowerCase() === targetPid;
+      return !(sameUser && sameProj);
+    });
+    this.saveToStorage();
+    this.notifyListeners();
+
+    if (broadcast) {
+      try {
+        fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+          method: 'POST',
+          body: JSON.stringify({ type: 'DELETE_LIKE', projectId, userName, timestamp: Date.now() }),
+          headers: { 'Content-Type': 'application/json' },
+        }).catch(() => {});
+      } catch {}
+    }
+  }
+
+  public removeLikerNotifications(projectId: string, userName: string) {
+    // If a visitor is re-liking later, we can clear or keep, here owner explicitly removed them
+    this.applyRemoveLiker(projectId, userName, true);
+  }
+
+  public unmarkRemovedLiker(projectId: string, userName: string) {
+    const key = this.makeLikerKey(projectId, userName);
+    if (this.deletedLikers.has(key)) {
+      this.deletedLikers.delete(key);
+      this.saveDeletedLikers();
+    }
   }
 
   public getUnreadCount(): number {

@@ -19,7 +19,57 @@ export interface RatingsState {
 
 const PAGE_SIZE = 10;
 const LOCAL_STORAGE_REVIEWS_KEY = 'vince_client_reviews_cloud_v1';
+const DELETED_REVIEWS_KEY = 'vince_deleted_reviews_v1';
 const LEGACY_STORAGE_KEYS = [LOCAL_STORAGE_REVIEWS_KEY, 'vince_client_reviews'];
+
+function getDeletedReviewsSet(): Set<string> {
+  if (typeof window === 'undefined') return new Set();
+  try {
+    const parsed = JSON.parse(localStorage.getItem(DELETED_REVIEWS_KEY) || '[]');
+    if (Array.isArray(parsed)) return new Set(parsed.map((s) => String(s).toLowerCase()));
+  } catch {}
+  return new Set();
+}
+
+function recordDeletedReviewLocal(id: string, name?: string) {
+  if (typeof window === 'undefined') return;
+  try {
+    const set = getDeletedReviewsSet();
+    if (id) set.add(`id:${id.toLowerCase()}`);
+    if (name) set.add(`name:${name.trim().toLowerCase()}`);
+    localStorage.setItem(DELETED_REVIEWS_KEY, JSON.stringify(Array.from(set)));
+
+    for (const key of LEGACY_STORAGE_KEYS) {
+      const parsed = JSON.parse(localStorage.getItem(key) || '[]');
+      if (Array.isArray(parsed)) {
+        const filtered = parsed.filter(
+          (r) =>
+            r &&
+            r.id !== id &&
+            (!name || String(r.name || '').trim().toLowerCase() !== name.trim().toLowerCase())
+        );
+        localStorage.setItem(key, JSON.stringify(filtered));
+      }
+    }
+  } catch {}
+}
+
+function unmarkDeletedReviewName(name?: string) {
+  if (typeof window === 'undefined' || !name) return;
+  try {
+    const set = getDeletedReviewsSet();
+    set.delete(`name:${name.trim().toLowerCase()}`);
+    localStorage.setItem(DELETED_REVIEWS_KEY, JSON.stringify(Array.from(set)));
+  } catch {}
+}
+
+function isReviewDeletedLocal(r: ClientReview): boolean {
+  if (!r) return true;
+  const set = getDeletedReviewsSet();
+  if (r.id && set.has(`id:${r.id.toLowerCase()}`)) return true;
+  if (r.name && set.has(`name:${r.name.trim().toLowerCase()}`)) return true;
+  return false;
+}
 
 interface ListResponse {
   reviews: ClientReview[];
@@ -45,7 +95,7 @@ function mergeWithDefaults(incoming: ClientReview[]): ClientReview[] {
   
   // Real database / local cache reviews take precedence
   incoming.forEach((r) => {
-    if (r && r.name) {
+    if (r && r.name && !r.hidden && !isReviewDeletedLocal(r)) {
       const key = r.name.trim().toLowerCase();
       if (!byName.has(key)) {
         byName.set(key, r);
@@ -53,8 +103,9 @@ function mergeWithDefaults(incoming: ClientReview[]): ClientReview[] {
     }
   });
 
-  // Only fall back to seed reviews for missing reviewers
+  // Only fall back to seed reviews for missing reviewers that haven't been deleted
   DEFAULT_REVIEWS.forEach((r) => {
+    if (isReviewDeletedLocal(r)) return;
     const key = r.name.trim().toLowerCase();
     if (!byName.has(key)) {
       byName.set(key, r);
@@ -209,6 +260,7 @@ class RatingService {
       timestamp: now,
     };
 
+    unmarkDeletedReviewName(data.name);
     let savedReview = fallbackReview;
     try {
       const result = await apiFetch<{ review: ClientReview; average: string; count: number }>('/api/ratings', {
@@ -246,6 +298,36 @@ class RatingService {
     });
 
     return savedReview;
+  }
+
+  /** Owner-only: Deletes a client review by id/name. */
+  public async deleteReview(id: string, name?: string): Promise<void> {
+    recordDeletedReviewLocal(id, name);
+
+    const remaining = this.state.reviews.filter(
+      (r) =>
+        r.id !== id &&
+        (!name || r.name.trim().toLowerCase() !== name.trim().toLowerCase())
+    );
+    const stats = calculateStats(remaining);
+    this.setState({
+      reviews: remaining,
+      average: stats.average,
+      count: stats.count,
+      total: remaining.length,
+    });
+
+    try {
+      await apiFetch(
+        `/api/ratings?id=${encodeURIComponent(id)}&name=${encodeURIComponent(name || '')}`,
+        {
+          method: 'DELETE',
+          headers: this.headers(),
+        }
+      );
+    } catch {
+      // Local tombstone already applied
+    }
   }
 
   public getState(): RatingsState {

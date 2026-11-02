@@ -119,6 +119,7 @@ class LikeService {
       this.liked[projectId] = data.isLiked;
 
       if (target && data.isLiked && userName) {
+        notificationService.unmarkRemovedLiker(projectId, userName);
         const proj = projectsData.find((p) => p.id === projectId);
         notificationService.recordLike(
           { id: projectId, title: proj?.title || projectId, thumbnail: proj?.thumbnail },
@@ -129,6 +130,7 @@ class LikeService {
     } catch {
       // If serverless is offline, record local like without crashing
       if (target && userName) {
+        notificationService.unmarkRemovedLiker(projectId, userName);
         const proj = projectsData.find((p) => p.id === projectId);
         notificationService.recordLike(
           { id: projectId, title: proj?.title || projectId, thumbnail: proj?.thumbnail },
@@ -151,7 +153,8 @@ class LikeService {
       .filter(
         (n) => n.projectId === projectId || (proj && n.projectTitle?.toLowerCase() === proj.title.toLowerCase())
       )
-      .map((n) => ({ userName: n.userName, timestamp: n.timestamp }));
+      .map((n) => ({ userName: n.userName, timestamp: n.timestamp }))
+      .filter((l) => l.userName && !notificationService.isLikerRemoved(projectId, l.userName));
 
     let list: LikerUser[] = [];
     try {
@@ -160,7 +163,9 @@ class LikeService {
       );
       const map = new Map<string, LikerUser>();
       (data.likers || []).forEach((l) => {
-        if (l.userName) map.set(l.userName.toLowerCase(), l);
+        if (l.userName && !notificationService.isLikerRemoved(projectId, l.userName)) {
+          map.set(l.userName.toLowerCase(), l);
+        }
       });
       notifLikers.forEach((l) => {
         if (l.userName && !map.has(l.userName.toLowerCase())) {
@@ -171,7 +176,9 @@ class LikeService {
     } catch {
       const map = new Map<string, LikerUser>();
       notifLikers.forEach((l) => {
-        if (l.userName) map.set(l.userName.toLowerCase(), l);
+        if (l.userName && !notificationService.isLikerRemoved(projectId, l.userName)) {
+          map.set(l.userName.toLowerCase(), l);
+        }
       });
       list = Array.from(map.values());
     }
@@ -181,6 +188,31 @@ class LikeService {
     this.likes[projectId] = list.length;
     this.notifyListeners();
     return list;
+  }
+
+  /** Owner-only: Removes a specific liker from a project post. */
+  public async removeLiker(projectId: string, userName: string): Promise<LikerUser[]> {
+    const cleanName = (userName || '').trim();
+    if (!cleanName) return this.fetchLikers(projectId);
+
+    // 1. Remove from notification service & cloud history immediately
+    notificationService.removeLikerNotifications(projectId, cleanName);
+
+    // 2. Remove from backend store
+    try {
+      await apiFetch(`/api/likes?projectId=${encodeURIComponent(projectId)}&userName=${encodeURIComponent(cleanName)}`, {
+        method: 'DELETE',
+        headers: { ...ownerAuthHeaders() },
+      });
+    } catch {
+      // Even if offline, local & cloud notification removal ensures the liker is removed
+    }
+
+    const updated = await this.fetchLikers(projectId);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('project_interaction_updated', { detail: { projectId } }));
+    }
+    return updated;
   }
 
   public subscribe(listener: () => void) {

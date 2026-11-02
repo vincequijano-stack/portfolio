@@ -40,8 +40,13 @@ async function getLikes(req, res, store) {
   if (query.likers) {
     if (!isValidProjectId(query.projectId)) throw new HttpError(400, 'Invalid projectId.');
     const raw = store ? await store.listLikers(query.projectId) : [];
+    // Automatically purge legacy auto-generated visitor_XXXX placeholders if present
+    if (store && raw.some((l) => /^visitor_\d+$/i.test(String(l?.userName || '').trim()))) {
+      await store.removeLikerByName(query.projectId, 'visitor_7783').catch(() => {});
+    }
     const likers = (raw.length > 0 ? raw : SEED_LIKERS[query.projectId] || [])
       .map((l) => ({ userName: l.userName || '', timestamp: Number(l.timestamp) || 0 }))
+      .filter((l) => l.userName && !/^visitor_\d+$/i.test(l.userName.trim()))
       .sort((a, b) => b.timestamp - a.timestamp);
     return send(res, 200, { success: true, projectId: query.projectId, likers, count: likers.length });
   }
@@ -110,6 +115,54 @@ async function setLike(req, res, store) {
   });
 }
 
+async function deleteLiker(req, res, store) {
+  requireOwner(req);
+  const query = getQuery(req);
+  const body = getBody(req);
+  const projectId = query.projectId || body.projectId;
+  const userName = String(query.userName || body.userName || '').trim();
+
+  if (!isValidProjectId(projectId)) throw new HttpError(400, 'Invalid projectId.');
+  if (!userName) throw new HttpError(400, 'Missing userName to remove.');
+
+  if (store) {
+    const existing = await store.listLikers(projectId);
+    // If store was empty and using SEED_LIKERS, seed the remaining likers first
+    if (existing.length === 0 && Array.isArray(SEED_LIKERS[projectId])) {
+      for (const seed of SEED_LIKERS[projectId]) {
+        if (seed.userName.trim().toLowerCase() !== userName.toLowerCase()) {
+          const seedVisId = `vis_seed_${seed.userName.trim().toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+          await store.addLike(projectId, seedVisId, seed);
+        }
+      }
+    } else if (typeof store.removeLikerByName === 'function') {
+      await store.removeLikerByName(projectId, userName);
+    }
+
+    const updatedRaw = await store.listLikers(projectId);
+    const likers = updatedRaw
+      .map((l) => ({ userName: l.userName || '', timestamp: Number(l.timestamp) || 0 }))
+      .filter((l) => l.userName && !/^visitor_\d+$/i.test(l.userName.trim()))
+      .sort((a, b) => b.timestamp - a.timestamp);
+
+    return send(res, 200, {
+      success: true,
+      deleted: true,
+      projectId,
+      likers,
+      likesCount: likers.length,
+    });
+  }
+
+  return send(res, 200, {
+    success: true,
+    deleted: true,
+    projectId,
+    likers: [],
+    likesCount: 0,
+  });
+}
+
 export default async function handler(req, res) {
   try {
     if (req.method === 'OPTIONS') return send(res, 204, {});
@@ -117,11 +170,12 @@ export default async function handler(req, res) {
     try {
       store = getStore();
     } catch (storeErr) {
-      if (req.method !== 'GET') throw storeErr;
+      if (req.method !== 'GET' && req.method !== 'DELETE') throw storeErr;
     }
     if (req.method === 'GET') return await getLikes(req, res, store);
     if (req.method === 'POST') return await setLike(req, res, store);
-    return methodNotAllowed(res, ['GET', 'POST']);
+    if (req.method === 'DELETE') return await deleteLiker(req, res, store);
+    return methodNotAllowed(res, ['GET', 'POST', 'DELETE']);
   } catch (err) {
     return handleError(res, err, 'likes');
   }

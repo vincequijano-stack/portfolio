@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   Loader2,
   AlertCircle,
+  Trash2,
 } from 'lucide-react';
 import {
   ratingService,
@@ -15,6 +16,7 @@ import {
   getSessionName,
   setSessionName,
   validateDisplayName,
+  isOwnerUnlocked,
 } from '../services/visitorSession';
 import { VisitorIdentityChip } from './VisitorIdentity';
 
@@ -118,6 +120,12 @@ export const RateModal: React.FC<RateModalProps> = ({
 
   const isReviewsOnly = initialTab === 'all';
   const currentView = isReviewsOnly ? 'all' : activeTab;
+  const isOwner = isOwnerUnlocked();
+
+  const handleDeleteReview = async (id: string, name: string) => {
+    if (!confirm(`Are you sure you want to delete ${name}'s review?`)) return;
+    await ratingService.deleteReview(id, name);
+  };
 
   return (
     <div
@@ -350,9 +358,22 @@ export const RateModal: React.FC<RateModalProps> = ({
                             </span>
                           )}
                         </div>
-                        <span className="text-[10px] text-[#8E8E8E] dark:text-[#737373]">
-                          {formatReviewDate(rev)}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] text-[#8E8E8E] dark:text-[#737373]">
+                            {formatReviewDate(rev)}
+                          </span>
+                          {isOwner && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteReview(rev.id, rev.name)}
+                              className="p-1 rounded-md text-[#8E8E8E] hover:text-[#ED4956] hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
+                              title={`Delete ${rev.name}'s review (Owner)`}
+                              aria-label={`Delete ${rev.name}'s review`}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
                       </div>
 
                       {/* Stars */}

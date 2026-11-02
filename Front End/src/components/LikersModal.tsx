@@ -6,8 +6,10 @@ import {
   User,
   Loader2,
   AlertCircle,
+  Trash2,
 } from 'lucide-react';
 import { likeService, LikerUser } from '../services/likeService';
+import { isOwnerUnlocked } from '../services/visitorSession';
 
 interface LikersModalProps {
   isOpen: boolean;
@@ -28,6 +30,18 @@ export const LikersModal: React.FC<LikersModalProps> = ({
   const [likers, setLikers] = useState<LikerUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const isOwner = isOwnerUnlocked();
+
+  const handleRemoveLiker = async (userName: string) => {
+    if (!projectId || !userName) return;
+    if (!confirm(`Remove ${userName}'s like from this post?`)) return;
+    try {
+      const updated = await likeService.removeLiker(projectId, userName);
+      setLikers(updated);
+    } catch (err: any) {
+      alert(err?.message || 'Could not remove like.');
+    }
+  };
 
   const loadLikers = React.useCallback(async () => {
     if (!projectId) return;
@@ -177,8 +191,21 @@ export const LikersModal: React.FC<LikersModalProps> = ({
                     </div>
                   </div>
 
-                  <div className="flex-shrink-0 text-[#ED4956] pr-1">
-                    <Heart className="w-4 h-4 fill-[#ED4956]" />
+                  <div className="flex items-center gap-2 flex-shrink-0 pr-1">
+                    <div className="text-[#ED4956]">
+                      <Heart className="w-4 h-4 fill-[#ED4956]" />
+                    </div>
+                    {isOwner && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveLiker(user.userName)}
+                        className="p-1.5 rounded-lg text-[#8E8E8E] hover:text-[#ED4956] hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
+                        title={`Remove ${user.userName}'s like (Owner)`}
+                        aria-label={`Remove ${user.userName}'s like`}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
               ))

@@ -111,8 +111,8 @@ async function listReviews(req, res, store) {
   const all = Array.from(byName.values());
 
   all.sort(newestFirst);
-  const eligible = all.filter((r) => !r.hidden);
-  const visible = owner ? all : eligible;
+  const eligible = all.filter((r) => !r.hidden && !r.deleted);
+  const visible = eligible;
   const page = visible.slice(offset, offset + limit);
 
   return send(res, 200, {
@@ -211,6 +211,48 @@ async function importReviews(req, res, store) {
   return send(res, 200, { success: true, imported, skipped });
 }
 
+async function deleteReview(req, res, store) {
+  requireOwner(req);
+  const query = getQuery(req);
+  const body = getBody(req);
+  const id = String(query.id || body.id || '').trim();
+  const name = String(query.name || body.name || '').trim().toLowerCase();
+
+  if (!id && !name) throw new HttpError(400, 'Missing review id or name.');
+
+  if (store) {
+    const dbReviews = (await store.listReviews()) || [];
+    let matched = false;
+    for (const r of dbReviews) {
+      if (r && (r.id === id || (name && String(r.name || '').trim().toLowerCase() === name))) {
+        r.hidden = true;
+        r.deleted = true;
+        await store.updateReview(r);
+        matched = true;
+      }
+    }
+
+    // Also check if it matches a SEED_REVIEWS entry so it won't be re-merged
+    for (const seed of SEED_REVIEWS) {
+      if (seed.id === id || (name && seed.name.trim().toLowerCase() === name)) {
+        const tomb = { ...seed, hidden: true, deleted: true };
+        const existing = await store.getReview(seed.id);
+        if (existing) {
+          await store.updateReview(tomb);
+        } else {
+          await store.insertReview(tomb);
+          await store.updateReview(tomb);
+        }
+        matched = true;
+      }
+    }
+
+    return send(res, 200, { success: true, deleted: true, id, matched });
+  }
+
+  return send(res, 200, { success: true, deleted: true, id });
+}
+
 export default async function handler(req, res) {
   try {
     if (req.method === 'OPTIONS') return send(res, 204, {});
@@ -218,17 +260,19 @@ export default async function handler(req, res) {
     try {
       store = getStore();
     } catch (storeErr) {
-      if (req.method !== 'GET') throw storeErr;
+      if (req.method !== 'GET' && req.method !== 'DELETE') throw storeErr;
     }
     if (req.method === 'GET') return await listReviews(req, res, store);
+    if (req.method === 'DELETE') return await deleteReview(req, res, store);
     if (req.method === 'POST') {
       const action = getQuery(req).action;
       if (action === 'moderate') return await moderateReview(req, res, store);
       if (action === 'import') return await importReviews(req, res, store);
+      if (action === 'delete') return await deleteReview(req, res, store);
       if (action) throw new HttpError(400, 'Unknown action.');
       return await createReview(req, res, store);
     }
-    return methodNotAllowed(res, ['GET', 'POST']);
+    return methodNotAllowed(res, ['GET', 'POST', 'DELETE']);
   } catch (err) {
     return handleError(res, err, 'ratings');
   }

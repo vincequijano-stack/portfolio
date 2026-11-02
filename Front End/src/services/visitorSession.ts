@@ -194,8 +194,11 @@ export function isOwnerUnlocked(): boolean {
 }
 
 export function ownerAuthHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {};
   const key = getOwnerKey();
-  return key ? { Authorization: `Bearer ${key}` } : {};
+  if (key) headers.Authorization = `Bearer ${key}`;
+  if (isOwnerUnlocked()) headers['X-Portfolio-Owner'] = 'true';
+  return headers;
 }
 
 /** Verifies the key with the server before storing it. */

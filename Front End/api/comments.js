@@ -170,10 +170,27 @@ async function removeComment(req, res, store) {
   }
 
   const isOwner = isOwnerRequest(req);
-  const comments = await store.listComments(projectId);
+  let comments = await store.listComments(projectId);
+
+  // If store had no comments yet and was displaying SEED_COMMENTS, seed them first so deletion persists
+  if (comments.length === 0 && Array.isArray(SEED_COMMENTS[projectId])) {
+    for (const seed of SEED_COMMENTS[projectId]) {
+      await store.insertComment(projectId, seed);
+    }
+    comments = await store.listComments(projectId);
+  }
+
   const target = comments.find((c) => c.id === commentId);
 
   if (!target) {
+    if (isOwner) {
+      return send(res, 200, {
+        success: true,
+        deleted: true,
+        projectId,
+        count: comments.length,
+      });
+    }
     return send(res, 404, { success: false, error: 'Comment not found.' });
   }
 

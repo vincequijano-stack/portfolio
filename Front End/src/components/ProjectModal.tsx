@@ -346,7 +346,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
                           <button
                             type="button"
                             onClick={() => handleDeleteComment(c.id)}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-[#8E8E8E] hover:text-[#ED4956] dark:text-[#737373] dark:hover:text-[#ED4956] rounded shrink-0 focus:opacity-100"
+                            className="opacity-75 hover:opacity-100 transition-opacity p-1 text-[#8E8E8E] hover:text-[#ED4956] dark:text-[#737373] dark:hover:text-[#ED4956] rounded shrink-0 cursor-pointer"
                             title={isOwner && !isAuthor ? 'Delete comment (Owner)' : 'Delete your comment'}
                           >
                             <Trash2 className="w-3.5 h-3.5" />

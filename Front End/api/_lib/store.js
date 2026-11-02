@@ -87,6 +87,25 @@ function createRedisStore({ url, token }) {
       return removed === 1;
     },
 
+    async removeLikerByName(projectId, userName) {
+      const target = String(userName || '').trim().toLowerCase();
+      if (!target) return false;
+      const [rawPairs] = await pipeline([['HGETALL', likesKey(projectId)]]);
+      const pairs = Array.isArray(rawPairs) ? rawPairs : [];
+      const toDelete = [];
+      for (let i = 0; i < pairs.length; i += 2) {
+        const field = pairs[i];
+        const parsed = safeParse(pairs[i + 1]);
+        const uName = String(parsed?.userName || '').trim().toLowerCase();
+        if (uName === target || String(field).toLowerCase() === target || /^visitor_\d+$/i.test(uName)) {
+          toDelete.push(field);
+        }
+      }
+      if (toDelete.length === 0) return false;
+      await pipeline(toDelete.map((f) => ['HDEL', likesKey(projectId), f]));
+      return true;
+    },
+
     async countLikes(projectIds) {
       if (projectIds.length === 0) return {};
       const results = await pipeline(projectIds.map((id) => ['HLEN', likesKey(id)]));
@@ -241,6 +260,24 @@ function createFileStore(filePath) {
         list.splice(idx, 1);
         await write(db);
         return true;
+      }),
+
+    removeLikerByName: (projectId, userName) =>
+      withLock(async () => {
+        const target = String(userName || '').trim().toLowerCase();
+        if (!target) return false;
+        const db = await read();
+        const list = db.likedBy[projectId] || [];
+        const initial = list.length;
+        db.likedBy[projectId] = list.filter((l) => {
+          const uName = String(l?.userName || '').trim().toLowerCase();
+          return uName !== target && String(l?.visitorId || '').toLowerCase() !== target && !/^visitor_\d+$/i.test(uName);
+        });
+        if (db.likedBy[projectId].length !== initial) {
+          await write(db);
+          return true;
+        }
+        return false;
       }),
 
     countLikes: (projectIds) =>

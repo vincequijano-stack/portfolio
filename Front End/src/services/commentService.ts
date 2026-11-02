@@ -14,15 +14,18 @@ export interface ProjectComment {
 }
 
 const POLL_INTERVAL_MS = 60_000;
+const DELETED_COMMENTS_KEY = 'portfolio_deleted_comments_v1';
 
 class CommentService {
   private comments: Record<string, ProjectComment[]> = {};
   private counts: Record<string, number> = {};
   private loading: Record<string, boolean> = {};
+  private deletedIds: Set<string> = new Set();
   private listeners: Set<() => void> = new Set();
   public loaded = false;
 
   constructor() {
+    this.loadDeletedIds();
     // Seed default baseline counts
     projectsData.forEach((p) => {
       this.counts[p.id] = p.commentsCount || 0;
@@ -35,6 +38,22 @@ class CommentService {
       }, POLL_INTERVAL_MS);
       window.addEventListener('focus', () => this.fetchCounts());
     }
+  }
+
+  private loadDeletedIds() {
+    try {
+      const raw = localStorage.getItem(DELETED_COMMENTS_KEY);
+      if (raw) {
+        const arr: string[] = JSON.parse(raw);
+        if (Array.isArray(arr)) this.deletedIds = new Set(arr);
+      }
+    } catch {}
+  }
+
+  private saveDeletedIds() {
+    try {
+      localStorage.setItem(DELETED_COMMENTS_KEY, JSON.stringify(Array.from(this.deletedIds)));
+    } catch {}
   }
 
   private notify() {
@@ -81,10 +100,11 @@ class CommentService {
         `/api/comments?projectId=${encodeURIComponent(projectId)}`
       );
       if (data && Array.isArray(data.comments)) {
-        this.comments[projectId] = data.comments;
-        this.counts[projectId] = data.comments.length;
+        const filtered = data.comments.filter((c) => !this.deletedIds.has(c.id));
+        this.comments[projectId] = filtered;
+        this.counts[projectId] = filtered.length;
         this.notify();
-        return data.comments;
+        return filtered;
       }
     } catch (err) {
       console.warn(`Could not fetch comments for ${projectId}:`, err);
@@ -156,28 +176,38 @@ class CommentService {
     const visitorId = getVisitorId();
     const headers = { ...ownerAuthHeaders() };
 
-    const res = await apiFetch<{ deleted: boolean; count: number }>(
-      `/api/comments?projectId=${encodeURIComponent(projectId)}&commentId=${encodeURIComponent(
-        commentId
-      )}&visitorId=${encodeURIComponent(visitorId)}`,
-      {
-        method: 'DELETE',
-        headers,
-      }
-    );
+    this.deletedIds.add(commentId);
+    this.saveDeletedIds();
 
-    if (res && res.deleted) {
-      if (this.comments[projectId]) {
-        this.comments[projectId] = this.comments[projectId].filter((c) => c.id !== commentId);
-      }
-      this.counts[projectId] = typeof res.count === 'number' ? res.count : (this.comments[projectId]?.length || 0);
-      this.notify();
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('project_interaction_updated', { detail: { projectId } }));
-      }
-      return true;
+    if (this.comments[projectId]) {
+      this.comments[projectId] = this.comments[projectId].filter((c) => c.id !== commentId);
+      this.counts[projectId] = this.comments[projectId].length;
     }
-    return false;
+    this.notify();
+
+    try {
+      const res = await apiFetch<{ deleted: boolean; count: number }>(
+        `/api/comments?projectId=${encodeURIComponent(projectId)}&commentId=${encodeURIComponent(
+          commentId
+        )}&visitorId=${encodeURIComponent(visitorId)}`,
+        {
+          method: 'DELETE',
+          headers,
+        }
+      );
+
+      if (res && typeof res.count === 'number' && !this.comments[projectId]) {
+        this.counts[projectId] = res.count;
+        this.notify();
+      }
+    } catch {
+      // Offline / local deletion already applied
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('project_interaction_updated', { detail: { projectId } }));
+    }
+    return true;
   }
 }
 
