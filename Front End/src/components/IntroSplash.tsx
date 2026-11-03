@@ -127,7 +127,7 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
                       setVisitorNameInput(e.target.value);
                       if (error) setError('');
                     }}
-                    placeholder="Enter your name (e.g. Alex, Sarah, Recruiter)..."
+                    placeholder="Enter your name (e.g. Vince Quijano)..."
                     maxLength={40}
                     className={`w-full text-xs sm:text-sm pl-10 pr-3.5 py-2.5 rounded-xl bg-[#FAFAFA] dark:bg-[#1A1A1A] text-[#262626] dark:text-white placeholder-[#8E8E8E] dark:placeholder-[#737373] border transition-all focus:outline-none ${
                       error

@@ -9,6 +9,8 @@ export interface ProfileData {
   website: string;
   github: string;
   linkedin: string;
+  facebook: string;
+  instagram: string;
   email: string;
   stats: {
     projects: number;
@@ -36,6 +38,8 @@ export const profileData: ProfileData = {
   website: "https://vincequijano.dev",
   github: "https://github.com/vincequijano-stack",
   linkedin: "https://www.linkedin.com/in/vince-quijano-769768421",
+  facebook: "https://www.facebook.com/",
+  instagram: "https://www.instagram.com/",
   email: "vincelawrencequijano@gmail.com",
   stats: {
     projects: 3,

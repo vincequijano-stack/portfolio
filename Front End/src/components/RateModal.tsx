@@ -261,7 +261,7 @@ export const RateModal: React.FC<RateModalProps> = ({
                     type="text"
                     value={clientName}
                     onChange={(e) => handleNameChange(e.target.value)}
-                    placeholder="e.g. Sarah Jenkins"
+                    placeholder="e.g. Vince Quijano"
                     maxLength={40}
                     className="w-full text-xs px-3 py-2 rounded-lg border border-[#DBDBDB] dark:border-[#333333] bg-white dark:bg-[#141414] text-[#262626] dark:text-white focus:outline-none focus:border-[#0095F6] transition-colors"
                   />

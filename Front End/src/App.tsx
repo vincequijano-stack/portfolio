@@ -143,8 +143,8 @@ export default function App() {
         unreadCount={unreadCount}
       />
 
-      {/* 2. Main Content Wrapper: Offset by slim sidebar on desktop, centered container */}
-      <div className="md:ml-[72px] flex flex-col min-h-screen">
+      {/* 2. Main Content Wrapper: Offset by sidebar on desktop, centered container */}
+      <div className="md:ml-[88px] flex flex-col min-h-screen">
         {/* Mobile Top Header (Only on small screens) */}
         <header className="md:hidden sticky top-0 z-30 bg-white/95 dark:bg-black/95 backdrop-blur-md border-b border-[#DBDBDB] dark:border-[#262626] px-4 py-2.5 flex items-center justify-between">
           <a
@@ -175,8 +175,8 @@ export default function App() {
           </button>
         </header>
 
-        {/* Inner Content Container: Exactly max-w-[935px] matching real Instagram desktop */}
-        <main className="flex-1 max-w-[935px] w-full mx-auto px-3 sm:px-6 pt-4 sm:pt-9 pb-24 md:pb-12">
+        {/* Inner Content Container: Full-size Instagram desktop proportions */}
+        <main className="flex-1 max-w-[1040px] w-full mx-auto px-3 sm:px-8 pt-5 sm:pt-10 pb-24 md:pb-16">
           {/* Profile Header (Avatar on left with "Note..." bubble, stats, bio, action buttons) */}
           <ProfileHeader
             onNavigate={handleNavigate}
@@ -211,7 +211,7 @@ export default function App() {
 
         {/* Minimalist Instagram Footer */}
         <footer className="w-full border-t border-[#DBDBDB] dark:border-[#262626] py-8 text-center text-xs text-[#8E8E8E] dark:text-[#737373] bg-white dark:bg-black transition-colors duration-200">
-          <div className="max-w-[935px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="max-w-[1040px] mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-4 text-xs font-semibold">
               <a href="#about" onClick={(e) => { e.preventDefault(); handleNavigate('about'); }} className="hover:text-[#262626] dark:hover:text-white">About</a>
               <a href="#skills" onClick={(e) => { e.preventDefault(); handleNavigate('skills'); }} className="hover:text-[#262626] dark:hover:text-white">Skills</a>

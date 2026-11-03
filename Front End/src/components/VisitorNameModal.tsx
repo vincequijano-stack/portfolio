@@ -120,7 +120,7 @@ export const VisitorNameModal: React.FC<VisitorNameModalProps> = ({ isOpen, onCl
                   setName(e.target.value);
                   if (error) setError('');
                 }}
-                placeholder="Enter your name"
+                placeholder="e.g. Vince Quijano"
                 maxLength={NAME_MAX_LENGTH + 10}
                 aria-invalid={Boolean(error)}
                 aria-describedby={error ? 'visitor-name-error' : 'visitor-name-privacy'}

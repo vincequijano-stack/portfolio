@@ -38,7 +38,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) =>
   return (
     <article
       onClick={() => onClick(project)}
-      className="group relative aspect-square bg-[#EFEFEF] dark:bg-[#1A1A1A] overflow-hidden rounded-[3px] border border-[#DBDBDB]/40 dark:border-[#262626] cursor-pointer shadow-xs select-none"
+      className="group relative aspect-[4/5] bg-[#EFEFEF] dark:bg-[#1A1A1A] overflow-hidden rounded-[4px] border border-[#DBDBDB]/40 dark:border-[#262626] cursor-pointer shadow-xs select-none"
     >
       {/* Thumbnail Image */}
       <img
@@ -72,23 +72,23 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) =>
       </div>
 
       {/* Always-Visible Bottom Info Bar (so visitors on mobile & desktop know it's clickable) */}
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent p-2 sm:p-3 pt-6 flex items-end justify-between gap-2 z-10 pointer-events-none group-hover:opacity-0 transition-opacity duration-200">
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent p-2.5 sm:p-3.5 pt-8 flex items-end justify-between gap-2 z-10 pointer-events-none group-hover:opacity-0 transition-opacity duration-200">
         <div className="text-left min-w-0 flex-1">
-          <h3 className="text-white text-[11px] sm:text-xs font-bold truncate drop-shadow-xs">
+          <h3 className="text-white text-xs sm:text-sm font-bold truncate drop-shadow-xs">
             {project.title}
           </h3>
-          <div className="flex items-center gap-2.5 text-white/90 text-[10px] font-semibold mt-0.5">
+          <div className="flex items-center gap-3 text-white/90 text-[11px] sm:text-xs font-semibold mt-0.5">
             <span className="flex items-center gap-1">
-              <Heart className="w-3 h-3 fill-[#ED4956] text-[#ED4956]" />
+              <Heart className="w-3.5 h-3.5 fill-[#ED4956] text-[#ED4956]" />
               {likesCount}
             </span>
             <span className="flex items-center gap-1">
-              <MessageCircle className="w-3 h-3 fill-white/80 text-white" />
+              <MessageCircle className="w-3.5 h-3.5 fill-white/80 text-white" />
               {commentsCount}
             </span>
           </div>
         </div>
-        <span className="shrink-0 text-[10px] font-bold bg-[#0095F6] text-white px-2 py-0.5 rounded-full shadow-xs">
+        <span className="shrink-0 text-[10px] sm:text-xs font-bold bg-[#0095F6] text-white px-2.5 py-1 rounded-full shadow-xs">
           View →
         </span>
       </div>
