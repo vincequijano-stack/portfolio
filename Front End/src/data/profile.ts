@@ -37,7 +37,7 @@ export const profileData: ProfileData = {
   location: "Pamantasan ng Cabuyao · Laguna, Philippines",
   website: "https://vincequijano.dev",
   github: "https://github.com/vincequijano-stack",
-  linkedin: "https://www.linkedin.com/in/vince-quijano-769768421",
+  linkedin: "https://www.linkedin.com/in/vince-quijano/",
   facebook: "https://www.facebook.com/",
   instagram: "https://www.instagram.com/",
   email: "vincelawrencequijano@gmail.com",

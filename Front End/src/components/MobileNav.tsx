@@ -17,12 +17,12 @@ export const MobileNav: React.FC<MobileNavProps> = ({
   unreadCount = 0,
 }) => {
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-black/95 backdrop-blur-md border-t border-[#DBDBDB] dark:border-[#262626] px-4 py-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] flex items-center justify-around select-none shadow-md">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#FAFBF8]/95 backdrop-blur-md border-t border-[#D4E0CD] px-4 py-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] flex items-center justify-around select-none shadow-md">
       {/* 1. Home */}
       <button
         onClick={() => onNavigate('profile-top')}
         className={`flex flex-col items-center justify-center min-w-[48px] min-h-[40px] gap-0.5 transition-colors cursor-pointer ${
-          activeSection === 'profile-top' ? 'text-[#0095F6] font-bold' : 'text-[#737373] dark:text-[#A8A8A8]'
+          activeSection === 'profile-top' ? 'text-[#283618] font-bold' : 'text-[#526348]'
         }`}
         aria-label="Home"
       >
@@ -39,13 +39,13 @@ export const MobileNav: React.FC<MobileNavProps> = ({
             onNavigate('certificates');
           }
         }}
-        className="flex flex-col items-center justify-center min-w-[48px] min-h-[40px] gap-0.5 text-[#737373] dark:text-[#A8A8A8] relative cursor-pointer"
+        className="flex flex-col items-center justify-center min-w-[48px] min-h-[40px] gap-0.5 text-[#526348] relative cursor-pointer"
         aria-label="Activity and notifications"
       >
         <div className="relative">
-          <Heart className={`w-5 h-5 ${unreadCount > 0 ? 'text-[#ED4956] stroke-[2]' : 'stroke-[1.75]'}`} />
+          <Heart className={`w-5 h-5 ${unreadCount > 0 ? 'text-[#283618] stroke-[2]' : 'stroke-[1.75]'}`} />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-[#ED4956] text-white text-[8px] font-bold rounded-full min-w-3.5 h-3.5 px-0.5 flex items-center justify-center shadow-xs animate-pulse">
+            <span className="absolute -top-1 -right-1 bg-[#283618] text-white text-[8px] font-bold rounded-full min-w-3.5 h-3.5 px-0.5 flex items-center justify-center shadow-xs animate-pulse">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
@@ -58,7 +58,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
         href={profileData.github}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex flex-col items-center justify-center min-w-[48px] min-h-[40px] gap-0.5 text-[#737373] dark:text-[#A8A8A8]"
+        className="flex flex-col items-center justify-center min-w-[48px] min-h-[40px] gap-0.5 text-[#526348] hover:text-[#283618]"
         aria-label="GitHub"
       >
         <GithubIcon className="w-5 h-5" />
@@ -70,7 +70,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
         href={profileData.linkedin}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex flex-col items-center justify-center min-w-[48px] min-h-[40px] gap-0.5 text-[#737373] dark:text-[#A8A8A8]"
+        className="flex flex-col items-center justify-center min-w-[48px] min-h-[40px] gap-0.5 text-[#526348] hover:text-[#283618]"
         aria-label="LinkedIn"
       >
         <LinkedinIcon className="w-5 h-5" />
@@ -82,7 +82,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
         href={profileData.facebook}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex flex-col items-center justify-center min-w-[48px] min-h-[40px] gap-0.5 text-[#737373] dark:text-[#A8A8A8]"
+        className="flex flex-col items-center justify-center min-w-[48px] min-h-[40px] gap-0.5 text-[#526348] hover:text-[#283618]"
         aria-label="Facebook"
       >
         <FacebookIcon className="w-5 h-5" />
@@ -94,7 +94,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
         href={profileData.instagram}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex flex-col items-center justify-center min-w-[48px] min-h-[40px] gap-0.5 text-[#737373] dark:text-[#A8A8A8]"
+        className="flex flex-col items-center justify-center min-w-[48px] min-h-[40px] gap-0.5 text-[#526348] hover:text-[#283618]"
         aria-label="Instagram"
       >
         <InstagramIcon className="w-5 h-5" />

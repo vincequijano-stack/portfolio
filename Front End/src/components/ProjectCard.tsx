@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { Heart, MessageCircle, ExternalLink, Layers } from 'lucide-react';
+import { Layers } from 'lucide-react';
 import { Project } from '../data/projects';
-import { likeService } from '../services/likeService';
-import { commentService } from '../services/commentService';
 
 interface ProjectCardProps {
   project: Project;
@@ -12,33 +10,11 @@ interface ProjectCardProps {
 export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [likesCount, setLikesCount] = useState<number>(() => likeService.getLikesCount(project.id));
-  const [commentsCount, setCommentsCount] = useState<number>(() => commentService.getCommentsCount(project.id));
-
-  const syncStats = React.useCallback(() => {
-    setLikesCount(likeService.getLikesCount(project.id));
-    setCommentsCount(commentService.getCommentsCount(project.id));
-  }, [project.id]);
-
-  React.useEffect(() => {
-    syncStats();
-    const handleUpdate = () => syncStats();
-    const unsubLikes = likeService.subscribe(() => syncStats());
-    const unsubComments = commentService.subscribe(() => syncStats());
-    window.addEventListener('project_interaction_updated', handleUpdate);
-    window.addEventListener('storage', handleUpdate);
-    return () => {
-      unsubLikes();
-      unsubComments();
-      window.removeEventListener('project_interaction_updated', handleUpdate);
-      window.removeEventListener('storage', handleUpdate);
-    };
-  }, [syncStats]);
 
   return (
     <article
       onClick={() => onClick(project)}
-      className="group relative aspect-[4/5] bg-[#EFEFEF] dark:bg-[#1A1A1A] overflow-hidden rounded-[4px] border border-[#DBDBDB]/40 dark:border-[#262626] cursor-pointer shadow-xs select-none"
+      className="group relative aspect-[4/5] bg-[#EBF1E6] overflow-hidden rounded-[6px] border border-[#D4E0CD] hover:border-[#283618] cursor-pointer shadow-xs hover:shadow-xl hover:shadow-[#283618]/15 transition-all select-none"
     >
       {/* Thumbnail Image */}
       <img
@@ -54,12 +30,12 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) =>
 
       {/* Loading Skeleton */}
       {!imgLoaded && (
-        <div className="absolute inset-0 bg-[#EFEFEF] dark:bg-[#1A1A1A] animate-pulse flex items-center justify-center">
-          <Layers className="w-6 h-6 text-[#DBDBDB] dark:text-[#333333]" />
+        <div className="absolute inset-0 bg-[#EBF1E6] animate-pulse flex items-center justify-center">
+          <Layers className="w-6 h-6 text-[#8FA882]" />
         </div>
       )}
 
-      {/* Multiple Post Carousel Icon (Top Right - exactly like Instagram in reference image) */}
+      {/* Multiple Post Carousel Icon (Top Right) */}
       <div className="absolute top-2.5 right-2.5 text-white drop-shadow-md z-10 pointer-events-none opacity-90">
         <svg
           className="w-4 h-4 fill-white drop-shadow"
@@ -71,65 +47,43 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) =>
         </svg>
       </div>
 
-      {/* Always-Visible Bottom Info Bar (so visitors on mobile & desktop know it's clickable) */}
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent p-2.5 sm:p-3.5 pt-8 flex items-end justify-between gap-2 z-10 pointer-events-none group-hover:opacity-0 transition-opacity duration-200">
+      {/* Always-Visible Bottom Info Bar (Title + View → button only) */}
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent p-3 sm:p-4 pt-8 flex items-center justify-between gap-2 z-10 pointer-events-none group-hover:opacity-0 transition-opacity duration-200">
         <div className="text-left min-w-0 flex-1">
           <h3 className="text-white text-xs sm:text-sm font-bold truncate drop-shadow-xs">
             {project.title}
           </h3>
-          <div className="flex items-center gap-3 text-white/90 text-[11px] sm:text-xs font-semibold mt-0.5">
-            <span className="flex items-center gap-1">
-              <Heart className="w-3.5 h-3.5 fill-[#ED4956] text-[#ED4956]" />
-              {likesCount}
-            </span>
-            <span className="flex items-center gap-1">
-              <MessageCircle className="w-3.5 h-3.5 fill-white/80 text-white" />
-              {commentsCount}
-            </span>
-          </div>
         </div>
-        <span className="shrink-0 text-[10px] sm:text-xs font-bold bg-[#0095F6] text-white px-2.5 py-1 rounded-full shadow-xs">
+        <span className="shrink-0 text-[10px] sm:text-xs font-bold bg-[#283618] text-white px-3 py-1 rounded-full shadow-xs">
           View →
         </span>
       </div>
 
-      {/* Instagram-Style Hover Overlay */}
-      <div className="absolute inset-0 bg-black/55 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center p-4 text-center z-20">
-        <h3 className="text-white text-sm font-bold drop-shadow line-clamp-2 px-2 mb-2">
+      {/* Hover Overlay (Title, Tech tags & View button) */}
+      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center p-4 text-center z-20">
+        <h3 className="text-white text-sm sm:text-base font-bold drop-shadow line-clamp-2 px-2 mb-3">
           {project.title}
         </h3>
 
-        {/* Likes and Comments Overlay Counter */}
-        <div className="flex items-center gap-5 text-white font-bold text-sm mb-3">
-          <div className="flex items-center gap-1.5">
-            <Heart className="w-4 h-4 fill-white" />
-            <span>{likesCount}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <MessageCircle className="w-4 h-4 fill-white" />
-            <span>{commentsCount}</span>
-          </div>
-        </div>
-
         {/* Tech tags preview */}
-        <div className="flex flex-wrap justify-center gap-1 max-w-[90%]">
+        <div className="flex flex-wrap justify-center gap-1.5 max-w-[90%]">
           {project.technologies.slice(0, 3).map((tech) => (
             <span
               key={tech}
-              className="text-[10px] bg-white/20 text-white font-medium px-2 py-0.5 rounded backdrop-blur-xs"
+              className="text-[10px] sm:text-xs bg-white/20 text-white font-medium px-2.5 py-0.5 rounded backdrop-blur-xs"
             >
               {tech}
             </span>
           ))}
           {project.technologies.length > 3 && (
-            <span className="text-[10px] bg-white/20 text-white font-medium px-1.5 py-0.5 rounded">
+            <span className="text-[10px] sm:text-xs bg-white/20 text-white font-medium px-2 py-0.5 rounded">
               +{project.technologies.length - 3}
             </span>
           )}
         </div>
 
-        <span className="mt-3 text-[11px] font-semibold text-white/90 underline underline-offset-2">
-          Click to View Details
+        <span className="mt-4 text-xs font-bold bg-[#283618] text-white px-4 py-1.5 rounded-full shadow-sm">
+          View →
         </span>
       </div>
     </article>
