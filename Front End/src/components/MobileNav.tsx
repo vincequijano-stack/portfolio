@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Heart } from 'lucide-react';
+import { Home } from 'lucide-react';
 import { GithubIcon, LinkedinIcon, FacebookIcon, InstagramIcon } from './SocialIcons';
 import { profileData } from '../data/profile';
 
@@ -13,8 +13,6 @@ interface MobileNavProps {
 export const MobileNav: React.FC<MobileNavProps> = ({
   activeSection,
   onNavigate,
-  onOpenActivity,
-  unreadCount = 0,
 }) => {
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#FAFBF8]/95 backdrop-blur-md border-t border-[#D4E0CD] px-4 py-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] flex items-center justify-around select-none shadow-md">
@@ -30,30 +28,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
         <span className="text-[9px]">Home</span>
       </button>
 
-      {/* 2. Activity */}
-      <button
-        onClick={() => {
-          if (onOpenActivity) {
-            onOpenActivity();
-          } else {
-            onNavigate('certificates');
-          }
-        }}
-        className="flex flex-col items-center justify-center min-w-[48px] min-h-[40px] gap-0.5 text-[#526348] relative cursor-pointer"
-        aria-label="Activity and notifications"
-      >
-        <div className="relative">
-          <Heart className={`w-5 h-5 ${unreadCount > 0 ? 'text-[#283618] stroke-[2]' : 'stroke-[1.75]'}`} />
-          {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-[#283618] text-white text-[8px] font-bold rounded-full min-w-3.5 h-3.5 px-0.5 flex items-center justify-center shadow-xs animate-pulse">
-              {unreadCount > 9 ? '9+' : unreadCount}
-            </span>
-          )}
-        </div>
-        <span className="text-[9px] font-semibold">Activity</span>
-      </button>
-
-      {/* 3. GitHub */}
+      {/* 2. GitHub */}
       <a
         href={profileData.github}
         target="_blank"

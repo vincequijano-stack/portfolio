@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Heart } from 'lucide-react';
+import { Home } from 'lucide-react';
 import { GithubIcon, LinkedinIcon, FacebookIcon, InstagramIcon } from './SocialIcons';
 import { profileData } from '../data/profile';
 
@@ -14,8 +14,6 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({
   activeSection,
   onNavigate,
-  onOpenActivity,
-  unreadCount = 0,
 }) => {
   return (
     <aside
@@ -23,7 +21,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       aria-label="Portfolio Navigation"
     >
       <div className="flex flex-col items-center w-full px-2">
-        {/* Navigation Items: Home, Activity, GitHub, LinkedIn, Facebook, Instagram */}
+        {/* Navigation Items: Home, GitHub, LinkedIn, Facebook, Instagram */}
         <nav className="flex flex-col items-center gap-3 w-full">
           {/* 1. Home */}
           <button
@@ -47,35 +45,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span className="text-[11px] font-medium leading-none tracking-tight">Home</span>
           </button>
 
-          {/* 2. Activity (Notifications) */}
-          <button
-            onClick={() => {
-              if (onOpenActivity) {
-                onOpenActivity();
-              } else {
-                onNavigate('certificates');
-              }
-            }}
-            className="w-full py-3 px-1.5 rounded-xl flex flex-col items-center justify-center gap-1.5 text-[#526348] hover:text-[#283618] hover:bg-[#EBF1E6] transition-all relative group cursor-pointer"
-            title="Notifications / Activity"
-            aria-label="Notifications"
-          >
-            <div className="relative">
-              <Heart
-                className={`w-6 h-6 stroke-[1.75] transition-transform group-hover:scale-110 ${
-                  unreadCount > 0 ? 'text-[#3A4D28] fill-[#8FA882]/40' : ''
-                }`}
-              />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1.5 -right-2 bg-[#283618] text-white text-[10px] font-bold rounded-full min-w-4 h-4 px-1 flex items-center justify-center shadow-xs animate-pulse">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </div>
-            <span className="text-[11px] font-medium leading-none tracking-tight">Activity</span>
-          </button>
-
-          {/* 3. GitHub Profile */}
+          {/* 2. GitHub Profile */}
           <a
             href={profileData.github}
             target="_blank"
