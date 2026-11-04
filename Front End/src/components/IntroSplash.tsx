@@ -1,168 +1,148 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { InstagramIcon } from './SocialIcons';
-import { CheckCircle2, ArrowRight, User } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowRight, Code2, Sparkles, Terminal } from 'lucide-react';
 import { profileData } from '../data/profile';
-import {
-  setSessionName,
-  validateDisplayName,
-  getSessionName,
-  isOwnerUnlocked,
-} from '../services/visitorSession';
 
 interface IntroSplashProps {
   onComplete: () => void;
 }
 
 export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
-  const isOwner = isOwnerUnlocked();
-  const [visitorName, setVisitorNameInput] = useState(() => getSessionName() || '');
-  const [error, setError] = useState('');
   const [isFadingOut, setIsFadingOut] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // If owner replays intro, auto-dismiss without asking for a name
-    if (isOwner) {
-      const fadeTimer = setTimeout(() => setIsFadingOut(true), 1300);
-      const doneTimer = setTimeout(() => onComplete(), 1650);
-      return () => {
-        clearTimeout(fadeTimer);
-        clearTimeout(doneTimer);
-      };
-    }
+    // Animate progress bar smoothly
+    const start = Date.now();
+    const duration = 2200;
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - start;
+      const pct = Math.min(100, Math.round((elapsed / duration) * 100));
+      setProgress(pct);
+      if (pct >= 100) {
+        clearInterval(interval);
+      }
+    }, 30);
 
-    // Focus the name input immediately for visitors
-    const timer = setTimeout(() => {
-      inputRef.current?.focus();
-    }, 150);
-    return () => clearTimeout(timer);
-  }, [isOwner, onComplete]);
+    // Auto-enter after the signature reveal (visitors can also click Enter anytime)
+    const fadeTimer = setTimeout(() => setIsFadingOut(true), 2400);
+    const doneTimer = setTimeout(() => onComplete(), 2750);
 
-  const handleFinish = (finalName: string) => {
-    setSessionName(finalName);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(fadeTimer);
+      clearTimeout(doneTimer);
+    };
+  }, [onComplete]);
+
+  const handleEnterNow = () => {
     setIsFadingOut(true);
     setTimeout(() => {
       onComplete();
-    }, 350);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const result = validateDisplayName(visitorName);
-    if (result.ok === false) {
-      setError(result.error);
-      inputRef.current?.focus();
-      return;
-    }
-    handleFinish(result.value);
+    }, 300);
   };
 
   return (
     <div
-      className={`fixed inset-0 z-100 flex flex-col items-center justify-between py-10 px-4 bg-white/95 dark:bg-black/95 backdrop-blur-md transition-opacity duration-350 select-none ${
+      className={`fixed inset-0 z-100 flex flex-col items-center justify-between py-10 px-4 bg-[#FAFBF8]/95 backdrop-blur-xl transition-opacity duration-350 select-none ${
         isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
       role="dialog"
       aria-modal="true"
       aria-label="Welcome Entrance"
     >
-      {/* Top spacer */}
-      <div className="w-full flex justify-end max-w-sm sm:max-w-md min-h-[28px]">
-        {isOwner && (
-          <button
-            type="button"
-            onClick={() => onComplete()}
-            className="text-xs font-medium text-[#8E8E8E] hover:text-[#262626] dark:hover:text-white px-3.5 py-1.5 rounded-full border border-[#DBDBDB]/60 dark:border-[#262626] transition-colors cursor-pointer"
-          >
-            <span>Skip Intro</span>
-          </button>
-        )}
+      {/* Subtle Ambient Sage & Olive Radial Glows */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] rounded-full bg-[#8FA882]/25 blur-[90px]" />
+        <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 translate-y-1/2 w-[300px] h-[300px] rounded-full bg-[#283618]/10 blur-[80px]" />
       </div>
 
-      {/* Center Welcome Card */}
-      <div className="w-full max-w-sm sm:max-w-md flex flex-col items-center text-center">
-        {/* Glowing Instagram Camera Glyph */}
-        <div className="relative group mb-5">
-          <div className="absolute -inset-4 bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] rounded-3xl blur-xl opacity-35 dark:opacity-45 animate-pulse" />
-          <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-[24px] bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] p-[3px] shadow-2xl flex items-center justify-center animate-logo-pulse">
-            <div className="w-full h-full bg-white dark:bg-black rounded-[21px] flex items-center justify-center">
-              <InstagramIcon className="w-10 h-10 sm:w-12 sm:h-12 text-black dark:text-white stroke-[1.8]" />
+      {/* Top Bar: Status Pill & Skip Button */}
+      <div className="relative z-10 w-full max-w-md flex items-center justify-between">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EBF1E6] border border-[#D4E0CD] text-[11px] font-semibold text-[#283618]">
+          <span className="w-2 h-2 rounded-full bg-[#527043] animate-pulse" />
+          <span>PORTFOLIO {new Date().getFullYear()}</span>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleEnterNow}
+          className="text-xs font-semibold text-[#526348] hover:text-[#283618] px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-[#EBF1E6] border border-[#D4E0CD] transition-all cursor-pointer"
+        >
+          Skip →
+        </button>
+      </div>
+
+      {/* Center Architectural Developer Card */}
+      <div className="relative z-10 w-full max-w-md flex flex-col items-center text-center my-auto">
+        {/* Monogram / Portrait Emblem with Sage & Olive Ring */}
+        <div className="relative mb-6 group cursor-pointer" onClick={handleEnterNow}>
+          <div className="absolute -inset-3 rounded-3xl bg-gradient-to-tr from-[#283618]/20 via-[#527043]/25 to-[#8FA882]/30 blur-xl animate-pulse" />
+          <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-3xl p-[3px] bg-gradient-to-tr from-[#283618] via-[#527043] to-[#8FA882] shadow-xl">
+            <div className="w-full h-full rounded-[21px] bg-[#FAFBF8] p-1 overflow-hidden relative">
+              <img
+                src="/assets/images/headshot/headshot.jpg"
+                alt={profileData.name}
+                className="w-full h-full rounded-[17px] object-cover"
+                style={{ objectPosition: '0% 20%' }}
+              />
             </div>
+          </div>
+          <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-xl bg-[#283618] text-[#FAFBF8] flex items-center justify-center shadow-md border-2 border-[#FAFBF8]">
+            <Code2 className="w-4 h-4 text-[#8FA882]" />
           </div>
         </div>
 
-        {/* Brand Text */}
-        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#262626] dark:text-white flex items-center justify-center gap-1.5">
-          <span>@{profileData.username}</span>
-          <CheckCircle2 className="w-5 h-5 text-[#0095F6] fill-[#0095F6] text-white inline-block" />
+        {/* Name & Title */}
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EBF1E6] border border-[#D4E0CD] text-[11px] font-bold uppercase tracking-widest text-[#3A4D28] mb-3">
+          <Sparkles className="w-3 h-3 text-[#527043]" />
+          <span>{profileData.role}</span>
+        </div>
+
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#283618]">
+          {profileData.name}
         </h1>
-        <p className="text-xs sm:text-sm text-[#8E8E8E] dark:text-[#A8A8A8] mt-1 font-medium">
-          Personal Portfolio &amp; Developer Profile
+
+        <p className="text-xs sm:text-sm text-[#526348] mt-2 max-w-xs leading-relaxed font-medium">
+          Full-Stack Web Architecture · Data Mining Systems · Intuitive UI/UX Design
         </p>
 
-        {/* Name Prompt Box — ONLY shown to visitors who are NOT the owner */}
-        {!isOwner && (
-          <div className="w-full mt-6 p-5 sm:p-6 bg-white dark:bg-[#121212] rounded-2xl border border-[#DBDBDB] dark:border-[#262626] shadow-xl text-left">
-            <div className="text-center mb-4">
-              <h2 className="text-base font-bold text-[#262626] dark:text-white">
-                Welcome to my portfolio!
-              </h2>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-3.5">
-              <div>
-                <label htmlFor="intro-visitor-name" className="sr-only">
-                  Your Name
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#8E8E8E] dark:text-[#737373]">
-                    <User className="w-4 h-4" />
-                  </div>
-                  <input
-                    id="intro-visitor-name"
-                    ref={inputRef}
-                    type="text"
-                    value={visitorName}
-                    onChange={(e) => {
-                      setVisitorNameInput(e.target.value);
-                      if (error) setError('');
-                    }}
-                    placeholder="Enter your name (e.g. Vince Quijano)..."
-                    maxLength={40}
-                    className={`w-full text-xs sm:text-sm pl-10 pr-3.5 py-2.5 rounded-xl bg-[#FAFAFA] dark:bg-[#1A1A1A] text-[#262626] dark:text-white placeholder-[#8E8E8E] dark:placeholder-[#737373] border transition-all focus:outline-none ${
-                      error
-                        ? 'border-[#ED4956] ring-1 ring-[#ED4956]'
-                        : 'border-[#DBDBDB] dark:border-[#333333] focus:border-[#0095F6] focus:ring-1 focus:ring-[#0095F6]'
-                    }`}
-                  />
-                </div>
-                {error && (
-                  <p className="text-[11px] text-[#ED4956] font-medium mt-1.5 pl-1">
-                    {error}
-                  </p>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#0095F6] hover:bg-[#1877F2] active:scale-[0.98] text-white text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-md"
-              >
-                <span>Enter Portfolio</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </form>
+        {/* Loading / System Initialization Progress Card */}
+        <div className="w-full mt-7 p-4 sm:p-5 bg-white/90 rounded-2xl border border-[#D4E0CD] shadow-lg shadow-[#283618]/5">
+          <div className="flex items-center justify-between text-[11px] font-mono text-[#526348] mb-2">
+            <span className="flex items-center gap-1.5 font-semibold text-[#283618]">
+              <Terminal className="w-3.5 h-3.5 text-[#527043]" />
+              <span>Initializing workspace...</span>
+            </span>
+            <span className="font-bold text-[#283618]">{progress}%</span>
           </div>
-        )}
+
+          {/* Progress Bar Track */}
+          <div className="w-full h-2 rounded-full bg-[#EBF1E6] overflow-hidden p-[1px] border border-[#D4E0CD]/60">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-[#283618] via-[#527043] to-[#8FA882] transition-all duration-75"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleEnterNow}
+            className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 px-5 rounded-xl bg-[#283618] hover:bg-[#3A4D28] active:scale-[0.99] text-white text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-md shadow-[#283618]/15"
+          >
+            <span>Enter Portfolio</span>
+            <ArrowRight className="w-4 h-4 text-[#8FA882]" />
+          </button>
+        </div>
       </div>
 
-      {/* Bottom: Meta-style footer */}
-      <div className="flex flex-col items-center gap-1">
-        <span className="text-[10px] uppercase font-bold tracking-widest text-[#8E8E8E] dark:text-[#737373]">
-          from
+      {/* Bottom Minimalist Signature */}
+      <div className="relative z-10 flex flex-col items-center gap-1">
+        <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-[#5C6B50]">
+          Designed &amp; Engineered by
         </span>
-        <div className="flex items-center gap-1 text-xs sm:text-sm font-bold bg-gradient-to-r from-[#f09433] via-[#dc2743] to-[#bc1888] bg-clip-text text-transparent">
+        <span className="text-xs font-extrabold tracking-wider text-[#283618]">
           VINCE QUIJANO
-        </div>
+        </span>
       </div>
     </div>
   );

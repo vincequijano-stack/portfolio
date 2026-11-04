@@ -11,14 +11,8 @@ import { ContactSection } from './components/ContactSection';
 import { StoryModal } from './components/StoryModal';
 import { MobileNav } from './components/MobileNav';
 import { IntroSplash } from './components/IntroSplash';
-import { InstagramIcon } from './components/SocialIcons';
-import { Play, Heart } from 'lucide-react';
-import { notificationService, LikeNotification } from './services/notificationService';
-import { ActivityModal } from './components/ActivityModal';
-import { LikeNotificationToast } from './components/LikeNotificationToast';
-import { VisitorNamePromptHost } from './components/VisitorNameModal';
+import { Play } from 'lucide-react';
 import { InteractiveBackground } from './components/InteractiveBackground';
-import { isOwnerUnlocked, getSessionName } from './services/visitorSession';
 
 import { projectsData, Project, CategoryType, categoryList } from './data/projects';
 import { profileData } from './data/profile';
@@ -28,26 +22,10 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState<CategoryType>('All Projects');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [activeStoryId, setActiveStoryId] = useState<string | null>(null);
-  const [isActivityOpen, setIsActivityOpen] = useState(false);
-  const [notifications, setNotifications] = useState<LikeNotification[]>([]);
-
-  useEffect(() => {
-    const unsubscribe = notificationService.subscribe((list) => {
-      setNotifications(list);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
 
   const [showIntro, setShowIntro] = useState<boolean>(() => {
     try {
-      // Owner is never asked for a name on entrance
-      if (isOwnerUnlocked()) {
-        return false;
-      }
-      // Visitors who are not the owner see the name entrance until they provide a name
-      return !sessionStorage.getItem('ig_intro_shown') || !getSessionName();
+      return !sessionStorage.getItem('portfolio_intro_shown');
     } catch {
       return true;
     }
@@ -56,7 +34,7 @@ export default function App() {
   const handleIntroComplete = () => {
     setShowIntro(false);
     try {
-      sessionStorage.setItem('ig_intro_shown', 'true');
+      sessionStorage.setItem('portfolio_intro_shown', 'true');
     } catch {}
   };
 
@@ -143,8 +121,6 @@ export default function App() {
       <Sidebar
         activeSection={activeSection}
         onNavigate={handleNavigate}
-        onOpenActivity={() => setIsActivityOpen(true)}
-        unreadCount={unreadCount}
       />
 
       {/* 2. Main Content Wrapper: Offset by sidebar on desktop, centered container */}
@@ -159,24 +135,8 @@ export default function App() {
             }}
             className="flex items-center gap-2 text-[#283618]"
           >
-            <InstagramIcon className="w-6 h-6 stroke-[2] text-[#3A4D28]" />
             <span className="text-lg font-bold tracking-tight">Vince Quijano</span>
           </a>
-          <button
-            onClick={() => setIsActivityOpen(true)}
-            className="p-1 text-[#283618] relative group"
-            title="Notifications / Activity"
-            aria-label="Notifications"
-          >
-            <div className="relative">
-              <Heart className={`w-6 h-6 stroke-[1.75] ${unreadCount > 0 ? 'text-[#3A4D28]' : ''}`} />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#3A4D28] text-white text-[9px] font-bold rounded-full min-w-3.5 h-3.5 px-0.5 flex items-center justify-center shadow-xs animate-pulse">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </div>
-          </button>
         </header>
 
         {/* Inner Content Container: Full-size Instagram desktop proportions */}
@@ -243,8 +203,6 @@ export default function App() {
       <MobileNav
         activeSection={activeSection}
         onNavigate={handleNavigate}
-        onOpenActivity={() => setIsActivityOpen(true)}
-        unreadCount={unreadCount}
       />
 
       {/* 5. Modals */}
@@ -263,19 +221,6 @@ export default function App() {
           onNavigateSection={handleNavigate}
         />
       )}
-
-      {/* 6. Real-Time Activity / Notifications Popover & Toasts */}
-      <ActivityModal
-        isOpen={isActivityOpen}
-        onClose={() => setIsActivityOpen(false)}
-        notifications={notifications}
-        onSelectProject={(projectId) => {
-          const proj = projectsData.find((p) => p.id === projectId);
-          if (proj) setSelectedProject(proj);
-        }}
-      />
-      <LikeNotificationToast onOpenActivity={() => setIsActivityOpen(true)} />
-      <VisitorNamePromptHost />
     </div>
   );
 }

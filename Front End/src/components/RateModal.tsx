@@ -18,7 +18,6 @@ import {
   validateDisplayName,
   isOwnerUnlocked,
 } from '../services/visitorSession';
-import { VisitorIdentityChip } from './VisitorIdentity';
 
 interface RateModalProps {
   isOpen: boolean;
@@ -133,22 +132,22 @@ export const RateModal: React.FC<RateModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-lg bg-white dark:bg-[#1A1A1A] border border-[#DBDBDB] dark:border-[#262626] rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col z-10 animate-in fade-in zoom-in-95 duration-200"
+        className="relative w-full max-w-lg bg-[#FAFBF8] border border-[#D4E0CD] rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col z-10 animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-[#EFEFEF] dark:border-[#262626]">
+        <div className="flex items-center justify-between p-4 border-b border-[#D4E0CD] bg-white">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-[#FEF3C7] dark:bg-[#78350F]/40 flex items-center justify-center text-[#D97706] dark:text-[#FBBF24]">
-              <Star className="w-4 h-4 fill-[#D97706] dark:fill-[#FBBF24]" />
+            <div className="w-8 h-8 rounded-full bg-[#EBF1E6] flex items-center justify-center text-[#283618]">
+              <Star className="w-4 h-4 fill-[#283618]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-[#262626] dark:text-white">
+                <h3 className="text-sm font-bold text-[#283618]">
                   {isReviewsOnly ? 'Client Reviews' : 'Rate My Portfolio'}
                 </h3>
               </div>
-              <p className="text-[11px] text-[#8E8E8E] dark:text-[#737373]">
+              <p className="text-[11px] text-[#526348]">
                 {ratingsState.count > 0
                   ? `${ratingsState.average} ★ from ${ratingsState.count} eligible reviews`
                   : 'Transparent real-time client reviews'}
@@ -158,7 +157,7 @@ export const RateModal: React.FC<RateModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-1.5 text-[#8E8E8E] hover:text-[#262626] dark:hover:text-white rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 text-[#526348] hover:text-[#283618] rounded-lg transition-colors cursor-pointer"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
@@ -167,13 +166,13 @@ export const RateModal: React.FC<RateModalProps> = ({
 
         {/* Tab Toggle — ONLY shown when opened via the Rate button */}
         {!isReviewsOnly && (
-          <div className="flex border-b border-[#EFEFEF] dark:border-[#262626] text-xs font-semibold">
+          <div className="flex border-b border-[#D4E0CD] bg-white text-xs font-semibold">
             <button
               onClick={() => setActiveTab('rate')}
               className={`flex-1 py-2.5 text-center transition-colors border-b-2 cursor-pointer ${
                 activeTab === 'rate'
-                  ? 'border-[#0095F6] text-[#0095F6]'
-                  : 'border-transparent text-[#737373] dark:text-[#8E8E8E] hover:text-[#262626] dark:hover:text-white'
+                  ? 'border-[#283618] text-[#283618]'
+                  : 'border-transparent text-[#526348] hover:text-[#283618]'
               }`}
             >
               ★ Leave a Rating
@@ -182,8 +181,8 @@ export const RateModal: React.FC<RateModalProps> = ({
               onClick={() => setActiveTab('all')}
               className={`flex-1 py-2.5 text-center transition-colors border-b-2 cursor-pointer ${
                 activeTab === 'all'
-                  ? 'border-[#0095F6] text-[#0095F6]'
-                  : 'border-transparent text-[#737373] dark:text-[#8E8E8E] hover:text-[#262626] dark:hover:text-white'
+                  ? 'border-[#283618] text-[#283618]'
+                  : 'border-transparent text-[#526348] hover:text-[#283618]'
               }`}
             >
               All Reviews ({ratingsState.total})
@@ -196,26 +195,23 @@ export const RateModal: React.FC<RateModalProps> = ({
           {currentView === 'rate' ? (
             isSuccess ? (
               <div className="py-8 text-center flex flex-col items-center">
-                <CheckCircle2 className="w-12 h-12 text-[#10B981] mb-2 animate-bounce" />
-                <h4 className="text-base font-bold text-[#262626] dark:text-white">
+                <CheckCircle2 className="w-12 h-12 text-[#527043] mb-2 animate-bounce" />
+                <h4 className="text-base font-bold text-[#283618]">
                   Thank You for Your Rating!
                 </h4>
-                <p className="text-xs text-[#737373] dark:text-[#A8A8A8] max-w-xs mt-1">
+                <p className="text-xs text-[#526348] max-w-xs mt-1">
                   Your feedback has been saved and published transparently on the portfolio.
                 </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4 text-left">
-                {/* Visitor identity chip if already recognized */}
-                <VisitorIdentityChip label="Submitting as" />
-
                 {/* Rating Prompt */}
                 <div>
-                  <label className="block text-xs font-bold text-[#262626] dark:text-white mb-1">
+                  <label className="block text-xs font-bold text-[#283618] mb-1">
                     How did my work &amp; service impact your project?{' '}
                     <span className="text-[#ED4956]">*</span>
                   </label>
-                  <p className="text-[11px] text-[#737373] dark:text-[#A8A8A8] mb-2">
+                  <p className="text-[11px] text-[#526348] mb-2">
                     Click the stars below to rate how I helped make your life or business better.
                   </p>
 
@@ -239,14 +235,14 @@ export const RateModal: React.FC<RateModalProps> = ({
                           <Star
                             className={`w-7 h-7 transition-colors ${
                               isFilled
-                                ? 'text-[#F59E0B] fill-[#F59E0B]'
-                                : 'text-[#DBDBDB] dark:text-[#4B5563] stroke-[1.5]'
+                                ? 'text-[#283618] fill-[#283618]'
+                                : 'text-[#D4E0CD] stroke-[1.5]'
                             }`}
                           />
                         </button>
                       );
                     })}
-                    <span className="text-xs font-semibold text-[#262626] dark:text-white ml-2">
+                    <span className="text-xs font-semibold text-[#283618] ml-2">
                       {starLabels[hoverRating || selectedRating]}
                     </span>
                   </div>
@@ -254,7 +250,7 @@ export const RateModal: React.FC<RateModalProps> = ({
 
                 {/* Display Name Input */}
                 <div>
-                  <label className="block text-xs font-semibold text-[#262626] dark:text-[#E0E0E0] mb-1">
+                  <label className="block text-xs font-semibold text-[#283618] mb-1">
                     Your Name / Nickname <span className="text-[#ED4956]">*</span>
                   </label>
                   <input
@@ -263,15 +259,15 @@ export const RateModal: React.FC<RateModalProps> = ({
                     onChange={(e) => handleNameChange(e.target.value)}
                     placeholder="e.g. Vince Quijano"
                     maxLength={40}
-                    className="w-full text-xs px-3 py-2 rounded-lg border border-[#DBDBDB] dark:border-[#333333] bg-white dark:bg-[#141414] text-[#262626] dark:text-white focus:outline-none focus:border-[#0095F6] transition-colors"
+                    className="w-full text-xs px-3 py-2 rounded-lg border border-[#D4E0CD] bg-white text-[#283618] focus:outline-none focus:border-[#283618] transition-colors"
                   />
                 </div>
 
                 {/* Role / Company Input */}
                 <div>
-                  <label className="block text-xs font-semibold text-[#262626] dark:text-[#E0E0E0] mb-1">
+                  <label className="block text-xs font-semibold text-[#283618] mb-1">
                     Your Role / Company{' '}
-                    <span className="text-[11px] text-[#8E8E8E] font-normal">(optional)</span>
+                    <span className="text-[11px] text-[#526348] font-normal">(optional)</span>
                   </label>
                   <input
                     type="text"
@@ -279,15 +275,15 @@ export const RateModal: React.FC<RateModalProps> = ({
                     onChange={(e) => setClientRole(e.target.value)}
                     placeholder="e.g. Founder at TechStartup / Client"
                     maxLength={50}
-                    className="w-full text-xs px-3 py-2 rounded-lg border border-[#DBDBDB] dark:border-[#333333] bg-white dark:bg-[#141414] text-[#262626] dark:text-white focus:outline-none focus:border-[#0095F6] transition-colors"
+                    className="w-full text-xs px-3 py-2 rounded-lg border border-[#D4E0CD] bg-white text-[#283618] focus:outline-none focus:border-[#283618] transition-colors"
                   />
                 </div>
 
                 {/* Feedback Textarea */}
                 <div>
-                  <label className="block text-xs font-semibold text-[#262626] dark:text-[#E0E0E0] mb-1">
+                  <label className="block text-xs font-semibold text-[#283618] mb-1">
                     Written Feedback / Testimonial{' '}
-                    <span className="text-[11px] text-[#8E8E8E] font-normal">(optional)</span>
+                    <span className="text-[11px] text-[#526348] font-normal">(optional)</span>
                   </label>
                   <textarea
                     rows={3}
@@ -295,9 +291,9 @@ export const RateModal: React.FC<RateModalProps> = ({
                     onChange={(e) => setClientFeedback(e.target.value)}
                     placeholder="How was your experience working with me? What did we accomplish together?"
                     maxLength={500}
-                    className="w-full text-xs px-3 py-2 rounded-lg border border-[#DBDBDB] dark:border-[#333333] bg-white dark:bg-[#141414] text-[#262626] dark:text-white focus:outline-none focus:border-[#0095F6] transition-colors resize-none"
+                    className="w-full text-xs px-3 py-2 rounded-lg border border-[#D4E0CD] bg-white text-[#283618] focus:outline-none focus:border-[#283618] transition-colors resize-none"
                   />
-                  <div className="flex justify-between text-[10px] text-[#8E8E8E] mt-0.5">
+                  <div className="flex justify-between text-[10px] text-[#526348] mt-0.5">
                     <span>Authentic feedback helps future clients decide with confidence.</span>
                     <span>{clientFeedback.length}/500</span>
                   </div>
@@ -305,7 +301,7 @@ export const RateModal: React.FC<RateModalProps> = ({
 
                 {/* Error Banner */}
                 {error && (
-                  <div className="p-2.5 bg-[#FFF5F5] dark:bg-[#3B1C1D]/30 border border-[#FED7D7] dark:border-[#742A2A] rounded-lg text-xs text-[#ED4956] flex items-center gap-2">
+                  <div className="p-2.5 bg-[#FFF5F5] border border-[#FED7D7] rounded-lg text-xs text-[#ED4956] flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     <span>{error}</span>
                   </div>
@@ -315,7 +311,7 @@ export const RateModal: React.FC<RateModalProps> = ({
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-2.5 bg-[#0095F6] hover:bg-[#1877F2] text-white text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="w-full py-2.5 bg-[#283618] hover:bg-[#3A4D28] text-white text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>
@@ -332,12 +328,12 @@ export const RateModal: React.FC<RateModalProps> = ({
             /* All Reviews List */
             <div className="space-y-3">
               {ratingsState.status === 'loading' && ratingsState.reviews.length === 0 ? (
-                <div className="py-12 text-center flex flex-col items-center gap-2 text-xs text-[#8E8E8E]">
-                  <Loader2 className="w-6 h-6 animate-spin text-[#0095F6]" />
+                <div className="py-12 text-center flex flex-col items-center gap-2 text-xs text-[#526348]">
+                  <Loader2 className="w-6 h-6 animate-spin text-[#527043]" />
                   <span>Loading reviews from database...</span>
                 </div>
               ) : ratingsState.reviews.length === 0 ? (
-                <div className="py-8 text-center text-xs text-[#8E8E8E] dark:text-[#737373]">
+                <div className="py-8 text-center text-xs text-[#526348]">
                   <p>No client reviews received yet.</p>
                 </div>
               ) : (
@@ -345,28 +341,28 @@ export const RateModal: React.FC<RateModalProps> = ({
                   {ratingsState.reviews.map((rev) => (
                     <div
                       key={rev.id}
-                      className="p-3.5 bg-[#FAFAFA] dark:bg-[#262626]/40 border border-[#EFEFEF] dark:border-[#333333] rounded-xl text-left space-y-1.5 relative"
+                      className="p-3.5 bg-white border border-[#D4E0CD] rounded-xl text-left space-y-1.5 relative"
                     >
                       <div className="flex items-center justify-between flex-wrap gap-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-xs text-[#262626] dark:text-white">
+                          <span className="font-bold text-xs text-[#283618]">
                             {rev.name}
                           </span>
                           {rev.role && (
-                            <span className="text-[10px] text-[#8E8E8E] dark:text-[#737373] bg-[#EFEFEF] dark:bg-[#262626] px-1.5 py-0.2 rounded">
+                            <span className="text-[10px] text-[#3A4D28] bg-[#EBF1E6] px-1.5 py-0.2 rounded">
                               {rev.role}
                             </span>
                           )}
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-[#8E8E8E] dark:text-[#737373]">
+                          <span className="text-[10px] text-[#526348]">
                             {formatReviewDate(rev)}
                           </span>
                           {isOwner && (
                             <button
                               type="button"
                               onClick={() => handleDeleteReview(rev.id, rev.name)}
-                              className="p-1 rounded-md text-[#8E8E8E] hover:text-[#ED4956] hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
+                              className="p-1 rounded-md text-[#526348] hover:text-[#ED4956] hover:bg-red-50 transition-colors cursor-pointer"
                               title={`Delete ${rev.name}'s review (Owner)`}
                               aria-label={`Delete ${rev.name}'s review`}
                             >
@@ -377,24 +373,24 @@ export const RateModal: React.FC<RateModalProps> = ({
                       </div>
 
                       {/* Stars */}
-                      <div className="flex items-center gap-0.5 text-[#F59E0B]">
+                      <div className="flex items-center gap-0.5 text-[#283618]">
                         {[1, 2, 3, 4, 5].map((s) => (
                           <Star
                             key={s}
                             className={`w-3 h-3 ${
                               s <= rev.rating
-                                ? 'fill-[#F59E0B]'
-                                : 'text-[#DBDBDB] dark:text-[#4B5563]'
+                                ? 'fill-[#283618] text-[#283618]'
+                                : 'text-[#D4E0CD]'
                             }`}
                           />
                         ))}
-                        <span className="text-[11px] font-bold text-[#262626] dark:text-white ml-1.5">
+                        <span className="text-[11px] font-bold text-[#283618] ml-1.5">
                           {rev.rating}.0
                         </span>
                       </div>
 
                       {rev.feedback && (
-                        <p className="text-xs text-[#4A4A4A] dark:text-[#D1D5DB] leading-relaxed italic">
+                        <p className="text-xs text-[#435339] leading-relaxed italic">
                           "{rev.feedback}"
                         </p>
                       )}
@@ -408,7 +404,7 @@ export const RateModal: React.FC<RateModalProps> = ({
                         type="button"
                         onClick={() => ratingService.loadMore()}
                         disabled={ratingsState.loadingMore}
-                        className="w-full py-2 bg-[#EFEFEF] dark:bg-[#262626] hover:bg-[#DBDBDB] dark:hover:bg-[#333333] text-xs font-semibold text-[#262626] dark:text-white rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="w-full py-2 bg-[#EBF1E6] hover:bg-[#D4E0CD] text-xs font-semibold text-[#283618] rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         {ratingsState.loadingMore ? (
                           <>
