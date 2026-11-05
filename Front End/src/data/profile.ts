@@ -38,8 +38,8 @@ export const profileData: ProfileData = {
   website: "https://vincequijano.dev",
   github: "https://github.com/vincequijano-stack",
   linkedin: "https://www.linkedin.com/in/vince-quijano/",
-  facebook: "https://www.facebook.com/",
-  instagram: "https://www.instagram.com/",
+  facebook: "https://www.facebook.com/profile.php?id=61574335992082",
+  instagram: "https://www.instagram.com/whos.lawrenceee?vrfl=cWs4YWZnYTI3OGt4",
   email: "vincelawrencequijano@gmail.com",
   stats: {
     projects: 3,
