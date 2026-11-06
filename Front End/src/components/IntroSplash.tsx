@@ -56,21 +56,8 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
         <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 translate-y-1/2 w-[300px] h-[300px] rounded-full bg-[#283618]/10 blur-[80px]" />
       </div>
 
-      {/* Top Bar: Status Pill & Skip Button */}
-      <div className="relative z-10 w-full max-w-md flex items-center justify-between">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EBF1E6] border border-[#D4E0CD] text-[11px] font-semibold text-[#283618]">
-          <span className="w-2 h-2 rounded-full bg-[#527043] animate-pulse" />
-          <span>PORTFOLIO {new Date().getFullYear()}</span>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleEnterNow}
-          className="text-xs font-semibold text-[#526348] hover:text-[#283618] px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-[#EBF1E6] border border-[#D4E0CD] transition-all cursor-pointer"
-        >
-          Skip →
-        </button>
-      </div>
+      {/* Top Spacer */}
+      <div className="relative z-10 w-full max-w-md h-4" />
 
       {/* Center Architectural Developer Card */}
       <div className="relative z-10 w-full max-w-md flex flex-col items-center text-center my-auto">
