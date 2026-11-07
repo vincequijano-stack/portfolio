@@ -3,31 +3,46 @@ import {
   GraduationCap,
   Code2,
   Building2,
-  Sparkles,
 } from 'lucide-react';
 
 export const AboutSection: React.FC = () => {
   return (
     <section id="about" className="py-16 border-t border-[#D4E0CD] text-left">
       <div className="w-full">
-        {/* Section Header */}
-        <div className="mb-10">
-          <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#3A4D28]">
-            <Sparkles className="w-3.5 h-3.5" />
-            Creator Story &amp; Background
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#283618] mt-1 tracking-tight">
-            About Me
-          </h2>
-          <p className="text-sm sm:text-base text-[#526348] mt-1">
-            4th Year Computer Science Student from Pamantasan ng Cabuyao, focusing on full-stack web systems and UI/UX design.
-          </p>
+        {/* Section Header: Style 3 — 3D Layered Shadow & Floating Kinetic Letters */}
+        <div data-reveal className="mb-12 flex items-center group select-none">
+          <div className="relative inline-flex items-center">
+            {/* Ambient Sage Glow Behind Letters */}
+            <div className="pointer-events-none absolute -inset-3 rounded-3xl bg-[#8FA882]/30 blur-xl opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
+
+            {/* Staggered 3D Extruded Letters */}
+            <h2
+              aria-label="ABOUT ME"
+              className="relative z-10 flex items-center text-3xl sm:text-5xl font-black uppercase tracking-[0.16em]"
+            >
+              {'ABOUT ME'.split('').map((char, idx) => (
+                <span
+                  key={idx}
+                  className={`inline-block text-[#283618] animate-float-letter transition-transform duration-300 group-hover:scale-105 ${
+                    char === ' ' ? 'w-3 sm:w-5' : ''
+                  }`}
+                  style={{
+                    animationDelay: `${idx * 0.12}s`,
+                    textShadow:
+                      '2px 2px 0px #8FA882, 4px 4px 0px #D4E0CD, 6px 6px 12px rgba(40, 54, 24, 0.15)',
+                  }}
+                >
+                  {char}
+                </span>
+              ))}
+            </h2>
+          </div>
         </div>
 
         {/* 3-Column Scaled-Up Visual Cards (Soft White, Sage Green, Deep Olive) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-7">
+        <div data-reveal-stagger className="grid grid-cols-1 lg:grid-cols-3 gap-7">
           {/* CARD 1: Education Card */}
-          <article className="bg-white border border-[#D4E0CD] hover:border-[#3A4D28] rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-[#283618]/10 hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between select-none">
+          <div data-reveal><article className="motion-card h-full bg-white border border-[#D4E0CD] rounded-3xl overflow-hidden shadow-sm flex flex-col justify-between select-none">
             <div>
               {/* Visual Graphic Banner */}
               <div className="relative h-44 bg-gradient-to-br from-[#283618] via-[#3A4D28] to-[#6B8A5B] p-7 flex flex-col justify-end text-white overflow-hidden">
@@ -57,10 +72,10 @@ export const AboutSection: React.FC = () => {
                 </div>
               </div>
             </div>
-          </article>
+          </article></div>
 
           {/* CARD 2: Full-Stack & UI/UX Focus Card */}
-          <article className="bg-white border border-[#D4E0CD] hover:border-[#3A4D28] rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-[#283618]/10 hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between select-none">
+          <div data-reveal><article className="motion-card h-full bg-white border border-[#D4E0CD] rounded-3xl overflow-hidden shadow-sm flex flex-col justify-between select-none">
             <div>
               {/* Visual Graphic Banner */}
               <div className="relative h-44 bg-gradient-to-br from-[#3A4D28] via-[#527043] to-[#8FA882] p-7 flex flex-col justify-end text-white overflow-hidden">
@@ -90,10 +105,10 @@ export const AboutSection: React.FC = () => {
                 </div>
               </div>
             </div>
-          </article>
+          </article></div>
 
           {/* CARD 3: Organizations & Tech Communities Card */}
-          <article className="bg-white border border-[#D4E0CD] hover:border-[#3A4D28] rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-[#283618]/10 hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between select-none">
+          <div data-reveal><article className="motion-card h-full bg-white border border-[#D4E0CD] rounded-3xl overflow-hidden shadow-sm flex flex-col justify-between select-none">
             <div>
               {/* Visual Graphic Banner */}
               <div className="relative h-44 bg-gradient-to-br from-[#1F2A12] via-[#3A4D28] to-[#748E65] p-7 flex flex-col justify-end text-white overflow-hidden">
@@ -125,7 +140,7 @@ export const AboutSection: React.FC = () => {
                 </div>
               </div>
             </div>
-          </article>
+          </article></div>
         </div>
       </div>
     </section>

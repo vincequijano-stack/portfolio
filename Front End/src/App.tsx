@@ -42,6 +42,29 @@ export default function App() {
     setShowIntro(true);
   };
 
+  useEffect(() => {
+    document.documentElement.dataset.motion = 'wipe';
+
+    const els = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-revealed');
+            obs.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+    );
+
+    const raf = requestAnimationFrame(() => els.forEach((el) => obs.observe(el)));
+    return () => {
+      cancelAnimationFrame(raf);
+      obs.disconnect();
+    };
+  }, []);
+
   // Dynamic project counts per category
   const projectCounts = useMemo(() => {
     const counts: Record<string, number> = {
@@ -85,7 +108,7 @@ export default function App() {
 
   // IntersectionObserver to update active section on scroll
   useEffect(() => {
-    const sectionIds = ['profile-top', 'projects', 'about', 'skills', 'contact'];
+    const sectionIds = ['profile-top', 'about', 'skills', 'projects', 'contact'];
     const observers: IntersectionObserver[] = [];
 
     sectionIds.forEach((id) => {
@@ -142,34 +165,64 @@ export default function App() {
         {/* Inner Content Container: Full-size Instagram desktop proportions */}
         <main className="flex-1 max-w-[1040px] w-full mx-auto px-3 sm:px-8 pt-5 sm:pt-10 pb-24 md:pb-16">
           {/* Profile Header (Avatar on left with "Note..." bubble, stats, bio, action buttons) */}
-          <ProfileHeader
-            onNavigate={handleNavigate}
-            onOpenStoryModal={(storyId) => setActiveStoryId(storyId)}
-          />
+          <div data-reveal>
+            <ProfileHeader
+              onNavigate={handleNavigate}
+              onOpenStoryModal={(storyId) => setActiveStoryId(storyId)}
+            />
+          </div>
 
-          {/* Story Highlights Bar (About, Skills, Projects, Organization, Certificates, + New) */}
-          <ProfileHighlights
-            onNavigate={handleNavigate}
-            onOpenStoryModal={(storyId) => setActiveStoryId(storyId)}
-          />
+          {/* Story Highlights Bar (About, Skills, Organization, Certificates, Achievements) */}
+          <div data-reveal style={{ '--reveal-delay': '120ms' } as React.CSSProperties}>
+            <ProfileHighlights
+              onNavigate={handleNavigate}
+              onOpenStoryModal={(storyId) => setActiveStoryId(storyId)}
+            />
+          </div>
 
-          {/* Instagram Post Category Tabs (⊞ POSTS, ▷ WEB DEV, 🔖 UI/UX, etc.) */}
-          <CategoryTabs
-            activeCategory={activeCategory}
-            onSelectCategory={setActiveCategory}
-            projectCounts={projectCounts}
-          />
-
-          {/* 3-Column Square Grid Project Gallery (tight 3px-4px gaps matching reference image) */}
-          <ProjectGallery
-            projects={filteredProjects}
-            onProjectClick={(proj) => setSelectedProject(proj)}
-            onClearSearch={() => setActiveCategory('All Projects')}
-          />
-
-          {/* Structured Portfolio Details */}
+          {/* 2. ABOUT ME */}
           <AboutSection />
+
+          {/* 3. PLATFORMS & TOOLS */}
           <SkillsSection />
+
+          {/* 4. PROJECT (Style 3 Heading + 3-Column Project Gallery) */}
+          <section id="projects" className="py-16 border-t border-[#D4E0CD] text-left">
+            <div data-reveal className="mb-10 flex items-center group select-none">
+              <div className="relative inline-flex items-center">
+                {/* Ambient Sage Glow Behind Letters */}
+                <div className="pointer-events-none absolute -inset-3 rounded-3xl bg-[#8FA882]/30 blur-xl opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
+
+                {/* Staggered 3D Extruded Letters */}
+                <h2
+                  aria-label="PROJECT"
+                  className="relative z-10 flex items-center text-3xl sm:text-5xl font-black uppercase tracking-[0.16em]"
+                >
+                  {'PROJECT'.split('').map((char, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-block text-[#283618] animate-float-letter transition-transform duration-300 group-hover:scale-105"
+                      style={{
+                        animationDelay: `${idx * 0.12}s`,
+                        textShadow:
+                          '2px 2px 0px #8FA882, 4px 4px 0px #D4E0CD, 6px 6px 12px rgba(40, 54, 24, 0.15)',
+                      }}
+                    >
+                      {char}
+                    </span>
+                  ))}
+                </h2>
+              </div>
+            </div>
+
+            <ProjectGallery
+              projects={projectsData}
+              onProjectClick={(proj) => setSelectedProject(proj)}
+              variant="curtain"
+            />
+          </section>
+
+          {/* 5. CONTACT ME */}
           <ContactSection />
         </main>
 

@@ -167,22 +167,42 @@ export const ContactSection: React.FC = () => {
   return (
     <section id="contact" className="py-16 border-t border-[#D4E0CD] text-left">
       <div className="w-full">
-        {/* Section Header */}
-        <div className="mb-9">
-          <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#3A4D28]">
-            <Sparkles className="w-3.5 h-3.5" />
-            Instagram Direct Messenger
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#283618] mt-1 tracking-tight">
-            Contact Me
-          </h2>
-          <p className="text-sm sm:text-base text-[#526348] mt-1">
-            Available for software engineering roles, internships, or academic collaborations.
-          </p>
+        {/* Section Header: Style 3 — 3D Layered Shadow & Floating Kinetic Letters */}
+        <div data-reveal className="mb-10 flex items-center group select-none">
+          <div className="relative inline-flex items-center">
+            {/* Ambient Sage Glow Behind Letters */}
+            <div className="pointer-events-none absolute -inset-3 rounded-3xl bg-[#8FA882]/30 blur-xl opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
+
+            {/* Staggered 3D Extruded Letters */}
+            <h2
+              aria-label="CONTACT ME"
+              className="relative z-10 flex items-center text-3xl sm:text-5xl font-black uppercase tracking-[0.16em]"
+            >
+              {'CONTACT ME'.split('').map((char, idx) => (
+                <span
+                  key={idx}
+                  className={`inline-block text-[#283618] animate-float-letter transition-transform duration-300 group-hover:scale-105 ${
+                    char === ' ' ? 'w-3 sm:w-5' : ''
+                  }`}
+                  style={{
+                    animationDelay: `${idx * 0.1}s`,
+                    textShadow:
+                      '2px 2px 0px #8FA882, 4px 4px 0px #D4E0CD, 6px 6px 12px rgba(40, 54, 24, 0.15)',
+                  }}
+                >
+                  {char}
+                </span>
+              ))}
+            </h2>
+          </div>
         </div>
 
         {/* Unified Instagram Direct Message (DM) Split Window (Soft White, Sage Green, Deep Olive) */}
-        <div className="bg-white border border-[#D4E0CD] rounded-3xl overflow-hidden shadow-lg grid grid-cols-1 lg:grid-cols-12">
+        <div
+          data-reveal
+          style={{ '--reveal-delay': '120ms' } as React.CSSProperties}
+          className="motion-card bg-white border border-[#D4E0CD] rounded-3xl overflow-hidden shadow-lg grid grid-cols-1 lg:grid-cols-12"
+        >
           {/* LEFT PANE: Instagram Inbox / Direct Channels (4 cols) */}
           <div className="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-[#E6EFE2] bg-[#F3F6F0] p-6 flex flex-col justify-between">
             <div>

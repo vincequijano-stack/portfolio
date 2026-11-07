@@ -258,22 +258,38 @@ export const SkillsSection: React.FC = () => {
   return (
     <section id="skills" className="py-16 border-t border-[#D4E0CD] text-left">
       <div className="w-full">
-        {/* Header */}
-        <div className="mb-9">
-          <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#3A4D28]">
-            <Sparkles className="w-3.5 h-3.5" />
-            Core Competencies
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#283618] mt-1 tracking-tight">
-            Technical Skills &amp; Architecture
-          </h2>
-          <p className="text-sm sm:text-base text-[#526348] mt-1">
-            Interactive full-stack architecture dock and categorized technology toolkit.
-          </p>
+        {/* Section Header: Style 3 — 3D Layered Shadow & Floating Kinetic Letters */}
+        <div data-reveal className="mb-10 flex items-center group select-none">
+          <div className="relative inline-flex items-center">
+            {/* Ambient Sage Glow Behind Letters */}
+            <div className="pointer-events-none absolute -inset-3 rounded-3xl bg-[#8FA882]/30 blur-xl opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
+
+            {/* Staggered 3D Extruded Letters */}
+            <h2
+              aria-label="PLATFORMS & TOOLS"
+              className="relative z-10 flex flex-wrap items-center text-3xl sm:text-5xl font-black uppercase tracking-[0.16em] gap-y-2"
+            >
+              {'PLATFORMS & TOOLS'.split('').map((char, idx) => (
+                <span
+                  key={idx}
+                  className={`inline-block text-[#283618] animate-float-letter transition-transform duration-300 group-hover:scale-105 ${
+                    char === ' ' ? 'w-3 sm:w-5' : ''
+                  }`}
+                  style={{
+                    animationDelay: `${idx * 0.08}s`,
+                    textShadow:
+                      '2px 2px 0px #8FA882, 4px 4px 0px #D4E0CD, 6px 6px 12px rgba(40, 54, 24, 0.15)',
+                  }}
+                >
+                  {char}
+                </span>
+              ))}
+            </h2>
+          </div>
         </div>
 
         {/* Interactive Architecture Pipeline Switcher */}
-        <div className="bg-white border border-[#D4E0CD] rounded-3xl p-6 sm:p-8 shadow-sm">
+        <div data-reveal style={{ '--reveal-delay': '120ms' } as React.CSSProperties} className="bg-white border border-[#D4E0CD] rounded-3xl p-6 sm:p-8 shadow-sm">
           {/* Pipeline Nodes */}
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
             {skillsData.map((group, idx) => {
@@ -310,7 +326,7 @@ export const SkillsSection: React.FC = () => {
             .map((group) => (
               <div
                 key={group.category}
-                className="p-6 rounded-2xl bg-[#F3F6F0] border border-[#D4E0CD]"
+                className="p-6 rounded-2xl bg-[#F3F6F0] border border-[#D4E0CD] animate-modal-in"
               >
                 <p className="text-sm sm:text-base text-[#435339] mb-5">
                   {group.description}
@@ -325,7 +341,7 @@ export const SkillsSection: React.FC = () => {
                     return (
                       <div
                         key={skill.name}
-                        className="group bg-white border border-[#D4E0CD] rounded-2xl p-4 flex items-center gap-4 hover:border-[#283618] hover:shadow-md hover:-translate-y-0.5 transition-all"
+                        className="motion-card group overflow-hidden bg-white border border-[#D4E0CD] rounded-2xl p-4 flex items-center gap-4"
                       >
                         <div className="w-13 h-13 rounded-2xl bg-[#FAFBF8] border border-[#D4E0CD] text-[#283618] font-extrabold text-base flex items-center justify-center shrink-0 shadow-xs group-hover:scale-110 group-hover:border-[#8FA882] transition-all">
                           {logoSvg || brand.abbr}
