@@ -14,9 +14,7 @@ const express    = require('express');
 const cors       = require('cors');
 const rateLimit  = require('express-rate-limit');
 const contactRoute = require('./routes/contact');
-const likesRoute   = require('./routes/likes');
 const ratingsRoute = require('./routes/ratings');
-const commentsRoute = require('./routes/comments');
 const { loadApiHandler } = require('./routes/apiBridge');
 
 const app  = express();
@@ -67,9 +65,7 @@ const contactLimiter = rateLimit({
 // ── Routes ────────────────────────────────────────────────────
 app.get('/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
 app.use('/api/contact', contactLimiter, contactRoute);
-app.use('/api/likes', likesRoute);
 app.use('/api/ratings', ratingsRoute);
-app.use('/api/comments', commentsRoute);
 app.all('/api/note', loadApiHandler('note'));
 app.get('/api/owner', loadApiHandler('owner'));
 
@@ -88,8 +84,6 @@ app.use((err, req, res, _next) => {
 app.listen(PORT, () => {
   console.log(`\n🚀 Portfolio backend running on http://localhost:${PORT}`);
   console.log(`   Health check: http://localhost:${PORT}/health`);
-  console.log(`   Likes API:    GET/POST http://localhost:${PORT}/api/likes`);
   console.log(`   Ratings API:  GET/POST http://localhost:${PORT}/api/ratings`);
-  console.log(`   Comments API: GET/POST/DELETE http://localhost:${PORT}/api/comments`);
   console.log(`   Contact API:  POST http://localhost:${PORT}/api/contact\n`);
 });
