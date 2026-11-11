@@ -312,13 +312,6 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               <span className="text-[11px] text-[#526348] font-medium">skills</span>
             </button>
             <button
-              onClick={() => onNavigate('certificates')}
-              className="flex flex-col items-center px-2 py-1 rounded-lg hover:bg-[#EBF1E6] active:scale-95 transition-all cursor-pointer"
-            >
-              <span className="font-bold text-sm text-[#283618]">{profileData.stats.certificates}</span>
-              <span className="text-[11px] text-[#526348] font-medium">certs</span>
-            </button>
-            <button
               onClick={() => {
                 setRateModalInitialTab('all');
                 setIsRateModalOpen(true);
@@ -366,14 +359,6 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             >
               <span className="font-bold text-[#283618]">{profileData.stats.skills}</span>
               <span className="text-xs sm:text-sm font-medium text-[#526348]">skills</span>
-            </button>
-            <button
-              onClick={() => onNavigate('certificates')}
-              className="px-3.5 py-1.5 rounded-full bg-white border border-[#D4E0CD] hover:border-[#3A4D28] hover:bg-[#8FA882]/15 transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
-              title="Jump to Certificates"
-            >
-              <span className="font-bold text-[#283618]">{profileData.stats.certificates}</span>
-              <span className="text-xs sm:text-sm font-medium text-[#526348]">certificates</span>
             </button>
 
             {/* Client Feedback Rating */}
