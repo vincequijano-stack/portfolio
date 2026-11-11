@@ -1,5 +1,4 @@
 import { apiFetch, ApiError } from '../config/api';
-import { notificationService } from './notificationService';
 import { getVisitorId, ownerAuthHeaders, isOwnerUnlocked, lockOwner } from './visitorSession';
 import { DEFAULT_REVIEWS, ClientReview } from '../data/reviews';
 
@@ -274,17 +273,6 @@ class RatingService {
       // Fallback: save to local storage if API backend is unconfigured or unreachable
       saveLocalReview(fallbackReview);
     }
-
-    notificationService.recordLike(
-      {
-        id: `rate_${savedReview.id}`,
-        title: `Portfolio (${savedReview.rating}★): "${
-          savedReview.feedback ? savedReview.feedback.slice(0, 50) : 'Rated your portfolio'
-        }"`,
-        thumbnail: '/assets/images/headshot/headshot.jpg',
-      },
-      savedReview.name
-    );
 
     // Update in-memory state immediately
     const updated = mergeWithDefaults([savedReview, ...this.state.reviews]);
