@@ -69,7 +69,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
     const mm = gsap.matchMedia();
 
-    mm.add('(min-width: 768px)', () => {
+    mm.add('(min-width: 1024px)', () => {
       const scope = heroRef.current;
       if (!scope) return;
 
@@ -171,9 +171,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     }
 
     const ctx = gsap.context(() => {
-      const isMobile = window.innerWidth < 768;
+      const isCompactStage = window.innerWidth < 1024;
 
-      if (isMobile) {
+      if (isCompactStage) {
         const mobTl = gsap.timeline({ defaults: { ease: 'expo.out' } });
         mobTl
           .fromTo(
@@ -364,7 +364,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             : 'py-5 sm:py-6 lg:py-[2.2vw] bg-transparent'
         }`}
       >
-        <div className="w-full px-5 sm:px-10 lg:px-[3.8%] flex items-center justify-between">
+        <div className="w-full px-4 sm:px-8 lg:px-[3.8%] flex items-center justify-between">
           {/* Upper-Left Personal Branding: VQ | VINCE QUIJANO */}
           <a
             href="#home"
@@ -373,7 +373,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               onNavigate('home');
             }}
             data-magnetic="0.16"
-            className="group flex items-center gap-3 sm:gap-3.5 focus:outline-none select-none"
+            className="group flex items-center gap-2.5 sm:gap-3.5 focus:outline-none select-none shrink-0"
             aria-label="VQ | Vince Quijano"
           >
             <svg
@@ -400,7 +400,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
             <span className="h-5 sm:h-6 w-[1px] bg-white/40" />
 
-            <span className="text-[11px] sm:text-xs lg:text-[12.5px] font-normal uppercase tracking-[0.28em] text-[#D8D8D8] group-hover:text-white transition-colors whitespace-nowrap">
+            <span className="text-[10.5px] sm:text-xs lg:text-[12.5px] font-normal uppercase tracking-[0.2em] sm:tracking-[0.28em] text-[#D8D8D8] group-hover:text-white transition-colors whitespace-nowrap">
               VINCE QUIJANO
             </span>
           </a>
@@ -453,10 +453,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
         {/* Mobile Drawer */}
         {mobileMenuOpen && (
-          <div className="md:hidden mt-3 mx-4 p-4 rounded-2xl bg-[#151515]/95 backdrop-blur-2xl border border-white/15 shadow-2xl animate-modal-in">
+          <div className="md:hidden mt-3 mx-4 p-4 rounded-2xl bg-[#151515]/95 backdrop-blur-2xl border border-white/15 shadow-2xl animate-modal-in max-h-[calc(100dvh-5rem)] overflow-y-auto">
             <div className="flex flex-col gap-1.5">
-              {NAV_ITEMS.map((item) => {
-                const isActive = normalizedActive === item.id;
+              {[
+                ...NAV_ITEMS,
+                { id: 'certificates', label: 'Certificates' },
+                { id: 'experience', label: 'Experience' },
+              ].map((item) => {
+                const isActive = activeSection === item.id || normalizedActive === item.id;
                 return (
                   <a
                     key={item.id}
@@ -515,7 +519,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         ref={heroRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        className="relative w-full h-screen min-h-[620px] max-h-[1100px] bg-[#0D0D0D] overflow-hidden select-none"
+        className="relative w-full hero-viewport bg-[#0D0D0D] overflow-hidden select-none"
       >
         {/* 1. Diagonal Geometric Background & Studio Lighting */}
         <div
@@ -622,8 +626,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </div>
         </div>
 
-        {/* 2. DESKTOP / TABLET STAGE */}
-        <div className="hidden md:block relative w-full h-full">
+        {/* 2. DESKTOP STAGE (lg 1024px+) */}
+        <div className="hidden lg:block relative w-full h-full">
           {/* B. 4-POINT STAR FLARE (Above the 'O' in QUIJANO) */}
           <div
             data-hero-star
@@ -667,7 +671,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           <h1 className="sr-only">VINCE QUIJANO — Portfolio</h1>
           <svg
             viewBox="0 0 1024 576"
-            preserveAspectRatio="none"
+            preserveAspectRatio="xMidYMid meet"
             className="pointer-events-none absolute inset-0 w-full h-full z-20"
             aria-hidden="true"
           >
@@ -775,24 +779,24 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             style={{
               left: '3.81%',
               top: '47.5%',
-              maxWidth: '31%',
+              maxWidth: '30%',
             }}
           >
             <p
               data-hero-desc
-              className="text-sm lg:text-[15.5px] xl:text-[17px] text-[#E0E0E0] leading-[1.55] font-normal max-w-[340px] xl:max-w-[380px]"
+              className="text-sm lg:text-[15px] xl:text-[17px] text-[#E0E0E0] leading-[1.55] font-normal max-w-[340px] xl:max-w-[380px]"
             >
               A BS Computer Science student passionate about technology,
               problem-solving, and building innovative solutions.
             </p>
 
-            <div className="mt-6 lg:mt-8 flex items-center gap-3 lg:gap-3.5">
+            <div className="mt-5 xl:mt-8 flex flex-wrap xl:flex-nowrap items-center gap-2.5 xl:gap-3.5">
               <div data-hero-cta>
                 <button
                   type="button"
                   onClick={() => onNavigate('projects')}
                   data-magnetic="0.22"
-                  className="group px-5 lg:px-6 py-2.5 lg:py-3 rounded-full bg-white hover:bg-[#F5F5F5] text-[#0A0A0A] text-xs lg:text-[13px] font-semibold flex items-center gap-2.5 shadow-[0_6px_24px_rgba(0,0,0,0.45)] hover:shadow-[0_0_28px_rgba(255,255,255,0.35)] active:scale-[0.98] cursor-pointer whitespace-nowrap"
+                  className="group px-4 xl:px-6 py-2.5 xl:py-3 rounded-full bg-white hover:bg-[#F5F5F5] text-[#0A0A0A] text-xs xl:text-[13px] font-semibold flex items-center gap-2 xl:gap-2.5 shadow-[0_6px_24px_rgba(0,0,0,0.45)] hover:shadow-[0_0_28px_rgba(255,255,255,0.35)] active:scale-[0.98] cursor-pointer whitespace-nowrap"
                 >
                   <span>Explore My Work</span>
                   <ArrowRight className="w-3.5 h-3.5 stroke-[2] transition-transform duration-300 group-hover:translate-x-1" />
@@ -804,7 +808,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   type="button"
                   onClick={() => onNavigate('about')}
                   data-magnetic="0.22"
-                  className="group px-5 lg:px-6 py-2.5 lg:py-3 rounded-full bg-[#141414]/70 hover:bg-[#242424] text-[#EAEAEA] hover:text-white border border-white/40 hover:border-white text-xs lg:text-[13px] font-normal flex items-center gap-2 backdrop-blur-md active:scale-[0.98] cursor-pointer whitespace-nowrap"
+                  className="group px-4 xl:px-6 py-2.5 xl:py-3 rounded-full bg-[#141414]/70 hover:bg-[#242424] text-[#EAEAEA] hover:text-white border border-white/40 hover:border-white text-xs xl:text-[13px] font-normal flex items-center gap-2 backdrop-blur-md active:scale-[0.98] cursor-pointer whitespace-nowrap"
                 >
                   <User className="w-3.5 h-3.5 text-[#D4D4D4] group-hover:text-white stroke-[1.75]" />
                   <span>About Me</span>
@@ -918,48 +922,48 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </div>
         </div>
 
-        {/* 3. MOBILE STAGE (< md): OPTIMIZED RESPONSIVE HERO */}
-        <div className="md:hidden relative z-20 w-full h-full flex flex-col justify-between pt-20 pb-6 px-5">
-          <div className="relative flex-1 flex flex-col items-center justify-end">
+        {/* 3. MOBILE & TABLET STAGE (< lg / < 1024px): OPTIMIZED RESPONSIVE HERO */}
+        <div className="lg:hidden relative z-20 w-full min-h-[100dvh] flex flex-col justify-between pt-20 pb-5 sm:pb-8 px-4 sm:px-8">
+          <div className="relative flex-1 flex flex-col items-center justify-end min-h-[240px]">
             <div
               data-hero-mobile-anim="title"
-              className="absolute top-[18%] inset-x-0 text-center pointer-events-none z-0"
+              className="absolute top-[14%] sm:top-[16%] inset-x-0 text-center pointer-events-none z-0"
               aria-hidden="true"
             >
-              <span className="hero-display-text block text-[9.5vw] font-black uppercase text-white tracking-wider leading-none">
+              <span className="hero-display-text block text-[11vw] sm:text-[9.5vw] md:text-[8.5vw] font-black uppercase text-white tracking-wider leading-[0.9]">
                 VINCE QUIJANO
               </span>
             </div>
 
             <div
               data-hero-mobile-anim="portrait"
-              className="relative z-10 w-[265px] sm:w-[310px] max-h-[42vh] flex items-end justify-center"
+              className="relative z-10 w-[220px] min-[380px]:w-[255px] sm:w-[310px] md:w-[360px] max-h-[38dvh] sm:max-h-[45dvh] md:max-h-[50dvh] flex items-end justify-center"
             >
               <img
                 src="/assets/images/headshot/vince-portrait-cutout.png"
                 alt="Vince Quijano Portrait"
-                className="w-full h-full object-contain object-bottom drop-shadow-[0_18px_35px_rgba(0,0,0,0.85)]"
+                className="w-full h-full max-h-[38dvh] sm:max-h-[45dvh] md:max-h-[50dvh] object-contain object-bottom drop-shadow-[0_18px_35px_rgba(0,0,0,0.85)]"
               />
             </div>
           </div>
 
           <div
             data-hero-mobile-anim="body"
-            className="relative z-20 pt-3 text-left bg-gradient-to-t from-[#0D0D0D] via-[#0D0D0D]/95 to-transparent"
+            className="relative z-20 pt-3 max-w-xl mx-auto w-full text-left bg-gradient-to-t from-[#0D0D0D] via-[#0D0D0D]/95 to-transparent"
           >
-            <p className="text-[10px] uppercase tracking-[0.24em] text-[#C8C8C8] mb-2">
+            <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.22em] text-[#C8C8C8] mb-2">
               CODE &nbsp;•&nbsp; ANALYZE &nbsp;•&nbsp; INNOVATE
             </p>
-            <p className="text-[13.5px] sm:text-sm text-[#E0E0E0] leading-relaxed">
+            <p className="text-[13.5px] sm:text-sm md:text-base text-[#E0E0E0] leading-relaxed">
               A BS Computer Science student passionate about technology,
               problem-solving, and building innovative solutions.
             </p>
 
-            <div className="mt-4 flex items-center gap-2.5">
+            <div className="mt-4 flex flex-col min-[360px]:flex-row items-stretch min-[360px]:items-center gap-2.5">
               <button
                 type="button"
                 onClick={() => onNavigate('projects')}
-                className="flex-1 py-2.5 px-4 rounded-full bg-white text-[#0A0A0A] text-xs font-bold flex items-center justify-center gap-2 shadow-lg cursor-pointer active:scale-95 transition-transform"
+                className="flex-1 py-2.5 sm:py-3 px-4 rounded-full bg-white text-[#0A0A0A] text-xs sm:text-[13px] font-bold flex items-center justify-center gap-2 shadow-lg cursor-pointer active:scale-95 transition-transform"
               >
                 <span>Explore My Work</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -967,7 +971,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <button
                 type="button"
                 onClick={() => onNavigate('about')}
-                className="py-2.5 px-4 rounded-full bg-[#151515]/85 text-white border border-white/40 text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition-transform"
+                className="py-2.5 sm:py-3 px-4 sm:px-5 rounded-full bg-[#151515]/85 text-white border border-white/40 text-xs sm:text-[13px] font-medium flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition-transform"
               >
                 <User className="w-3.5 h-3.5" />
                 <span>About Me</span>

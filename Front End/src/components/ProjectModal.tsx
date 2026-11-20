@@ -48,19 +48,19 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
 
       {/* Monochrome Glass Modal Container */}
       <div
-        className="bg-[#151515] rounded-3xl overflow-hidden max-w-5xl w-full max-h-[92vh] flex flex-col md:flex-row shadow-[0_30px_80px_rgba(0,0,0,0.95)] border border-white/20"
+        className="bg-[#151515] rounded-3xl overflow-y-auto md:overflow-hidden max-w-5xl w-full max-h-[90dvh] flex flex-col md:flex-row shadow-[0_30px_80px_rgba(0,0,0,0.95)] border border-white/20"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left Column: Project Visual / Screenshot (55%) */}
-        <div className="md:w-[55%] bg-[#0A0A0A] flex items-center justify-center relative overflow-hidden select-none min-h-[280px] md:min-h-[540px] border-b md:border-b-0 md:border-r border-white/10">
+        <div className="md:w-[55%] bg-[#0A0A0A] flex items-center justify-center relative overflow-hidden select-none shrink-0 min-h-[190px] max-h-[34dvh] md:max-h-none md:min-h-[520px] border-b md:border-b-0 md:border-r border-white/10">
           <img
             src={project.thumbnail}
             alt={project.title}
-            className="w-full h-full object-contain max-h-[88vh]"
+            className="w-full h-full object-contain max-h-[34dvh] md:max-h-[88dvh]"
           />
 
           {project.stats && (
-            <div className="absolute bottom-4 left-4 bg-[#0A0A0A]/85 backdrop-blur-md border border-white/20 text-white px-3.5 py-1.5 rounded-full text-xs font-mono-code flex items-center gap-1.5 shadow-lg">
+            <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 bg-[#0A0A0A]/85 backdrop-blur-md border border-white/20 text-white px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono-code flex items-center gap-1.5 shadow-lg">
               <Sparkles className="w-3.5 h-3.5 text-[#C8C8C8]" />
               <span className="text-[#C8C8C8]">{project.stats.label}:</span>
               <strong className="text-white">{project.stats.value}</strong>
@@ -69,7 +69,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
         </div>
 
         {/* Right Column: Project Details & Information (45%) */}
-        <div className="md:w-[45%] flex flex-col justify-between bg-[#151515] max-h-[90vh]">
+        <div className="md:w-[45%] flex flex-col justify-between bg-[#151515] md:max-h-[90dvh]">
           {/* Header */}
           <div className="p-5 border-b border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-3">

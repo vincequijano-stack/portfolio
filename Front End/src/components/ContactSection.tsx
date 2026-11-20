@@ -258,7 +258,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     <section
       id="contact"
       ref={sectionRef}
-      className="relative py-24 sm:py-32 border-t border-white/10 text-left overflow-hidden bg-gradient-to-b from-[#0A0A0A] via-[#060606] to-[#030303]"
+      className="relative py-16 sm:py-24 lg:py-32 border-t border-white/10 text-left overflow-hidden bg-gradient-to-b from-[#0A0A0A] via-[#060606] to-[#030303]"
     >
       {/* Subtle Background Watermark */}
       <span
@@ -318,11 +318,11 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
           <a
             href={`mailto:${profileData.email}?subject=Portfolio%20Inquiry`}
             data-magnetic="0.25"
-            className="group self-start lg:self-auto px-7 py-4 rounded-full bg-white hover:bg-[#F5F5F5] text-[#0A0A0A] text-xs sm:text-sm font-bold flex items-center gap-2.5 shadow-[0_0_30px_rgba(255,255,255,0.18)] shrink-0"
+            className="group w-full sm:w-auto justify-center px-5 sm:px-7 py-3.5 sm:py-4 rounded-full bg-white hover:bg-[#F5F5F5] text-[#0A0A0A] text-xs sm:text-sm font-bold flex items-center gap-2.5 shadow-[0_0_30px_rgba(255,255,255,0.18)] shrink-0 max-w-full"
           >
-            <Mail className="w-4 h-4" />
-            <span>{profileData.email}</span>
-            <ArrowUpRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            <Mail className="w-4 h-4 shrink-0" />
+            <span className="truncate">{profileData.email}</span>
+            <ArrowUpRight className="w-4 h-4 shrink-0 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
         </div>
 
@@ -352,12 +352,12 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
             </div>
 
             {onOpenRateModal && (
-              <div className="flex items-center gap-2.5">
+              <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
                 <button
                   type="button"
                   onClick={() => onOpenRateModal('rate')}
                   data-magnetic="0.22"
-                  className="px-4 py-2.5 rounded-full bg-white hover:bg-[#F5F5F5] text-[#0A0A0A] text-xs font-bold flex items-center gap-1.5 hover:scale-[1.02] cursor-pointer shadow-[0_0_20px_rgba(255,255,255,0.2)] active:scale-95"
+                  className="flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-full bg-white hover:bg-[#F5F5F5] text-[#0A0A0A] text-xs font-bold flex items-center gap-1.5 hover:scale-[1.02] cursor-pointer shadow-[0_0_20px_rgba(255,255,255,0.2)] active:scale-95 whitespace-nowrap"
                 >
                   <MessageSquarePlus className="w-3.5 h-3.5" />
                   <span>Leave a Review</span>
@@ -366,7 +366,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   type="button"
                   onClick={() => onOpenRateModal('all')}
                   data-magnetic="0.18"
-                  className="px-4 py-2.5 rounded-full bg-[#242424] hover:bg-[#303030] text-white border border-white/15 text-xs font-semibold cursor-pointer active:scale-95"
+                  className="flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-full bg-[#242424] hover:bg-[#303030] text-white border border-white/15 text-xs font-semibold cursor-pointer active:scale-95 whitespace-nowrap"
                 >
                   All Reviews ({ratingsState.total})
                 </button>
@@ -374,7 +374,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
             )}
           </div>
 
-          <div data-reveal-stagger className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div data-reveal-stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {ratingsState.reviews.slice(0, 3).map((rev, idx) => (
               <div
                 key={rev.id}

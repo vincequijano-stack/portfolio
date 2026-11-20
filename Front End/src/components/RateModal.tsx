@@ -131,11 +131,11 @@ export const RateModal: React.FC<RateModalProps> = ({
       aria-label="Client Reviews & Rating"
     >
       <div
-        className="relative w-full max-w-lg bg-[#151515] border border-white/20 rounded-3xl shadow-[0_30px_80px_rgba(0,0,0,0.95)] overflow-hidden max-h-[90vh] flex flex-col z-10"
+        className="relative w-full max-w-lg bg-[#151515] border border-white/20 rounded-3xl shadow-[0_30px_80px_rgba(0,0,0,0.95)] overflow-hidden max-h-[90dvh] flex flex-col z-10"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-white/10 bg-[#0A0A0A]">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-white/10 bg-[#0A0A0A] shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-[#242424] border border-white/15 flex items-center justify-center text-white">
               <Star className="w-4 h-4 fill-white" />
@@ -186,7 +186,7 @@ export const RateModal: React.FC<RateModalProps> = ({
         </div>
 
         {/* Body Content */}
-        <div className="p-6 overflow-y-auto flex-1">
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1">
           {activeTab === 'rate' ? (
             isSuccess ? (
               <div className="py-10 text-center flex flex-col items-center">

@@ -42,6 +42,30 @@ body {
   font-family: var(--font-mono);
 }
 
+/* Dynamic viewport sizing for all devices (phones, landscape, tablets & ultra-wide) */
+.hero-viewport {
+  min-height: 100svh;
+  min-height: 100dvh;
+  height: auto;
+}
+
+@media (min-width: 1024px) {
+  .hero-viewport {
+    height: 100dvh;
+    min-height: 620px;
+    max-height: 1100px;
+  }
+}
+
+/* Prevent iOS Safari input auto-zoom on mobile touch screens */
+@media (max-width: 639px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 /* Oversized Hero Display Typography */
 .hero-display-text {
   font-family: 'Montserrat', sans-serif;
@@ -146,11 +170,12 @@ body {
   justify-content: center;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(0.95rem, 2.2vw, 1.35rem);
-  letter-spacing: 0.36em;
-  padding-left: 0.36em;
+  font-size: clamp(0.9rem, 3.2vw, 1.35rem);
+  letter-spacing: clamp(0.18em, 1.5vw, 0.36em);
+  padding-left: clamp(0.18em, 1.5vw, 0.36em);
   color: #FFFFFF;
   margin-bottom: 1.25rem;
+  white-space: nowrap;
 }
 
 .intro-char {
@@ -187,8 +212,8 @@ body {
 
 .intro-skip {
   position: absolute;
-  top: 1.75rem;
-  right: 2rem;
+  top: 1.15rem;
+  right: 1.15rem;
   z-index: 4;
   font-family: var(--font-mono);
   font-size: 0.68rem;
@@ -200,6 +225,13 @@ body {
   background: rgba(21, 21, 21, 0.7);
   transition: color 0.25s ease, border-color 0.25s ease;
   cursor: pointer;
+}
+
+@media (min-width: 640px) {
+  .intro-skip {
+    top: 1.75rem;
+    right: 2rem;
+  }
 }
 
 .intro-skip:hover {

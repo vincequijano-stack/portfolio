@@ -68,7 +68,7 @@ export const CertificatesSection: React.FC = () => {
   return (
     <section
       id="certificates"
-      className="relative py-24 sm:py-32 border-t border-white/10 text-left overflow-hidden"
+      className="relative py-16 sm:py-24 lg:py-32 border-t border-white/10 text-left overflow-hidden"
     >
       {/* Subtle Background Watermark */}
       <span
@@ -108,7 +108,7 @@ export const CertificatesSection: React.FC = () => {
         </div>
 
         {/* 1. Verified Certificates Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-7 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7 mb-16">
           {certificatesData.map((cert, idx) => (
             <div
               key={cert.id}
@@ -260,7 +260,7 @@ export const CertificatesSection: React.FC = () => {
             </span>
           </div>
 
-          <div data-reveal-stagger className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div data-reveal-stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {achievementsList.map((ach, idx) => (
               <div
                 key={ach.id}
@@ -302,20 +302,20 @@ export const CertificatesSection: React.FC = () => {
         >
           <div
             ref={modalPanelRef}
-            className="bg-[#151515] border border-white/20 rounded-3xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.95)]"
+            className="bg-[#151515] border border-white/20 rounded-3xl w-full max-w-4xl h-[90dvh] flex flex-col overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.95)]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between bg-[#0A0A0A]">
-              <div>
-                <h3 className="font-display text-sm sm:text-base font-bold text-white">
+            <div className="p-4 sm:p-5 border-b border-white/10 flex flex-wrap items-center justify-between gap-3 bg-[#0A0A0A]">
+              <div className="min-w-0 flex-1">
+                <h3 className="font-display text-sm sm:text-base font-bold text-white truncate">
                   {activePdfCert.title}
                 </h3>
-                <p className="text-xs font-mono-code text-[#C8C8C8] mt-0.5">
+                <p className="text-xs font-mono-code text-[#C8C8C8] mt-0.5 truncate">
                   Issued by {activePdfCert.issuer} · {activePdfCert.date}
                   {activePdfCert.credentialId ? ` · ID: ${activePdfCert.credentialId}` : ''}
                 </p>
               </div>
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2 shrink-0">
                 <a
                   href={activePdfCert.pdfUrl}
                   target="_blank"

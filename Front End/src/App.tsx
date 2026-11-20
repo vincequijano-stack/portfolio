@@ -489,7 +489,7 @@ export default function App() {
         {/* 03. FEATURED PROJECTS SECTION */}
         <section
           id="projects"
-          className="relative py-24 sm:py-32 border-t border-white/10 text-left overflow-hidden"
+          className="relative py-16 sm:py-24 lg:py-32 border-t border-white/10 text-left overflow-hidden"
         >
           {/* Subtle Background Watermark */}
           <span
@@ -523,7 +523,7 @@ export default function App() {
               </div>
 
               {/* Project Category Filter Pills */}
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+              <div className="w-full lg:w-auto max-w-full flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
                 {categoryList.map((cat) => {
                   const isActive = activeCategory === cat;
                   return (

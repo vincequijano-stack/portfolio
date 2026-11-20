@@ -120,7 +120,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     <section
       id="experience"
       ref={sectionRef}
-      className="relative py-24 sm:py-32 border-t border-white/10 text-left overflow-hidden"
+      className="relative py-16 sm:py-24 lg:py-32 border-t border-white/10 text-left overflow-hidden"
     >
       {/* Subtle Background Watermark */}
       <span
@@ -160,7 +160,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
         </div>
 
         {/* 1. Organizations Timeline with Scrubbed Progressive Spine */}
-        <div ref={timelineRef} data-reveal className="relative pl-6 sm:pl-9 mb-16">
+        <div ref={timelineRef} data-reveal className="relative pl-5 sm:pl-9 mb-16">
           {/* Progressive Vertical Timeline Spine */}
           <div
             className="timeline-spine absolute left-1.5 sm:left-2.5 top-2 bottom-2 w-[2px] rounded-full"
@@ -169,7 +169,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
             <div ref={spineFillRef} className="timeline-spine-fill" />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-7">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-7">
             {organizations.map((org, idx) => (
               <div
                 key={org.id}
@@ -184,23 +184,23 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
                 />
                 <article
                   data-exp-card
-                  className="motion-card h-full rounded-3xl bg-[#151515] border border-white/12 p-7 sm:p-9 flex flex-col justify-between relative overflow-hidden"
+                  className="motion-card h-full rounded-3xl bg-[#151515] border border-white/12 p-5 sm:p-7 lg:p-9 flex flex-col justify-between relative overflow-hidden"
                 >
                 <div>
-                  <div className="flex items-center justify-between gap-4 mb-6">
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-12 h-12 rounded-2xl bg-[#242424] border border-white/15 flex items-center justify-center text-white">
+                  <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 mb-6">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-[#242424] border border-white/15 flex items-center justify-center text-white shrink-0">
                         {idx === 0 ? (
                           <Users className="w-5 h-5" />
                         ) : (
                           <Code2 className="w-5 h-5" />
                         )}
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <span className="text-[11px] font-mono-code uppercase tracking-widest text-[#C8C8C8] block">
                           ORGANIZATION 0{idx + 1}
                         </span>
-                        <h3 className="font-display text-xl sm:text-2xl font-extrabold text-white">
+                        <h3 className="font-display text-lg sm:text-2xl font-extrabold text-white truncate">
                           {org.name}
                         </h3>
                       </div>
@@ -268,7 +268,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7">
               {eventStories.map((ev, idx) => (
                 <div
                   key={ev.id}
@@ -372,14 +372,14 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
         >
           <div
             ref={eventModalRef}
-            className="bg-[#151515] border border-white/20 rounded-3xl max-w-3xl w-full overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.95)]"
+            className="bg-[#151515] border border-white/20 rounded-3xl max-w-3xl w-full max-h-[90dvh] overflow-y-auto shadow-[0_30px_80px_rgba(0,0,0,0.95)]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative bg-[#0A0A0A] max-h-[62vh] flex items-center justify-center overflow-hidden border-b border-white/10">
+            <div className="relative bg-[#0A0A0A] max-h-[50dvh] sm:max-h-[60dvh] flex items-center justify-center overflow-hidden border-b border-white/10">
               <img
                 src={selectedEvent.image}
                 alt={selectedEvent.title}
-                className="w-full h-full max-h-[62vh] object-contain"
+                className="w-full h-full max-h-[50dvh] sm:max-h-[60dvh] object-contain"
               />
               <button
                 type="button"

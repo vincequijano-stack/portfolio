@@ -235,7 +235,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
     <section
       id="about"
       ref={sectionRef}
-      className="relative py-24 sm:py-32 border-t border-white/10 text-left overflow-hidden"
+      className="relative py-16 sm:py-24 lg:py-32 border-t border-white/10 text-left overflow-hidden"
     >
       {/* Subtle Background Watermark & Studio Glow */}
       <span
@@ -409,34 +409,34 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
               {/* Quick Metrics & Resume CTA */}
               <div className="mt-8 pt-6 relative">
                 <div data-about-line-rule className="h-px w-full bg-white/12 mb-6" aria-hidden="true" />
-                <div className="grid grid-cols-3 gap-3 mb-6 text-center">
-                  <div className="p-3 rounded-2xl bg-[#0A0A0A] border border-white/8">
-                    <span className="font-display text-xl sm:text-2xl font-black text-white block">
+                <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-6 text-center">
+                  <div className="p-2.5 sm:p-3 rounded-2xl bg-[#0A0A0A] border border-white/8">
+                    <span className="font-display text-lg sm:text-2xl font-black text-white block">
                       4th Yr
                     </span>
-                    <span className="text-[10px] font-mono-code uppercase tracking-wider text-[#777777]">
+                    <span className="text-[9px] sm:text-[10px] font-mono-code uppercase tracking-wider text-[#777777]">
                       BSCS Standing
                     </span>
                   </div>
-                  <div className="p-3 rounded-2xl bg-[#0A0A0A] border border-white/8">
-                    <span className="font-display text-xl sm:text-2xl font-black text-white block">
+                  <div className="p-2.5 sm:p-3 rounded-2xl bg-[#0A0A0A] border border-white/8">
+                    <span className="font-display text-lg sm:text-2xl font-black text-white block">
                       {profileData.stats.projects}
                     </span>
-                    <span className="text-[10px] font-mono-code uppercase tracking-wider text-[#777777]">
+                    <span className="text-[9px] sm:text-[10px] font-mono-code uppercase tracking-wider text-[#777777]">
                       Core Systems
                     </span>
                   </div>
-                  <div className="p-3 rounded-2xl bg-[#0A0A0A] border border-white/8">
-                    <span className="font-display text-xl sm:text-2xl font-black text-white block">
+                  <div className="p-2.5 sm:p-3 rounded-2xl bg-[#0A0A0A] border border-white/8">
+                    <span className="font-display text-lg sm:text-2xl font-black text-white block">
                       {profileData.stats.skills}
                     </span>
-                    <span className="text-[10px] font-mono-code uppercase tracking-wider text-[#777777]">
+                    <span className="text-[9px] sm:text-[10px] font-mono-code uppercase tracking-wider text-[#777777]">
                       Technologies
                     </span>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-col min-[360px]:flex-row flex-wrap items-stretch min-[360px]:items-center gap-3">
                   <a
                     href="/assets/resume/Resume.pdf"
                     target="_blank"

@@ -255,7 +255,7 @@ export const StoryModal: React.FC<StoryModalProps> = ({
           </button>
 
           <div
-            className="relative w-full h-[720px] max-h-[92vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between border border-white/20 bg-[#0A0A0A]"
+            className="relative w-full h-[min(720px,88dvh)] rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between border border-white/20 bg-[#0A0A0A]"
             onClick={handleCardClick}
             onMouseDown={() => setIsPaused(true)}
             onMouseUp={() => setIsPaused(false)}
@@ -425,7 +425,7 @@ export const StoryModal: React.FC<StoryModalProps> = ({
           </button>
 
           <div
-            className="relative w-full h-[730px] max-h-[92vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between border border-white/20 bg-[#151515]"
+            className="relative w-full h-[min(730px,88dvh)] rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between border border-white/20 bg-[#151515]"
             onClick={handleCardClick}
             onMouseDown={() => setIsPaused(true)}
             onMouseUp={() => setIsPaused(false)}
@@ -605,7 +605,7 @@ export const StoryModal: React.FC<StoryModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div
-          className="relative w-full h-[560px] rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between p-6 text-white bg-[#151515] border border-white/20"
+          className="relative w-full h-[min(560px,86dvh)] rounded-3xl overflow-y-auto shadow-2xl flex flex-col justify-between p-5 sm:p-6 text-white bg-[#151515] border border-white/20"
           onClick={handleCardClick}
           onMouseDown={() => setIsPaused(true)}
           onMouseUp={() => setIsPaused(false)}

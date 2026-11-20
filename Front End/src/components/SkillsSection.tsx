@@ -390,15 +390,15 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, delayMs }) => {
         onMouseEnter={handleMouseEnter}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        className="group relative h-full rounded-2xl bg-[#0A0A0A] border border-white/10 hover:border-white/45 p-4.5 flex flex-col justify-between gap-3.5 overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.45)] hover:shadow-[0_18px_36px_rgba(0,0,0,0.85),0_0_20px_rgba(255,255,255,0.08)] transition-[border-color,box-shadow] duration-300"
+        className="group relative h-full rounded-2xl bg-[#0A0A0A] border border-white/10 hover:border-white/45 p-3.5 sm:p-4.5 flex flex-col justify-between gap-3 sm:gap-3.5 overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.45)] hover:shadow-[0_18px_36px_rgba(0,0,0,0.85),0_0_20px_rgba(255,255,255,0.08)] transition-[border-color,box-shadow] duration-300"
       >
         <div ref={spotRef} className="pointer-events-none absolute inset-0 opacity-0" />
 
-        <div className="relative z-10 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5 min-w-0">
+        <div className="relative z-10 flex items-center justify-between gap-2.5 sm:gap-4">
+          <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
             <div
               data-skill-icon
-              className="w-12 h-12 rounded-xl bg-[#151515] border border-white/12 group-hover:border-white group-hover:bg-white text-[#C8C8C8] group-hover:text-[#0A0A0A] flex items-center justify-center shrink-0 transition-colors duration-300 group-hover:scale-105"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#151515] border border-white/12 group-hover:border-white group-hover:bg-white text-[#C8C8C8] group-hover:text-[#0A0A0A] flex items-center justify-center shrink-0 transition-colors duration-300 group-hover:scale-105"
             >
               {renderMonochromeSkillIcon(skill.name)}
             </div>
@@ -522,7 +522,7 @@ export const SkillsSection: React.FC = () => {
   return (
     <section
       id="skills"
-      className="relative py-24 sm:py-32 border-t border-white/10 text-left overflow-hidden"
+      className="relative py-16 sm:py-24 lg:py-32 border-t border-white/10 text-left overflow-hidden"
     >
       {/* Subtle Background Watermark */}
       <span
@@ -557,7 +557,7 @@ export const SkillsSection: React.FC = () => {
           </div>
 
           {/* Category Filter Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+          <div className="w-full lg:w-auto max-w-full flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
             {['All', ...categorizedGroups.map((g) => g.id)].map((tab) => {
               const isActive = activeFilter === tab;
               return (
