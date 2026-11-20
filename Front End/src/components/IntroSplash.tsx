@@ -1,136 +1,223 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowRight, Code2, Sparkles, Terminal } from 'lucide-react';
-import { profileData } from '../data/profile';
+import React, { useEffect, useRef, useCallback } from 'react';
+import { gsap } from '../lib/gsap';
 
 interface IntroSplashProps {
+  /** Fired the moment the curtain starts opening — triggers Hero GSAP timeline. */
+  onReveal?: () => void;
+  /** Fired once the curtain has fully opened and the intro can be unmounted. */
   onComplete: () => void;
 }
 
-export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
-  const [isFadingOut, setIsFadingOut] = useState(false);
-  const [progress, setProgress] = useState(0);
+const NAME = 'VINCE QUIJANO';
+
+export const IntroSplash: React.FC<IntroSplashProps> = ({ onReveal, onComplete }) => {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const exitingRef = useRef(false);
+  const revealRef = useRef(onReveal);
+  const completeRef = useRef(onComplete);
+  revealRef.current = onReveal;
+  completeRef.current = onComplete;
+
+  const runExit = useCallback((fast = false) => {
+    if (exitingRef.current) return;
+    exitingRef.current = true;
+
+    const root = rootRef.current;
+    if (!root) {
+      revealRef.current?.();
+      completeRef.current();
+      return;
+    }
+
+    root.style.pointerEvents = 'none';
+    // Trigger hero entrance simultaneously behind the opening curtain
+    revealRef.current?.();
+
+    const exitTl = gsap.timeline({
+      onComplete: () => completeRef.current(),
+    });
+
+    exitTl
+      .to(
+        [
+          root.querySelector('.intro-content'),
+          root.querySelector('.intro-skip'),
+          root.querySelector('.intro-seam'),
+        ],
+        {
+          opacity: 0,
+          scale: 0.96,
+          y: -10,
+          duration: fast ? 0.18 : 0.28,
+          ease: 'power2.in',
+        }
+      )
+      .to(
+        root.querySelector('.intro-curtain-top'),
+        {
+          yPercent: -102,
+          duration: fast ? 0.42 : 0.88,
+          ease: 'expo.inOut',
+        },
+        '-=0.08'
+      )
+      .to(
+        root.querySelector('.intro-curtain-bottom'),
+        {
+          yPercent: 102,
+          duration: fast ? 0.42 : 0.88,
+          ease: 'expo.inOut',
+        },
+        '<'
+      );
+  }, []);
 
   useEffect(() => {
-    // Animate progress bar smoothly
-    const start = Date.now();
-    const duration = 2200;
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - start;
-      const pct = Math.min(100, Math.round((elapsed / duration) * 100));
-      setProgress(pct);
-      if (pct >= 100) {
-        clearInterval(interval);
-      }
-    }, 30);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
 
-    // Auto-enter after the signature reveal (visitors can also click Enter anytime)
-    const fadeTimer = setTimeout(() => setIsFadingOut(true), 2400);
-    const doneTimer = setTimeout(() => onComplete(), 2750);
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
+        runExit(true);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+
+    if (reduce) {
+      const quickTimer = window.setTimeout(() => runExit(true), 220);
+      return () => {
+        window.clearTimeout(quickTimer);
+        window.removeEventListener('keydown', onKey);
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+
+    const ctx = gsap.context(() => {
+      gsap.set('.intro-seam', { scaleX: 0, opacity: 0 });
+      gsap.set('.intro-logo', { opacity: 0, scale: 0.82, y: 14 });
+      gsap.set('.intro-char', { opacity: 0, y: 16 });
+      gsap.set('.intro-line-fill', { scaleX: 0 });
+      gsap.set('.intro-tag', { opacity: 0, y: 6 });
+
+      const tl = gsap.timeline();
+      tl.to('.intro-seam', {
+        scaleX: 1,
+        opacity: 0.65,
+        duration: 0.55,
+        ease: 'power3.out',
+      })
+        .to(
+          '.intro-logo',
+          {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            duration: 0.65,
+            ease: 'expo.out',
+          },
+          0.08
+        )
+        .to(
+          '.intro-char',
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.48,
+            stagger: 0.032,
+            ease: 'power3.out',
+          },
+          0.26
+        )
+        .to(
+          '.intro-line-fill',
+          {
+            scaleX: 1,
+            duration: 1.0,
+            ease: 'power2.inOut',
+          },
+          0.35
+        )
+        .to(
+          '.intro-tag',
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.45,
+            ease: 'power2.out',
+          },
+          0.55
+        )
+        .call(() => runExit(false), undefined, 1.58);
+    }, rootRef);
 
     return () => {
-      clearInterval(interval);
-      clearTimeout(fadeTimer);
-      clearTimeout(doneTimer);
+      ctx.revert();
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
     };
-  }, [onComplete]);
-
-  const handleEnterNow = () => {
-    setIsFadingOut(true);
-    setTimeout(() => {
-      onComplete();
-    }, 300);
-  };
+  }, [runExit]);
 
   return (
     <div
-      className={`fixed inset-0 z-100 flex flex-col items-center justify-between py-10 px-4 bg-[#FAFBF8]/95 backdrop-blur-xl transition-opacity duration-350 select-none ${
-        isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
-      }`}
+      ref={rootRef}
+      className="intro-root"
+      onClick={() => runExit(true)}
       role="dialog"
       aria-modal="true"
-      aria-label="Welcome Entrance"
+      aria-label="Vince Quijano portfolio intro"
     >
-      {/* Subtle Ambient Sage & Olive Radial Glows */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] rounded-full bg-[#8FA882]/25 blur-[90px]" />
-        <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 translate-y-1/2 w-[300px] h-[300px] rounded-full bg-[#283618]/10 blur-[80px]" />
-      </div>
+      {/* Curtain panels that split open via GSAP */}
+      <div className="intro-curtain intro-curtain-top" />
+      <div className="intro-curtain intro-curtain-bottom" />
+      <span className="intro-seam" />
 
-      {/* Top Spacer */}
-      <div className="relative z-10 w-full max-w-md h-4" />
-
-      {/* Center Architectural Developer Card */}
-      <div className="relative z-10 w-full max-w-md flex flex-col items-center text-center my-auto">
-        {/* Monogram / Portrait Emblem with Sage & Olive Ring */}
-        <div className="relative mb-6 group cursor-pointer" onClick={handleEnterNow}>
-          <div className="absolute -inset-3 rounded-3xl bg-gradient-to-tr from-[#283618]/20 via-[#527043]/25 to-[#8FA882]/30 blur-xl animate-pulse" />
-          <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-3xl p-[3px] bg-gradient-to-tr from-[#283618] via-[#527043] to-[#8FA882] shadow-xl">
-            <div className="w-full h-full rounded-[21px] bg-[#FAFBF8] p-1 overflow-hidden relative">
-              <img
-                src="/assets/images/headshot/headshot.jpg"
-                alt={profileData.name}
-                className="w-full h-full rounded-[17px] object-cover"
-                style={{ objectPosition: '0% 20%' }}
-              />
-            </div>
-          </div>
-          <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-xl bg-[#283618] text-[#FAFBF8] flex items-center justify-center shadow-md border-2 border-[#FAFBF8]">
-            <Code2 className="w-4 h-4 text-[#8FA882]" />
-          </div>
-        </div>
-
-        {/* Name & Title */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EBF1E6] border border-[#D4E0CD] text-[11px] font-bold uppercase tracking-widest text-[#3A4D28] mb-3">
-          <Sparkles className="w-3 h-3 text-[#527043]" />
-          <span>{profileData.role}</span>
-        </div>
-
-        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#283618]">
-          {profileData.name}
-        </h1>
-
-        <p className="text-xs sm:text-sm text-[#526348] mt-2 max-w-xs leading-relaxed font-medium">
-          Full-Stack Web Architecture · Data Mining Systems · Intuitive UI/UX Design
-        </p>
-
-        {/* Loading / System Initialization Progress Card */}
-        <div className="w-full mt-7 p-4 sm:p-5 bg-white/90 rounded-2xl border border-[#D4E0CD] shadow-lg shadow-[#283618]/5">
-          <div className="flex items-center justify-between text-[11px] font-mono text-[#526348] mb-2">
-            <span className="flex items-center gap-1.5 font-semibold text-[#283618]">
-              <Terminal className="w-3.5 h-3.5 text-[#527043]" />
-              <span>Initializing workspace...</span>
-            </span>
-            <span className="font-bold text-[#283618]">{progress}%</span>
-          </div>
-
-          {/* Progress Bar Track */}
-          <div className="w-full h-2 rounded-full bg-[#EBF1E6] overflow-hidden p-[1px] border border-[#D4E0CD]/60">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-[#283618] via-[#527043] to-[#8FA882] transition-all duration-75"
-              style={{ width: `${progress}%` }}
+      <div className="intro-content">
+        {/* VQ monogram */}
+        <div className="intro-logo">
+          <svg viewBox="0 0 76 46" className="w-16 h-10 sm:w-20 sm:h-12" aria-hidden="true">
+            <defs>
+              <linearGradient id="introVqGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#FFFFFF" />
+                <stop offset="55%" stopColor="#D4D4D4" />
+                <stop offset="100%" stopColor="#8A8A8A" />
+              </linearGradient>
+            </defs>
+            <path d="M1 3 L11 3 L21 32 L31 3 L41 3 L25.5 43 L16.5 43 Z" fill="#FFFFFF" />
+            <path
+              d="M52 2 C64.5 2 73 10.5 73 22.5 C73 29 70 34.8 64.8 38.4 L72 44.5 L61.5 44.5 L56.8 40.5 C55.2 41 53.6 41.3 52 41.3 C39.5 41.3 31 32.8 31 21.5 C31 10.5 39.5 2 52 2 Z M52 10.8 C44.8 10.8 40.2 15.2 40.2 21.5 C40.2 27.8 44.8 32.5 52 32.5 C54 32.5 55.8 32 57.4 31.1 L50.8 25.5 L59.5 25.5 L61.8 27.5 C62.7 25.8 63.2 23.8 63.2 21.5 C63.2 15.2 59.2 10.8 52 10.8 Z"
+              fill="url(#introVqGrad)"
             />
-          </div>
-
-          <button
-            type="button"
-            onClick={handleEnterNow}
-            className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 px-5 rounded-xl bg-[#283618] hover:bg-[#3A4D28] active:scale-[0.99] text-white text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-md shadow-[#283618]/15"
-          >
-            <span>Enter Portfolio</span>
-            <ArrowRight className="w-4 h-4 text-[#8FA882]" />
-          </button>
+          </svg>
         </div>
+
+        {/* Letter-by-letter name */}
+        <div className="intro-name" aria-label={NAME}>
+          {NAME.split('').map((c, i) => (
+            <span key={i} className="intro-char" aria-hidden="true">
+              {c === ' ' ? '\u00A0' : c}
+            </span>
+          ))}
+        </div>
+
+        {/* Horizontal loading line */}
+        <div className="intro-line">
+          <span className="intro-line-fill" />
+        </div>
+
+        <p className="intro-tag">CODE &nbsp;•&nbsp; ANALYZE &nbsp;•&nbsp; INNOVATE</p>
       </div>
 
-      {/* Bottom Minimalist Signature */}
-      <div className="relative z-10 flex flex-col items-center gap-1">
-        <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-[#5C6B50]">
-          Designed &amp; Engineered by
-        </span>
-        <span className="text-xs font-extrabold tracking-wider text-[#283618]">
-          VINCE QUIJANO
-        </span>
-      </div>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          runExit(true);
+        }}
+        className="intro-skip"
+      >
+        SKIP
+      </button>
     </div>
   );
 };

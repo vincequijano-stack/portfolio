@@ -14,20 +14,20 @@ interface ProjectGalleryProps {
 export const ProjectGallery: React.FC<ProjectGalleryProps> = ({
   projects,
   onProjectClick,
-  variant = 'reveal',
+  variant = 'tilt',
   onClearSearch,
 }) => {
   if (projects.length === 0) {
     return (
       <div className="py-16 text-center flex flex-col items-center justify-center">
-        <div className="w-16 h-16 rounded-full bg-[#EBF1E6] flex items-center justify-center mb-3 text-[#8FA882]">
+        <div className="w-16 h-16 rounded-full bg-[#151515] border border-white/15 flex items-center justify-center mb-3 text-[#C8C8C8]">
           <SearchX className="w-8 h-8" />
         </div>
-        <h3 className="text-base font-bold text-[#283618]">No projects found</h3>
+        <h3 className="text-base font-bold text-white">No projects found</h3>
         {onClearSearch && (
           <button
             onClick={onClearSearch}
-            className="mt-4 px-4 py-1.5 rounded-lg text-xs font-semibold bg-[#283618] hover:bg-[#3A4D28] text-white transition-colors"
+            className="mt-4 px-5 py-2 rounded-full text-xs font-bold bg-white text-[#0A0A0A] hover:bg-[#F5F5F5] transition-colors cursor-pointer"
           >
             Show All Projects
           </button>
@@ -38,13 +38,13 @@ export const ProjectGallery: React.FC<ProjectGalleryProps> = ({
 
   return (
     <div className="pt-2">
-      {/* 3-Column Grid with staggered scroll reveal */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
         {projects.map((project, idx) => (
           <div
             key={project.id}
             data-reveal
             style={{ '--reveal-delay': `${idx * 120}ms` } as React.CSSProperties}
+            className="h-full"
           >
             <ProjectCard
               project={project}

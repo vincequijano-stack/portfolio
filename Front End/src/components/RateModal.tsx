@@ -40,7 +40,6 @@ export const RateModal: React.FC<RateModalProps> = ({
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
-  // Ratings store state
   const [ratingsState, setRatingsState] = useState<RatingsState>(() =>
     ratingService.getState()
   );
@@ -68,7 +67,7 @@ export const RateModal: React.FC<RateModalProps> = ({
     2: 'Fair Experience',
     3: 'Good Quality',
     4: 'Great & Responsive',
-    5: 'Exceptional — Made a Huge Difference! 🚀',
+    5: 'Exceptional — High Impact!',
   };
 
   const handleNameChange = (val: string) => {
@@ -86,14 +85,13 @@ export const RateModal: React.FC<RateModalProps> = ({
     }
 
     const nameValidation = validateDisplayName(clientName);
-    if (!nameValidation.ok) {
+    if (nameValidation.ok === false) {
       setError(nameValidation.error);
       return;
     }
 
     setIsSubmitting(true);
     try {
-      // Retain display name for the current browser session
       setSessionName(nameValidation.value);
 
       await ratingService.submitReview({
@@ -117,8 +115,6 @@ export const RateModal: React.FC<RateModalProps> = ({
     }
   };
 
-  const isReviewsOnly = initialTab === 'all';
-  const currentView = isReviewsOnly ? 'all' : activeTab;
   const isOwner = isOwnerUnlocked();
 
   const handleDeleteReview = async (id: string, name: string) => {
@@ -128,26 +124,27 @@ export const RateModal: React.FC<RateModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-modal-in"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Client Reviews & Rating"
     >
       <div
-        className="relative w-full max-w-lg bg-[#FAFBF8] border border-[#D4E0CD] rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col z-10 animate-in fade-in zoom-in-95 duration-200"
+        className="relative w-full max-w-lg bg-[#151515] border border-white/20 rounded-3xl shadow-[0_30px_80px_rgba(0,0,0,0.95)] overflow-hidden max-h-[90vh] flex flex-col z-10"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-[#D4E0CD] bg-white">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-[#EBF1E6] flex items-center justify-center text-[#283618]">
-              <Star className="w-4 h-4 fill-[#283618]" />
+        <div className="flex items-center justify-between p-5 border-b border-white/10 bg-[#0A0A0A]">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-[#242424] border border-white/15 flex items-center justify-center text-white">
+              <Star className="w-4 h-4 fill-white" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-[#283618]">
-                  {isReviewsOnly ? 'Client Reviews' : 'Rate My Portfolio'}
-                </h3>
-              </div>
-              <p className="text-[11px] text-[#526348]">
+              <h3 className="font-display text-sm font-bold text-white">
+                Client Reviews &amp; Ratings
+              </h3>
+              <p className="text-[11px] font-mono-code text-[#C8C8C8]">
                 {ratingsState.count > 0
                   ? `${ratingsState.average} ★ from ${ratingsState.count} eligible reviews`
                   : 'Transparent real-time client reviews'}
@@ -157,65 +154,61 @@ export const RateModal: React.FC<RateModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-1.5 text-[#526348] hover:text-[#283618] rounded-lg transition-colors cursor-pointer"
+            className="p-2 text-[#C8C8C8] hover:text-white rounded-full bg-[#151515] border border-white/12 transition-colors cursor-pointer"
             aria-label="Close modal"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4.5 h-4.5" />
           </button>
         </div>
 
-        {/* Tab Toggle — ONLY shown when opened via the Rate button */}
-        {!isReviewsOnly && (
-          <div className="flex border-b border-[#D4E0CD] bg-white text-xs font-semibold">
-            <button
-              onClick={() => setActiveTab('rate')}
-              className={`flex-1 py-2.5 text-center transition-colors border-b-2 cursor-pointer ${
-                activeTab === 'rate'
-                  ? 'border-[#283618] text-[#283618]'
-                  : 'border-transparent text-[#526348] hover:text-[#283618]'
-              }`}
-            >
-              ★ Leave a Rating
-            </button>
-            <button
-              onClick={() => setActiveTab('all')}
-              className={`flex-1 py-2.5 text-center transition-colors border-b-2 cursor-pointer ${
-                activeTab === 'all'
-                  ? 'border-[#283618] text-[#283618]'
-                  : 'border-transparent text-[#526348] hover:text-[#283618]'
-              }`}
-            >
-              All Reviews ({ratingsState.total})
-            </button>
-          </div>
-        )}
+        {/* Tab Toggle */}
+        <div className="flex border-b border-white/10 bg-[#0A0A0A] text-xs font-semibold">
+          <button
+            onClick={() => setActiveTab('rate')}
+            className={`flex-1 py-3 text-center transition-colors border-b-2 cursor-pointer ${
+              activeTab === 'rate'
+                ? 'border-white text-white'
+                : 'border-transparent text-[#777777] hover:text-[#C8C8C8]'
+            }`}
+          >
+            ★ Leave a Rating
+          </button>
+          <button
+            onClick={() => setActiveTab('all')}
+            className={`flex-1 py-3 text-center transition-colors border-b-2 cursor-pointer ${
+              activeTab === 'all'
+                ? 'border-white text-white'
+                : 'border-transparent text-[#777777] hover:text-[#C8C8C8]'
+            }`}
+          >
+            All Reviews ({ratingsState.total})
+          </button>
+        </div>
 
         {/* Body Content */}
-        <div className="p-5 overflow-y-auto flex-1">
-          {currentView === 'rate' ? (
+        <div className="p-6 overflow-y-auto flex-1">
+          {activeTab === 'rate' ? (
             isSuccess ? (
-              <div className="py-8 text-center flex flex-col items-center">
-                <CheckCircle2 className="w-12 h-12 text-[#527043] mb-2 animate-bounce" />
-                <h4 className="text-base font-bold text-[#283618]">
+              <div className="py-10 text-center flex flex-col items-center">
+                <CheckCircle2 className="w-12 h-12 text-white mb-3 animate-bounce" />
+                <h4 className="font-display text-base font-bold text-white">
                   Thank You for Your Rating!
                 </h4>
-                <p className="text-xs text-[#526348] max-w-xs mt-1">
+                <p className="text-xs text-[#C8C8C8] max-w-xs mt-1">
                   Your feedback has been saved and published transparently on the portfolio.
                 </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4 text-left">
-                {/* Rating Prompt */}
                 <div>
-                  <label className="block text-xs font-bold text-[#283618] mb-1">
+                  <label className="block text-xs font-bold text-white mb-1">
                     How did my work &amp; service impact your project?{' '}
-                    <span className="text-[#ED4956]">*</span>
+                    <span className="text-[#C8C8C8]">*</span>
                   </label>
-                  <p className="text-[11px] text-[#526348] mb-2">
-                    Click the stars below to rate how I helped make your life or business better.
+                  <p className="text-[11px] text-[#777777] mb-2">
+                    Select a star rating below.
                   </p>
 
-                  {/* Star Selector */}
                   <div className="flex items-center gap-1.5 py-1">
                     {[1, 2, 3, 4, 5].map((star) => {
                       const isFilled = (hoverRating || selectedRating) >= star;
@@ -235,83 +228,82 @@ export const RateModal: React.FC<RateModalProps> = ({
                           <Star
                             className={`w-7 h-7 transition-colors ${
                               isFilled
-                                ? 'text-[#283618] fill-[#283618]'
-                                : 'text-[#D4E0CD] stroke-[1.5]'
+                                ? 'text-white fill-white'
+                                : 'text-[#242424] stroke-[#777777] stroke-[1.5]'
                             }`}
                           />
                         </button>
                       );
                     })}
-                    <span className="text-xs font-semibold text-[#283618] ml-2">
+                    <span className="text-xs font-semibold text-[#C8C8C8] ml-2">
                       {starLabels[hoverRating || selectedRating]}
                     </span>
                   </div>
                 </div>
 
-                {/* Display Name Input */}
                 <div>
-                  <label className="block text-xs font-semibold text-[#283618] mb-1">
-                    Your Name / Nickname <span className="text-[#ED4956]">*</span>
+                  <label className="block text-xs font-semibold text-[#C8C8C8] mb-1">
+                    Your Name / Nickname <span className="text-white">*</span>
                   </label>
                   <input
                     type="text"
                     value={clientName}
                     onChange={(e) => handleNameChange(e.target.value)}
-                    placeholder="e.g. Vince Quijano"
+                    placeholder="e.g. Raziel Sevilla"
                     maxLength={40}
-                    className="w-full text-xs px-3 py-2 rounded-lg border border-[#D4E0CD] bg-white text-[#283618] focus:outline-none focus:border-[#283618] transition-colors"
+                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-white/15 bg-[#0A0A0A] text-white placeholder-[#777777] focus:outline-none focus:border-white transition-colors"
                   />
                 </div>
 
-                {/* Role / Company Input */}
                 <div>
-                  <label className="block text-xs font-semibold text-[#283618] mb-1">
+                  <label className="block text-xs font-semibold text-[#C8C8C8] mb-1">
                     Your Role / Company{' '}
-                    <span className="text-[11px] text-[#526348] font-normal">(optional)</span>
+                    <span className="text-[11px] text-[#777777] font-normal">
+                      (optional)
+                    </span>
                   </label>
                   <input
                     type="text"
                     value={clientRole}
                     onChange={(e) => setClientRole(e.target.value)}
-                    placeholder="e.g. Founder at TechStartup / Client"
+                    placeholder="e.g. Founder / Collaborator"
                     maxLength={50}
-                    className="w-full text-xs px-3 py-2 rounded-lg border border-[#D4E0CD] bg-white text-[#283618] focus:outline-none focus:border-[#283618] transition-colors"
+                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-white/15 bg-[#0A0A0A] text-white placeholder-[#777777] focus:outline-none focus:border-white transition-colors"
                   />
                 </div>
 
-                {/* Feedback Textarea */}
                 <div>
-                  <label className="block text-xs font-semibold text-[#283618] mb-1">
+                  <label className="block text-xs font-semibold text-[#C8C8C8] mb-1">
                     Written Feedback / Testimonial{' '}
-                    <span className="text-[11px] text-[#526348] font-normal">(optional)</span>
+                    <span className="text-[11px] text-[#777777] font-normal">
+                      (optional)
+                    </span>
                   </label>
                   <textarea
                     rows={3}
                     value={clientFeedback}
                     onChange={(e) => setClientFeedback(e.target.value)}
-                    placeholder="How was your experience working with me? What did we accomplish together?"
+                    placeholder="How was your experience working with me?"
                     maxLength={500}
-                    className="w-full text-xs px-3 py-2 rounded-lg border border-[#D4E0CD] bg-white text-[#283618] focus:outline-none focus:border-[#283618] transition-colors resize-none"
+                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-white/15 bg-[#0A0A0A] text-white placeholder-[#777777] focus:outline-none focus:border-white transition-colors resize-none"
                   />
-                  <div className="flex justify-between text-[10px] text-[#526348] mt-0.5">
-                    <span>Authentic feedback helps future clients decide with confidence.</span>
+                  <div className="flex justify-between text-[10px] text-[#777777] mt-1">
+                    <span>Authentic feedback helps future collaborators.</span>
                     <span>{clientFeedback.length}/500</span>
                   </div>
                 </div>
 
-                {/* Error Banner */}
                 {error && (
-                  <div className="p-2.5 bg-[#FFF5F5] border border-[#FED7D7] rounded-lg text-xs text-[#ED4956] flex items-center gap-2">
+                  <div className="p-3 bg-red-950/60 border border-red-500/40 rounded-xl text-xs text-red-200 flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     <span>{error}</span>
                   </div>
                 )}
 
-                {/* Submit Action */}
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-2.5 bg-[#283618] hover:bg-[#3A4D28] text-white text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="w-full py-3 bg-white hover:bg-[#F5F5F5] text-[#0A0A0A] text-xs font-bold rounded-full transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>
@@ -325,15 +317,15 @@ export const RateModal: React.FC<RateModalProps> = ({
               </form>
             )
           ) : (
-            /* All Reviews List */
             <div className="space-y-3">
-              {ratingsState.status === 'loading' && ratingsState.reviews.length === 0 ? (
-                <div className="py-12 text-center flex flex-col items-center gap-2 text-xs text-[#526348]">
-                  <Loader2 className="w-6 h-6 animate-spin text-[#527043]" />
+              {ratingsState.status === 'loading' &&
+              ratingsState.reviews.length === 0 ? (
+                <div className="py-12 text-center flex flex-col items-center gap-2 text-xs text-[#C8C8C8]">
+                  <Loader2 className="w-6 h-6 animate-spin text-white" />
                   <span>Loading reviews from database...</span>
                 </div>
               ) : ratingsState.reviews.length === 0 ? (
-                <div className="py-8 text-center text-xs text-[#526348]">
+                <div className="py-8 text-center text-xs text-[#777777]">
                   <p>No client reviews received yet.</p>
                 </div>
               ) : (
@@ -341,28 +333,28 @@ export const RateModal: React.FC<RateModalProps> = ({
                   {ratingsState.reviews.map((rev) => (
                     <div
                       key={rev.id}
-                      className="p-3.5 bg-white border border-[#D4E0CD] rounded-xl text-left space-y-1.5 relative"
+                      className="p-4 bg-[#0A0A0A] border border-white/12 rounded-2xl text-left space-y-2 relative"
                     >
                       <div className="flex items-center justify-between flex-wrap gap-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-xs text-[#283618]">
+                          <span className="font-bold text-xs text-white">
                             {rev.name}
                           </span>
                           {rev.role && (
-                            <span className="text-[10px] text-[#3A4D28] bg-[#EBF1E6] px-1.5 py-0.2 rounded">
+                            <span className="text-[10px] font-mono-code text-[#C8C8C8] bg-[#151515] border border-white/10 px-2 py-0.5 rounded-full">
                               {rev.role}
                             </span>
                           )}
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-[#526348]">
+                          <span className="text-[10px] font-mono-code text-[#777777]">
                             {formatReviewDate(rev)}
                           </span>
                           {isOwner && (
                             <button
                               type="button"
                               onClick={() => handleDeleteReview(rev.id, rev.name)}
-                              className="p-1 rounded-md text-[#526348] hover:text-[#ED4956] hover:bg-red-50 transition-colors cursor-pointer"
+                              className="p-1 rounded-md text-[#777777] hover:text-red-400 transition-colors cursor-pointer"
                               title={`Delete ${rev.name}'s review (Owner)`}
                               aria-label={`Delete ${rev.name}'s review`}
                             >
@@ -372,39 +364,37 @@ export const RateModal: React.FC<RateModalProps> = ({
                         </div>
                       </div>
 
-                      {/* Stars */}
-                      <div className="flex items-center gap-0.5 text-[#283618]">
+                      <div className="flex items-center gap-0.5 text-white">
                         {[1, 2, 3, 4, 5].map((s) => (
                           <Star
                             key={s}
                             className={`w-3 h-3 ${
                               s <= rev.rating
-                                ? 'fill-[#283618] text-[#283618]'
-                                : 'text-[#D4E0CD]'
+                                ? 'fill-white text-white'
+                                : 'text-[#242424]'
                             }`}
                           />
                         ))}
-                        <span className="text-[11px] font-bold text-[#283618] ml-1.5">
+                        <span className="text-[11px] font-bold text-white ml-1.5">
                           {rev.rating}.0
                         </span>
                       </div>
 
                       {rev.feedback && (
-                        <p className="text-xs text-[#435339] leading-relaxed italic">
-                          "{rev.feedback}"
+                        <p className="text-xs text-[#C8C8C8] leading-relaxed italic">
+                          &ldquo;{rev.feedback}&rdquo;
                         </p>
                       )}
                     </div>
                   ))}
 
-                  {/* Load More Button */}
                   {ratingsState.hasMore && (
                     <div className="pt-2 text-center">
                       <button
                         type="button"
                         onClick={() => ratingService.loadMore()}
                         disabled={ratingsState.loadingMore}
-                        className="w-full py-2 bg-[#EBF1E6] hover:bg-[#D4E0CD] text-xs font-semibold text-[#283618] rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="w-full py-2.5 bg-[#242424] hover:bg-[#323232] text-xs font-semibold text-white rounded-full transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         {ratingsState.loadingMore ? (
                           <>

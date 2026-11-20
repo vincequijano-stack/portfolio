@@ -1,96 +1,100 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { gsap } from '../lib/gsap';
 
 export const InteractiveBackground: React.FC = () => {
-  const [mousePos, setMousePos] = useState({ x: -1000, y: -1000 });
+  const rootRef = useRef<HTMLDivElement>(null);
+  const spotlightRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
+    const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return;
+
+    const ctx = gsap.context(() => {
+      if (window.innerWidth >= 768) {
+        gsap.to('[data-ambient-orb="1"]', {
+          x: 26,
+          y: -20,
+          scale: 1.06,
+          duration: 10,
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+        });
+        gsap.to('[data-ambient-orb="2"]', {
+          x: -22,
+          y: 24,
+          scale: 1.05,
+          duration: 12,
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: 1.5,
+        });
+      }
+    }, rootRef);
+
+    if (!fine) {
+      return () => ctx.revert();
+    }
+
+    let raf = 0;
+    let mx = -1000;
+    let my = -1000;
+
+    const render = () => {
+      raf = 0;
+      if (spotlightRef.current) {
+        spotlightRef.current.style.background = `radial-gradient(700px circle at ${mx}px ${my}px, rgba(255, 255, 255, 0.045), rgba(200, 200, 200, 0.015) 40%, transparent 75%)`;
+      }
     };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      mx = e.clientX;
+      my = e.clientY;
+      if (!raf) raf = requestAnimationFrame(render);
+    };
+
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    return () => {
+      ctx.revert();
+      if (raf) cancelAnimationFrame(raf);
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
   }, []);
 
   return (
     <div
+      ref={rootRef}
       className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none"
       aria-hidden="true"
     >
-      {/* 1. Architectural Sage & Olive Dot-Grid Canvas */}
-      <div className="absolute inset-0 bg-dot-grid opacity-55" />
+      {/* Subtle Architectural Monochrome Grid */}
+      <div className="absolute inset-0 bg-mono-grid opacity-55" />
 
-      {/* 2. Floating Sage Green & Deep Olive Ambient Orbs */}
-      <div className="ambient-orb ambient-orb-1" />
-      <div className="ambient-orb ambient-orb-2" />
-      <div className="ambient-orb ambient-orb-3" />
-
-      {/* 3. Interactive Sage Green Cursor Spotlight */}
+      {/* Slow-Moving Ambient Monochrome Lighting Orbs */}
       <div
-        className="transition-opacity duration-300"
+        data-ambient-orb="1"
+        className="absolute -top-40 right-[8%] w-[520px] h-[520px] rounded-full blur-[130px] opacity-20"
         style={{
-          position: 'fixed',
-          inset: 0,
-          background: `radial-gradient(650px circle at ${mousePos.x}px ${mousePos.y}px, rgba(143, 168, 130, 0.18), rgba(58, 77, 40, 0.05) 40%, transparent 75%)`,
+          background:
+            'radial-gradient(circle, rgba(200, 200, 200, 0.26) 0%, rgba(36, 36, 36, 0.05) 60%, transparent 80%)',
         }}
       />
-    </div>
-  );
-};
-
-interface InteractiveCardProps {
-  children: React.ReactNode;
-  className?: string;
-  glowColor?: string;
-}
-
-export const InteractiveCard: React.FC<InteractiveCardProps> = ({
-  children,
-  className = '',
-  glowColor = 'rgba(143, 168, 130, 0.22)',
-}) => {
-  const [coords, setCoords] = useState({ x: 0, y: 0 });
-  const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
-  const [isHovered, setIsHovered] = useState(false);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    setCoords({ x, y });
-
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const rotateX = ((y - centerY) / centerY) * -2.2;
-    const rotateY = ((x - centerX) / centerX) * 2.2;
-    setTilt({ rotateX, rotateY });
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    setTilt({ rotateX: 0, rotateY: 0 });
-  };
-
-  return (
-    <div
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      style={{
-        transform: isHovered
-          ? `perspective(1000px) rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) translateY(-3px)`
-          : 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)',
-        transition: isHovered ? 'transform 0.12s ease-out, box-shadow 0.25s ease' : 'transform 0.35s ease, box-shadow 0.35s ease',
-      }}
-      className={`relative overflow-hidden backdrop-blur-md bg-white/90 border border-[#D4E0CD] hover:border-[#3A4D28] hover:shadow-xl hover:shadow-[#3A4D28]/10 rounded-2xl ${className}`}
-    >
       <div
-        className="pointer-events-none absolute -inset-px rounded-2xl transition-opacity duration-300 z-0"
+        data-ambient-orb="2"
+        className="absolute top-[45%] -left-36 w-[500px] h-[500px] rounded-full blur-[130px] opacity-15"
         style={{
-          opacity: isHovered ? 1 : 0,
-          background: `radial-gradient(420px circle at ${coords.x}px ${coords.y}px, ${glowColor}, transparent 70%)`,
+          background:
+            'radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(36, 36, 36, 0.05) 60%, transparent 80%)',
         }}
       />
-      <div className="relative z-10">{children}</div>
+
+      {/* Interactive Cursor Silver Spotlight */}
+      <div
+        ref={spotlightRef}
+        className="fixed inset-0 transition-opacity duration-300"
+      />
     </div>
   );
 };
