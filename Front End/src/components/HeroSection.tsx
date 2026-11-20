@@ -155,7 +155,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           '[data-hero-portrait]',
           '[data-hero-letter-left]',
           '[data-hero-letter-right]',
-          '[data-hero-welcome]',
           '[data-hero-desc]',
           '[data-hero-cta]',
           '[data-hero-tagline]',
@@ -264,18 +263,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           0.18
         )
         // 4. Sequential introduction & CTAs
-        .fromTo(
-          '[data-hero-welcome]',
-          { opacity: 0, y: 14 },
-          { opacity: 1, y: 0, duration: 0.7 },
-          0.2
-        )
-        .fromTo(
-          '[data-hero-welcome-line]',
-          { scaleX: 0, transformOrigin: 'left center' },
-          { scaleX: 1, duration: 0.85 },
-          0.28
-        )
         .fromTo(
           '[data-hero-desc]',
           { opacity: 0, y: 22 },
@@ -637,22 +624,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
         {/* 2. DESKTOP / TABLET STAGE */}
         <div className="hidden md:block relative w-full h-full">
-          {/* A. "WELCOME TO MY ─────────────────" */}
-          <div
-            data-hero-welcome
-            className="absolute z-20 flex items-center gap-4"
-            style={{
-              left: '3.81%',
-              top: '23.8%',
-              width: '35.1%',
-            }}
-          >
-            <span className="text-[11px] lg:text-[13px] xl:text-[14px] font-normal uppercase tracking-[0.18em] text-[#DCDCDC] whitespace-nowrap">
-              WELCOME TO MY
-            </span>
-            <span data-hero-welcome-line className="h-[1px] flex-1 bg-white/45" />
-          </div>
-
           {/* B. 4-POINT STAR FLARE (Above the 'O' in QUIJANO) */}
           <div
             data-hero-star
@@ -950,16 +921,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         {/* 3. MOBILE STAGE (< md): OPTIMIZED RESPONSIVE HERO */}
         <div className="md:hidden relative z-20 w-full h-full flex flex-col justify-between pt-20 pb-6 px-5">
           <div className="relative flex-1 flex flex-col items-center justify-end">
-            <div
-              data-hero-mobile-anim="title"
-              className="w-full flex items-center gap-3 mb-2 self-start"
-            >
-              <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#DCDCDC]">
-                WELCOME TO MY
-              </span>
-              <span className="h-px flex-1 bg-white/35" />
-            </div>
-
             <div
               data-hero-mobile-anim="title"
               className="absolute top-[18%] inset-x-0 text-center pointer-events-none z-0"
